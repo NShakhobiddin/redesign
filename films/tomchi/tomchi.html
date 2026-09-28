@@ -1,0 +1,478 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tomchi · pencil animation study</title>
+<style>body{margin:0;background:#242321;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="studio.js"></script>
+<script src="cels.js"></script>
+<script>
+'use strict';
+/* Film brief
+Subject and beat: a curious garden snail pokes a dew drop hanging from a leaf.
+  The drop falls on its head, the eye stalks snap in; it peeks out, finds the
+  water refreshing and smiles.
+Duration 8.3 s; 16:9; 1920x1080, 24 fps.
+Drawing reference: examples/sketchbook-bird.html (whole cels, visible strokes).
+Look: pencil (default) or ink via ?look=ink / --look ink.
+Techniques: whole cels, assisted inbetweens, replacement cels, exposure sheet.
+  No joint rig: every exposed snail drawing is a complete contour for its pose.
+Palette: pencilMinimal on warm paper. Graphite belongs to each drawing; paper
+  grain belongs to the screen and never moves.
+Mark language: long pressure-tapered contours, a lighter mantle line, sparse
+  search lines, growth lines that follow the whorl, shadow hatching on the
+  lower-left of the shell and under the foot. Lit side stays quiet.
+Cast: snail (shell is rigid: it only translates and tilts; the soft body is
+  redrawn per pose), leaf (finite bend drawings), dew drop (hang, pull, fall,
+  splat), spray droplets.
+Replacement drawings: blink (lids), squeezed eyes on retracted stubs, wet face.
+Hardest action: touch -> fall -> impact -> flinch -> recoil. The eye brushes
+  the drop at T, the drop pulls for 3 frames, falls for 3, splats on the stalk
+  base at T+6; the flinch drawing lands on T+7. Fall, splat, spray, flinch on ones.
+Exposure: long holds; the slow reach on twos (a snail is slow); impact on ones;
+  recovery on twos. Leaf spring on twos, drop and spray on ones.
+Camera locked. Tail tip and sole stay planted on the ground for the whole film.
+Beat sheet (s): 0.0 rest, blink 0.5 | 0.7 the drop glints | 1.1 notice, stalks
+  turn | 2.0 gather (anticipation) | 2.6 slow stretch | 3.8 touch, pull, fall |
+  4.0 impact, flinch, spray | 4.2 recoil hold | 5.1 peek | 5.6 happy, smile,
+  blink | 8.3 end.
+Sound: small synthesized score (pentatonic notes, a plip on impact).
+Sources: all drawings are original and code-authored. Engine: the
+  hand-drawn-canvas-animation skill (MIT, Alexey Fateev).
+*/
+const LOOK = new URLSearchParams(location.search).get('look') || 'pencil';
+if (!['pencil','ink'].includes(LOOK)) throw new Error('Use --look pencil or ink');
+const INK = LOOK === 'pencil' ? '#352c25' : '#2a2623';
+const PRESS = [[0,.1],[.12,.8],[.4,1],[.73,.65],[1,.05]];
+const EVEN = [[0,1],[1,1]];
+const DEG = Math.PI / 180;
+const qbez = (a, c, b, n = 4) => Array.from({length: n}, (_, k) => {
+ const t = k / (n - 1), u = 1 - t;
+ return [u*u*a[0] + 2*u*t*c[0] + t*t*b[0], u*u*a[1] + 2*u*t*c[1] + t*t*b[1]];
+});
+const cbez = (a, b, c, d, n = 5) => Array.from({length: n}, (_, k) => {
+ const t = k / (n - 1), u = 1 - t, w = [u*u*u, 3*u*u*t, 3*u*t*t, t*t*t];
+ return [0, 1].map(j => w[0]*a[j] + w[1]*b[j] + w[2]*c[j] + w[3]*d[j]);
+});
+const ellAt = (h, rx, ry, a) => [h[0] + rx*Math.cos(a), h[1] + ry*Math.sin(a)];
+const ring = (c, rx, ry, a0, sweep, n, tilt = 0) => Array.from({length: n}, (_, k) => {
+ const a = a0 + sweep*k/(n - 1), x = rx*Math.cos(a), y = ry*Math.sin(a);
+ return [c[0] + x*Math.cos(tilt) - y*Math.sin(tilt), c[1] + x*Math.sin(tilt) + y*Math.cos(tilt)];
+});
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0]/l, v[1]/l]; };
+
+// ---------------------------------------------------------------- the set
+// Snail-local units: ground at y = 0, the snail faces right. The frame places
+// this space at O and scales it by SC.
+const SC = 2;
+const DROP_R = 10, DROP_HANG = 11;             // the drop's centre hangs 11 below the leaf tip
+
+// ---------------------------------------------------------------- the snail
+const SHELL_R = 78;
+const shellRad = (a, rot) => SHELL_R * (1 + .028*Math.sin(3*(a - rot) + .7));
+const shellAt = (s, a) => [s[0] + shellRad(a, s[2])*Math.cos(a), s[1] + shellRad(a, s[2])*Math.sin(a)];
+const eyeCentre = (p, st, baseA) => {
+ const B = ellAt(p.head, p.hr[0], p.hr[1], baseA), [ang, len, bend] = st;
+ const d = [Math.sin(ang), -Math.cos(ang)];
+ return [B[0] + d[0]*(len + 6.5), B[1] + d[1]*(len + 6.5)];
+};
+const NEAR_BASE = -62*DEG, FAR_BASE = -104*DEG;
+
+// Keys. Each is a whole pose; the drawing function redraws every contour from
+// it. The shell never squashes; the body stretches, compresses and changes.
+const REST = {shell: [-40, -95, 0], tail: [-178, -3], front: 140, head: [96, -104], hr: [34, 28],
+ neckK: [16, 24], throatK: [18, 30], stalkN: [.22, 60, .12], stalkF: [.02, 54, .1],
+ gaze: [.9, -.3], mouth: .25, tent: .5, tentL: 11};
+const K = {
+ rest: REST,
+ notice: {shell: [-40, -96, -.02], front: 142, head: [100, -114], neckK: [18, 30], throatK: [18, 34],
+  stalkN: [.42, 70, -.05], stalkF: [.3, 64, -.05], gaze: 'drop', mouth: 0, tent: .38, tentL: 12},
+ gather: {shell: [-50, -92, -.08], front: 130, head: [80, -94], hr: [35, 27], neckK: [12, 20], throatK: [22, 26],
+  stalkN: [.46, 64, 0], stalkF: [.34, 58, 0], gaze: 'drop', mouth: -.25, tent: .62, tentL: 10},
+ stretch: {shell: [-26, -97, .1], front: 182, head: [148, -178], hr: [33, 29], neckK: [42, 62], throatK: [14, 60],
+  stalkN: [.32, 56, -.06], stalkF: [.14, 52, -.08], gaze: 'drop', mouth: .05, tent: .2, tentL: 13},
+ touch: {shell: [-20, -98, .14], front: 190, head: [158, -190], hr: [33, 29], neckK: [48, 70], throatK: [12, 66],
+  stalkN: [.25, 54, -.05], stalkF: [.05, 50, -.08], gaze: 'drop', mouth: .1, tent: .15, tentL: 13},
+ flinch: {shell: [-30, -95, .04], front: 168, head: [130, -146], hr: [35, 27], neckK: [32, 44], throatK: [20, 44],
+  stalkN: [-.35, 30, .35], stalkF: [-.5, 26, .35], gaze: [0, 0], mouth: -.7, tent: 1.2, tentL: 6},
+ recoil: {shell: [-40, -92, -.04], front: 120, head: [72, -70], hr: [37, 25], neckK: [8, 10], throatK: [20, 16],
+  stalkN: [-.1, 13, 0], stalkF: [-.3, 11, 0], gaze: [0, 0], mouth: -.55, tent: 1.1, tentL: 5},
+ peek: {shell: [-40, -93, -.03], front: 122, head: [76, -76], hr: [36, 26], neckK: [10, 12], throatK: [20, 18],
+  stalkN: [.25, 28, 0], stalkF: [.08, 24, 0], gaze: [.45, -.85], mouth: -.1, tent: .7, tentL: 7},
+ happyUp: {shell: [-41, -97, .01], front: 140, head: [97, -112], neckK: [16, 28], throatK: [18, 32],
+  stalkN: [.16, 66, .18], stalkF: [-.02, 60, .16], gaze: [.25, -.55], mouth: .95, tent: .45, tentL: 12},
+ happy: {shell: [-40, -95, 0], front: 140, head: [96, -106], neckK: [16, 25], throatK: [18, 30],
+  stalkN: [.2, 62, .12], stalkF: [0, 56, .1], gaze: [.5, -.15], mouth: .85, tent: .5, tentL: 11},
+};
+// The leaf hangs where the touch drawing can reach it: the drop's centre sits
+// just above-left of the near eye, so the eye brushes it at full stretch.
+const DROP_C = (() => { const e = eyeCentre(K.touch, K.touch.stalkN, NEAR_BASE); return [e[0] - 16, e[1] - 9]; })();
+const LEAF = {tip: [DROP_C[0], DROP_C[1] - DROP_HANG], w: 30};
+LEAF.base = [LEAF.tip[0] + 148, LEAF.tip[1] - 46];
+LEAF.len = Math.hypot(LEAF.tip[0] - LEAF.base[0], LEAF.tip[1] - LEAF.base[1]);
+LEAF.a0 = Math.atan2(LEAF.tip[1] - LEAF.base[1], LEAF.tip[0] - LEAF.base[0]);
+// The twig enters from beyond the right edge of the frame; the leaf stalk joins it near its end.
+const TWIG = [[740, -236], [560, -282], [LEAF.base[0] + 96, LEAF.base[1] - 48], [LEAF.base[0] - 10, LEAF.base[1] - 38]];
+LEAF.stem = cbez(...TWIG, 11)[9];
+for (const p of Object.values(K)) for (const f of ['tail', 'hr']) p[f] ??= REST[f];
+for (const p of Object.values(K)) if (p.gaze === 'drop') {
+ const e = eyeCentre(p, p.stalkN, NEAR_BASE); p.gaze = norm([DROP_C[0] - e[0], DROP_C[1] - e[1]]);
+}
+
+// A whole snail drawing. v.eyes: 'open' | 'closed' (blink) | 'shut' (squeezed);
+// v.wet adds the water that stays on the face after the impact. Stroke ids and
+// point counts depend only on v, so drawings that share v can be inbetweened.
+function snailRaw(p, v = {}) {
+ const eyes = v.eyes || 'open', strokes = [];
+ const add = (id, points, width = 1.7, opacity = 1, extra = {}) => strokes.push({id, points, width, opacity, pressure: PRESS, ...extra});
+ const [sx, sy, rot] = p.shell, T = p.tail, F = [p.front, -2];
+ const [rx, ry] = p.hr, Hd = a => ellAt(p.head, rx, ry, a*DEG);
+ const along = (u, y) => [lerp(T[0], F[0], u), y];
+
+ // Cast shadow under the foot: short strokes on the ground, drawn first.
+ for (let i = 0; i < 20; i++) {
+  const x = lerp(T[0] + 26, F[0] - 12, (i + .5)/20), y = 4 + hash(i, 3)*3, l = 5 + hash(i, 5)*5;
+  add('shadow/' + i, [[x - l, y + 4], [x, y + 1.5], [x + l*.7, y - .3]], .7, .2 + hash(i, 4)*.18);
+ }
+ // The planted sole: one long gesture along the ground.
+ add('sole', [T, along(.12, 0), along(.4, 1), along(.7, 1), along(.92, 0), F], 1.9, .95);
+ add('mantle', [[T[0] + 30, -7], along(.35, -9.5), along(.65, -9.5), [F[0] - 22, -8]], 1, .42);
+
+ const S0 = shellAt(p.shell, 128*DEG), S1 = shellAt(p.shell, 40*DEG);
+ const tailCtl = [lerp(T[0], S0[0], .55), lerp(T[1], S0[1], .3) - 5];
+ add('tail', qbez(T, tailCtl, S0), 1.8, .95);
+ for (let i = 0; i < 6; i++) {
+  const [a, b] = qbez(T, tailCtl, S0, 13).slice(2 + i*1.6 | 0, 4 + i*1.6 | 0);
+  add('tail/skin/' + i, [[a[0] + 1, a[1] + 6], [lerp(a[0], b[0], .5), lerp(a[1], b[1], .5) + 8], [b[0] + 2, b[1] + 7]], .6, .3);
+ }
+
+ // Eye stalks: tubes whose contours are redrawn for each pose.
+ const stalk = (tag, st, baseA, op) => {
+  const [ang, len, bend] = st, B = ellAt(p.head, rx, ry, baseA);
+  const d = [Math.sin(ang), -Math.cos(ang)], n = [Math.cos(ang), Math.sin(ang)];
+  const C = t => [B[0] + d[0]*len*t + n[0]*bend*len*Math.sin(Math.PI*t)*.5,
+   B[1] + d[1]*len*t + n[1]*bend*len*Math.sin(Math.PI*t)*.5];
+  const wid = t => lerp(5.6, 3.3, t);
+  const edge = s => [0, .34, .67, 1].map(t => { const c = C(t); return [c[0] + n[0]*wid(t)*s, c[1] + n[1]*wid(t)*s]; });
+  add('stalk' + tag + '/back', edge(-1), 1.3, op);
+  add('stalk' + tag + '/front', edge(1), 1.3, op);
+  const E = [C(1)[0] + d[0]*6.5, C(1)[1] + d[1]*6.5], R = 8.2;
+  if (eyes === 'open') {
+   add('eye' + tag, ring(E, R, R*.94, -110*DEG, 372*DEG, 11), 1.6, op);
+   const g = p.gaze, P = [E[0] + g[0]*R*.4, E[1] + g[1]*R*.4];
+   for (let k = 0; k < 3; k++) add('eye' + tag + '/pupil/' + k, ring(P, 2.9 - k*.75, 2.9 - k*.75, 0, 2*Math.PI, 6), 1.25, op, {pressure: EVEN});
+  } else if (eyes === 'closed') {
+   const tilt = ang;
+   add('eye' + tag, ring(E, R, R*.94, -110*DEG, 372*DEG, 11), 1.6, op);
+   add('eye' + tag + '/lid', ring(E, R*.95, R*.35, 175*DEG, -170*DEG, 5, tilt), 1.4, op);
+   for (let k = 0; k < 3; k++) {
+    const a = (200 + k*55)*DEG, q = ellAt(E, R*.8, R*.8, a + tilt);
+    add('eye' + tag + '/lash/' + k, [q, [lerp(q[0], E[0], .45), lerp(q[1], E[1], .45)]], .6, op*.6);
+   }
+  } else {
+   add('eye' + tag, ring(E, R*.95, R*.7, -110*DEG, 372*DEG, 11, ang), 1.6, op);
+   const a = [E[0] - n[0]*4.5, E[1] - n[1]*4.5];
+   add('eye' + tag + '/crease', [[a[0] + d[0]*3.4, a[1] + d[1]*3.4], [E[0] + n[0]*2.5, E[1] + n[1]*2.5], [a[0] - d[0]*3.4, a[1] - d[1]*3.4]], 1.5, op, {corner: .9});
+  }
+ };
+ stalk('F', p.stalkF, FAR_BASE, .55);
+
+ // Neck and head: one contour, broken into gestures where the pressure changes.
+ const back = Hd(200), chin = Hd(40);
+ // The neck leaves the shell forwards and turns up into the head; the throat
+ // bulges forward and tucks into the front of the foot.
+ const neckC = [S1, [S1[0] + p.neckK[0], S1[1]], [back[0], back[1] + p.neckK[1]], back];
+ const throatC = [chin, [chin[0] + p.throatK[0]*.5, chin[1] + p.throatK[0]], [F[0] + p.throatK[0]*.45, F[1] - p.throatK[1]], F];
+ const neckAt = n => cbez(...neckC, n), throatAt = n => cbez(...throatC, n);
+ add('neck', neckAt(6), 2, .95);
+ add('neck/search', neckAt(6).map(([x, y], k) => [x - 2.5 + k*.3, y + 2.5]), .75, .22);
+ add('crown', [200, 222, 245, 268, 290, 309].map(Hd), 1.9, .95);
+ add('face', [303, 324, 345, 366, 384, 400].map(Hd), 1.7, .9);
+ add('throat', throatAt(6), 1.8, .9);
+ for (let k = 0; k < 4; k++) {
+  const t = .22 + k*.17, a = neckAt(21)[Math.round(t*20)], b = throatAt(21)[Math.round((1 - t)*20)];
+  const m = [lerp(a[0], b[0], .2), lerp(a[1], b[1], .2)];
+  add('neck/fold/' + k, [a, [m[0] + 2, m[1] - 1], [lerp(a[0], b[0], .36), lerp(a[1], b[1], .36)]], .85, .38);
+ }
+ for (let k = 0; k < 7; k++) {
+  const u = hash(k, 61), w = hash(k, 62), a = neckAt(11)[1 + (u*8 | 0)], b = throatAt(11)[9 - (u*8 | 0)];
+  const q = [lerp(a[0], b[0], .45 + w*.35), lerp(a[1], b[1], .45 + w*.35)];
+  add('neck/skin/' + k, [[q[0] - 2, q[1] - 2], [q[0] + 1, q[1]], [q[0] + 2, q[1] + 3]], .6, .28);
+ }
+
+ // Tentacles and mouth.
+ const tent = (tag, a, dir, L, op) => {
+  const B = Hd(a), d = [Math.cos(dir), Math.sin(dir)];
+  add('tent' + tag, [B, [B[0] + d[0]*L*.55, B[1] + d[1]*L*.55 - 1], [B[0] + d[0]*L, B[1] + d[1]*L]], 3.6, op, {pressure: [[0, 1], [.75, .8], [1, .45]]});
+ };
+ tent('F', 8, p.tent - .3, p.tentL*.8, .5);
+ tent('N', 22, p.tent, p.tentL, .9);
+ const m0 = ellAt(p.head, rx*.6, ry*.62, 66*DEG), m1 = ellAt(p.head, rx*.86, ry*.84, 36*DEG), sm = p.mouth;
+ add('mouth', [[m0[0] - 4, m0[1] - 4*sm - 1], m0, [lerp(m0[0], m1[0], .5), lerp(m0[1], m1[1], .5) + 2.2*sm], m1], 1.35, .9);
+ add('cheek', [[m0[0] - 7, m0[1] - 7 - 3*Math.max(0, sm)], [m0[0] - 3, m0[1] - 9 - 3*Math.max(0, sm)], [m0[0] + 1, m0[1] - 8 - 3*Math.max(0, sm)]], .7, .3 + .25*Math.max(0, sm));
+
+ if (v.wet) {
+  add('wet/film', [236, 252, 268, 284, 298].map(a => ellAt(p.head, rx + 4.5, ry + 4.5, a*DEG)), .9, .6);
+  const d0 = Hd(318), d1 = Hd(338), d2 = Hd(356);
+  add('wet/drip/0', [[d0[0] + 3, d0[1]], [d1[0] + 5, d1[1] + 1], [d2[0] + 5, d2[1] + 3]], 1.1, .55);
+  add('wet/bead/0', ring([d2[0] + 6, d2[1] + 7], 2.6, 2.9, 0, 2*Math.PI, 7), .9, .75, {pressure: EVEN});
+  const b1 = Hd(244);
+  add('wet/bead/1', ring([b1[0] - 2, b1[1] - 8], 2.2, 2.5, 0, 2*Math.PI, 7), .8, .7, {pressure: EVEN});
+  const g = Hd(262);
+  add('wet/glint', [[g[0] - 5, g[1] + 5], [g[0], g[1] + 3], [g[0] + 5, g[1] + 4]], .8, .5);
+ }
+ // The near stalk overlaps the crown, so it is drawn after the head outline.
+ stalk('N', p.stalkN, NEAR_BASE, 1);
+
+ // Shell: rigid, in front of the body. An open contour gesture that starts at
+ // the aperture and overlaps itself, the whorl, and growth lines that follow it.
+ const a0 = rot + 52*DEG, turns = 2.25;
+ add('shell', Array.from({length: 24}, (_, k) => shellAt(p.shell, a0 - k/23*(2*Math.PI + .32))), 2.15, .95);
+ add('shell/search', Array.from({length: 9}, (_, k) => {
+  const a = a0 - 2.4 - k*.22, r = shellRad(a, rot) + 2.5; return [sx + r*Math.cos(a), sy + r*Math.sin(a)];
+ }), .8, .24);
+ const spR = t => SHELL_R*(.96 - .84*Math.pow(t, .78)), spA = t => a0 - t*turns*2*Math.PI;
+ const spP = (t, r = spR(t)) => [sx + r*Math.cos(spA(t)), sy + r*Math.sin(spA(t))];
+ add('whorl', Array.from({length: 44}, (_, k) => spP(.015 + k/43*.985)), 1.55, .85);
+ // Growth lines: uneven spacing and reach, denser near the aperture, a few
+ // doubled like real growth checks. Stable per index, not per frame.
+ for (let k = 0, t = .02; k < 17; k++) {
+  t += .018 + hash(k, 13)*.03;
+  const rOut = spR(t) - 1.5, rIn = spR(t + 1/turns) + 2.5, a = spA(t), reach = .45 + hash(k, 14)*.55;
+  const r1 = lerp(rOut, rIn, reach), mid = (rOut + r1)/2, bow = .05*(hash(k, 12) - .3);
+  add('growth/' + k, [spP(t, rOut), [sx + mid*Math.cos(a + bow), sy + mid*Math.sin(a + bow)], spP(t + bow*.08, r1)], .65 + hash(k, 15)*.35, .2 + hash(k, 11)*.3);
+ }
+ add('lip', [shellAt(p.shell, a0 + .1), [sx + SHELL_R*.9*Math.cos(a0 + .05), sy + SHELL_R*.9*Math.sin(a0 + .05)], spP(.06, spR(.06) - 5)], 1.1, .55);
+ // Lower-left shadow of the shell. Light comes from the upper right (the leaf
+ // side), so the hatching keeps its world direction when the shell tilts.
+ let hk = 0;
+ for (let s = -64; s <= 64; s += 6.5) {
+  const Rr = SHELL_R*.9, disc = Rr*Rr - s*s; if (disc <= 0) continue;
+  const t0 = -Math.sqrt(disc), t1 = Math.min(Math.sqrt(disc), (-.141*s - SHELL_R*.26)/.99);
+  if (t1 - t0 < 9) continue;
+  const at = t => [sx + s*.8 + t*.6, sy + s*.6 - t*.8];
+  add('shade/' + hk++, [at(t0), at(lerp(t0, t1, .5) + 1.5), at(t1)], .75, .24 + hash(hk, 19)*.14);
+ }
+ return {strokes};
+}
+
+// ---------------------------------------------------------------- props
+function leafRaw(lift) {
+ const a = LEAF.a0 + lift, d = [Math.cos(a), Math.sin(a)], up = [d[1], -d[0]];
+ const axis = s => [LEAF.base[0] + d[0]*LEAF.len*s + up[0]*9*Math.sin(Math.PI*s), LEAF.base[1] + d[1]*LEAF.len*s + up[1]*9*Math.sin(Math.PI*s)];
+ const half = s => LEAF.w*Math.sin(Math.PI*Math.pow(s, .8));
+ const edge = (k, s) => { const q = axis(s), h = half(s)*k; return [q[0] + up[0]*h, q[1] + up[1]*h]; };
+ const S = [0, .08, .2, .34, .5, .64, .78, .9, 1], strokes = [];
+ const add = (id, points, width, opacity, extra = {}) => strokes.push({id, points, width, opacity, pressure: PRESS, ...extra});
+ add('petiole', [LEAF.stem, [lerp(LEAF.stem[0], LEAF.base[0], .5) + 3, lerp(LEAF.stem[1], LEAF.base[1], .5)], LEAF.base], 1.9, .85);
+ add('upper', S.map(s => edge(1, s)), 1.8, .9);
+ add('lower', S.map(s => edge(-.78, s)), 1.6, .85);
+ add('rib', [0, .2, .45, .7, .9, .985].map(axis), 1.2, .7);
+ for (let k = 0; k < 6; k++) {
+  const s = .13 + k*.13;
+  add('vein/u/' + k, [axis(s), edge(.5, s + .06), edge(.86, s + .12)], .7, .45);
+  add('vein/l/' + k, [axis(s + .03), edge(-.4, s + .08), edge(-.68, s + .13)], .6, .38);
+ }
+ for (let k = 0; k < 13; k++) {
+  const s = .12 + k*.058;
+  add('shade/' + k, [edge(-.12, s), edge(-.45, s + .025), edge(-.7, s + .045)], .6, .25 + hash(k, 44)*.12);
+ }
+ return {strokes, tip: axis(1)};
+}
+// Dew drop, drawn around the point it hangs from. stretch pulls it long.
+function dropRaw(stretch = 1, id = 'drop') {
+ const cy = DROP_HANG*stretch, r = DROP_R, strokes = [];
+ const add = (sid, points, width, opacity, extra = {}) => strokes.push({id: sid, points, width, opacity, pressure: PRESS, ...extra});
+ add('skin', [[0, 0], [4.5, 4*stretch], [r*.95, cy - 1], [r*.9, cy + 6], [4, cy + r], [-3, cy + r*1.02], [-r*.88, cy + 6], [-r*.95, cy - 1], [-4.5, 4*stretch], [.8, -.4]], 1.35, .9, {corner: 1.2});
+ add('glint', [[-5.5, cy - 1], [-5, cy - 5], [-2.3, cy - 7.5]], .9, .8);
+ add('refract', [[.5, cy + 7.5], [5, cy + 5.5], [7, cy + 1]], .7, .5);
+ return {strokes};
+}
+function fallRaw() {
+ const r = DROP_R, strokes = [];
+ strokes.push({id: 'skin', points: ring([0, 0], r*.92, r*1.12, -95*DEG, 370*DEG, 11), width: 1.35, opacity: .9, pressure: PRESS});
+ strokes.push({id: 'glint', points: [[-5, 0], [-4.5, -4], [-2, -7]], width: .9, opacity: .8, pressure: PRESS});
+ strokes.push({id: 'tail', points: [[-1, -r*1.1 - 3], [0, -r*1.1 - 10]], width: .7, opacity: .4, pressure: PRESS});
+ return {strokes};
+}
+// The drop meets the stalk base: a flattened crown of water.
+function splatRaw() {
+ const strokes = [], add = (id, points, width, opacity) => strokes.push({id, points, width, opacity, pressure: PRESS});
+ add('dome', [[-24, 3], [-17, -5], [-5, -9], [8, -8.5], [18, -4], [25, 3]], 1.5, .9);
+ add('base', [[-25, 4], [0, 6], [26, 4]], .8, .45);
+ [[-17, -4, -26, -17], [-5, -9, -8, -24], [8, -9, 12, -22], [18, -4, 28, -15]].forEach(([x0, y0, x1, y1], k) =>
+  add('spike/' + k, [[x0, y0], [lerp(x0, x1, .6), lerp(y0, y1, .6)], [x1, y1]], 1, .75));
+ return {strokes};
+}
+function dropletRaw(r) {
+ return {strokes: [{id: 'skin', points: ring([0, 0], r, r*1.1, -100*DEG, 372*DEG, 8), width: .9, opacity: .85, pressure: PRESS},
+  {id: 'glint', points: [[-r*.45, -r*.1], [-r*.2, -r*.5]], width: .6, opacity: .7, pressure: EVEN}]};
+}
+// A glint that tells the snail (and us) where to look.
+function sparkleRaw(size) {
+ const strokes = [];
+ [[0, -1], [1, 0], [0, 1], [-1, 0], [.7, -.7], [-.7, -.7]].forEach(([x, y], k) => {
+  const L = (k < 4 ? 1 : .55)*size, r0 = 4;
+  strokes.push({id: 'ray/' + k, points: [[x*r0, y*r0], [x*(r0 + L*.55), y*(r0 + L*.55)], [x*(r0 + L), y*(r0 + L)]], width: .9, opacity: .7, pressure: PRESS});
+ });
+ return {strokes};
+}
+function groundRaw() {
+ const strokes = [], add = (id, points, width, opacity, extra = {}) => strokes.push({id, points, width, opacity, pressure: PRESS, ...extra});
+ const gy = x => 4 + Math.sin(x*.011)*2.2 + Math.sin(x*.037 + 1)*1.1;
+ const run = (id, x0, x1, n, w, o) => add(id, Array.from({length: n}, (_, k) => { const x = lerp(x0, x1, k/(n - 1)); return [x, gy(x)]; }), w, o);
+ run('ground/left', -580, -196, 10, 1.7, .8);
+ run('ground/right', 214, 780, 12, 1.7, .8);
+ run('ground/far', -520, 720, 16, .7, .22);
+ for (let k = 0; k < 64; k++) {
+  const x = -560 + hash(k, 71)*1320, y = 16 + hash(k, 72)*hash(k, 73)*120, l = 6 + hash(k, 74)*16;
+  add('soil/' + k, [[x, y], [x + l*.5, y - .6], [x + l, y + .4]], .6, .12 + hash(k, 75)*.14);
+ }
+ [[-318, 11, 1], [-276, 6, .7], [436, 13, 1], [486, 7, .8], [-452, 5, .6]].forEach(([x, r, o], k) => {
+  add('pebble/' + k, ring([x, gy(x) - r*.6], r, r*.68, 170*DEG, 375*DEG, 10), 1.3, .7*o);
+  add('pebble/shade/' + k, [[x - r*.2, gy(x) - r*.1], [x + r*.5, gy(x) - r*.3], [x + r*.85, gy(x) - r*.7]], .6, .35*o);
+ });
+ const tuft = (id, x, n, h, lean) => { for (let k = 0; k < n; k++) {
+  const b = x + (k - n/2)*5, t = h*(.6 + hash(k, x | 0)*.6), l = lean + (k - n/2)*.12;
+  add(id + '/' + k, [[b, gy(b)], [b + Math.sin(l)*t*.5, gy(b) - t*.55], [b + Math.sin(l)*t*1.1, gy(b) - t]], 1.1, .7, {pressure: [[0, 1], [.6, .6], [1, .05]]});
+ } };
+ tuft('tuft/a', -420, 7, 44, -.15); tuft('tuft/b', 590, 8, 56, .2); tuft('tuft/c', 262, 4, 26, .35); tuft('tuft/d', -232, 3, 20, -.3);
+ // The twig enters from above the frame; the leaf stalk hangs from it.
+ const tw = cbez(...TWIG, 12);
+ add('twig/top', tw, 2.3, .85);
+ add('twig/bottom', tw.slice(0, 11).map(([x, y], k) => [x + 1 + k*.3, y + 11 - k*.8]), 1.5, .7);
+ for (let k = 0; k < 9; k++) { const [x, y] = tw[k + 1]; add('twig/bark/' + k, [[x - 2, y + 2], [x + 3, y + 4], [x + 6, y + 7]], .6, .35); }
+ const l2 = tw[4];
+ add('twig/leaf2/a', [[l2[0], l2[1] + 6], [l2[0] - 18, l2[1] + 38], [l2[0] - 20, l2[1] + 82], [l2[0] - 4, l2[1] + 96], [l2[0] + 14, l2[1] + 64], [l2[0] + 10, l2[1] + 26], [l2[0] + 1, l2[1] + 7]], 1.5, .6);
+ add('twig/leaf2/rib', [[l2[0], l2[1] + 8], [l2[0] - 6, l2[1] + 50], [l2[0] - 5, l2[1] + 90]], .7, .4);
+ return {strokes};
+}
+
+// ---------------------------------------------------------------- exposure sheet
+const D = {}, entries = [];
+const cel = (id, raw) => { D[id] ??= compileCel(raw, {id}); return id; };
+const expose = (id, frames) => entries.push({id, frames});
+const KR = {}, rawOf = (k, v) => (KR[k + JSON.stringify(v)] ??= snailRaw(K[k], v));
+function hold(k, frames, v = {}, as = k) { expose(cel(as, rawOf(k, v)), frames); }
+function passage(a, b, spacing, frames = 2, v = {}) {
+ for (const [i, u] of spacing.entries()) expose(cel(`${a}-${b}-${i}`, inbetweenCel(rawOf(a, v), rawOf(b, v), u)), frames);
+}
+const WET = {wet: true}, SHUT = {eyes: 'shut', wet: true};
+hold('rest', 12); hold('rest', 3, {eyes: 'closed'}, 'rest-blink'); hold('rest', 12);
+passage('rest', 'notice', [.18, .5, .84]); hold('notice', 16);
+passage('notice', 'gather', [.25, .6, .88]); hold('gather', 8);
+// A snail is slow: the reach is a long, evenly worked stretch on twos.
+passage('gather', 'stretch', [.05, .13, .24, .37, .51, .65, .77, .87, .94]); hold('stretch', 6);
+passage('stretch', 'touch', [.4, .8]); hold('touch', 7);
+hold('flinch', 2, SHUT); passage('flinch', 'recoil', [.55], 1, SHUT); hold('recoil', 22, SHUT);
+hold('peek', 12, WET);                       // replacement: open eyes on short stubs
+passage('peek', 'happyUp', [.2, .5, .8], 2, WET); hold('happyUp', 4, WET);
+passage('happyUp', 'happy', [.5], 2, WET); hold('happy', 16, WET);
+hold('happy', 3, {eyes: 'closed', wet: true}, 'happy-blink'); hold('happy', 34, WET);
+const SHEET = exposureSheet(entries, D);
+const rowOf = id => SHEET.rows.find(r => r.id === id);
+const T_TOUCH = rowOf('touch').start, T_FALL = T_TOUCH + 3, T_HIT = T_TOUCH + 6, T_NOTICE = rowOf('rest-notice-0').start;
+const T_GLINT = T_NOTICE - 12;
+window.__rows = SHEET.rows;
+
+// The drop lands where it meets the touch drawing: the base of the near stalk.
+const IMPACT = (() => {
+ const p = K.touch, c = Math.min(1, Math.abs(DROP_C[0] - p.head[0])/p.hr[0]);
+ const headY = p.head[1] - p.hr[1]*Math.sqrt(1 - c*c);
+ return [DROP_C[0], headY - DROP_R + 3];
+})();
+const DROPS = Array.from({length: 7}, (_, k) => {
+ const a = (-168 + k*26 + (hash(k, 81) - .5)*14)*DEG, v = 330 + hash(k, 82)*200;
+ return {vx: Math.cos(a)*v, vy: Math.sin(a)*v - 90, r: 2.2 + hash(k, 83)*2.4, id: 'droplet/' + k};
+});
+DROPS.forEach(q => cel(q.id, dropletRaw(q.r)));
+cel('drop', dropRaw(1)); cel('drop-pull', dropRaw(1.28)); cel('drop-fall', fallRaw()); cel('splat', splatRaw());
+cel('glint-s', sparkleRaw(7)); cel('glint-l', sparkleRaw(13));
+const GROUND = compileCel(groundRaw(), {id: 'ground'});
+
+// Leaf bend on twos: pressed a little by the touch, then released of the
+// drop's weight it springs up past its unloaded angle and settles.
+const LIFT = .11;
+function leafLift(f) {
+ if (f < T_TOUCH) return 0;
+ if (f < T_FALL) return -.025;
+ const g = T_FALL + 2*Math.floor((f - T_FALL)/2), t = (g - T_FALL)/24;
+ // Once the swing is smaller than one drawing step the leaf holds still,
+ // instead of flipping between two neighbouring drawings forever.
+ if (t > 1.5) return LIFT;
+ return Math.round(LIFT*spring(t, {freq: 1.5, damp: .28})/.004)*.004;
+}
+const leafCel = lift => {
+ const id = 'leaf/' + lift.toFixed(3);
+ if (!D[id]) { const r = leafRaw(lift); D[id] = compileCel(r, {id: 'leaf'}); D[id].tip = r.tip; }
+ return id;
+};
+
+// ---------------------------------------------------------------- rendering
+// Every drawing is rasterized once per look and output scale, then held.
+// No frame-number seeds, no paper shake, no camera noise.
+const sprites = new Map();
+const O = () => [CX - 300, CY + 300];
+function sprite(id, box) {
+ const k = LOOK + '/' + S + '/' + id;
+ if (!sprites.has(k)) {
+  const cv2 = document.createElement('canvas'), z = SC*S;
+  cv2.width = Math.ceil(box[2]*z); cv2.height = Math.ceil(box[3]*z);
+  const g = cv2.getContext('2d'); g.scale(z, z); g.translate(-box[0], -box[1]);
+  drawCel(g, id === 'ground' ? GROUND : D[id], {material: LOOK, color: INK});
+  sprites.set(k, cv2);
+ }
+ return sprites.get(k);
+}
+function put(c, id, box, at = [0, 0]) {
+ const s = sprite(id, box), [ox, oy] = O();
+ c.drawImage(s, ox + (box[0] + at[0])*SC, oy + (box[1] + at[1])*SC, s.width/S, s.height/S);
+}
+const BOX = {snail: [-240, -360, 520, 410], leaf: [120, -440, 300, 220], small: [-30, -40, 60, 70], ground: [-600, -600, 1420, 800]};
+let groundLayer = null, groundKey = '';
+function shot(c, tau) {
+ const f = Math.round(tau*24);
+ paper(c, '#f4efe3', null, 87);
+ if (groundKey !== LOOK + S) { groundLayer = layer(); groundKey = LOOK + S; const g = groundLayer.getContext('2d'); resetT(g); put(g, 'ground', BOX.ground); }
+ blit(c, groundLayer);
+ const lift = leafLift(f), lid = leafCel(lift), tip = D[lid].tip;
+ put(c, lid, BOX.leaf);
+ // Dew drop: hanging, pulled by the touch, falling on ones, then the splat.
+ if (f < T_FALL) put(c, f >= T_TOUCH ? 'drop-pull' : 'drop', BOX.small, tip);
+ else if (f < T_HIT) {
+  const u = Math.pow((f - T_FALL + 1)/(T_HIT - T_FALL + 1), 2);
+  put(c, 'drop-fall', BOX.small, [DROP_C[0], lerp(DROP_C[1], IMPACT[1] - 4, u)]);
+ }
+ if (f >= T_GLINT && f < T_GLINT + 12) put(c, (f - T_GLINT) % 8 < 4 ? 'glint-s' : 'glint-l', BOX.small, [DROP_C[0] + 13, DROP_C[1] - 12]);
+ const q = SHEET.atFrame(f);
+ put(c, q.id, BOX.snail);
+ if (f === T_HIT) put(c, 'splat', BOX.small, IMPACT);
+ // Spray on ones: ballistic droplets from the impact point, gone at the ground.
+ if (f > T_HIT && f <= T_HIT + 10) {
+  const t = (f - T_HIT)/24;
+  for (const d of DROPS) {
+   const x = IMPACT[0] + d.vx*t, y = IMPACT[1] - 6 + d.vy*t + .5*2600*t*t;
+   if (y < -d.r - 2) put(c, d.id, BOX.small, [x, y]);
+  }
+ }
+}
+
+// ---------------------------------------------------------------- score
+function score(ac, t0, dest) {
+ const m = ac.createGain(); m.gain.value = 1.1; m.connect(dest);
+ const at = f => f/24, bell = (o, s, f, d = .9, g = .13) => note(ac, m, pentHz(o, s, 262), t0, at(f), d, 'sine', g);
+ bell(1, 2, T_GLINT, .5, .06); bell(1, 4, T_GLINT + 4, .6, .05);
+ bell(0, 2, T_NOTICE, .4, .1); bell(0, 4, T_NOTICE + 5, .7, .1);
+ const g0 = rowOf('gather-stretch-0').start;
+ [[0, 1], [0, 2], [0, 3], [0, 4], [1, 0]].forEach(([o, n], k) => bell(o, n, g0 + k*4, .5, .06 + k*.012));
+ bell(2, 0, T_TOUCH, .25, .07);
+ bell(2, 2, T_HIT, .18, .16); bell(1, 4, T_HIT + 1, .3, .12); noiseBurst(ac, m, t0, at(T_HIT), .09, .12, 7);
+ note(ac, m, pentHz(-1, 0, 262), t0, at(T_HIT + 3), 1.1, 'triangle', .08);
+ const p0 = rowOf('peek').start; bell(0, 3, p0, .3, .07); bell(0, 4, p0 + 6, .3, .07);
+ const h0 = rowOf('happyUp').start; [0, 2, 4].forEach((s, k) => bell(k ? 1 : 0, s, h0 + k*3, 2.4, .08));
+ bell(1, 4, rowOf('happy-blink').start, .35, .05);
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: '#f4efe3'}, format: {ar: '16:9', width: 1920}, fps: 24,
+ timeline: [{name: 'tomchi', dur: SHEET.duration, fn: shot}], score});
+</script>

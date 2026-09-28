@@ -1,0 +1,5 @@
+node_modules/
+films/*/out/*-frames/
+films/*/out/*.wav
+films/*/out/*.mp4
+!films/*/out/*-final.mp4
