@@ -31,9 +31,14 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 - **Tekshiruv.** Avval `--grid`, keyin `--strip` va `--only`, oxirida to'liq
   MP4. Faqat kontakt varag'ining o'zi harakatni tekshirishga yetmaydi.
 
-### Namuna film
+### Filmlar
 
-[`films/tomchi/`](films/tomchi/) — skill usulida noldan chizilgan 8 soniyalik
-original film: shilliqqurt va shudring tomchisi.
+- [`films/tosh-teshar/`](films/tosh-teshar/) — **"Tomchi tomib, tosh
+  teshar"**. 38 soniyalik vertikal (9:16) motivatsion film: tomchilar toshni
+  yoradi, tosh ostidagi urug' nurga yo'l topib, lola bo'lib ochiladi. Qalam
+  dunyosi nur bilan rangga kiradi.
+- [`films/tomchi/`](films/tomchi/) — 8 soniyalik qalam etyudi: shilliqqurt va
+  shudring tomchisi.
 
+![Tomchi tomib, tosh teshar](films/tosh-teshar/out/tosh-teshar-preview.gif)
 ![Tomchi](films/tomchi/out/tomchi-preview.gif)

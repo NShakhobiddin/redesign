@@ -1,0 +1,17 @@
+{
+  "file": "/home/user/redesign/films/tosh-teshar/tosh-teshar.html",
+  "fps": 24,
+  "frames": 912,
+  "outputFps": 24,
+  "outputFrames": 912,
+  "duration": 38,
+  "size": {
+    "w": 1080,
+    "h": 1920,
+    "W": 1080,
+    "H": 1920,
+    "S": 1
+  },
+  "look": null,
+  "audio": true
+}

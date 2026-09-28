@@ -1,0 +1,820 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tomchi tomib, tosh teshar</title>
+<style>body{margin:0;background:#1f1d1b;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="studio.js"></script>
+<script src="cels.js"></script>
+<script src="materials.js"></script>
+<script>
+'use strict';
+/* Film brief
+Subject and beat: "Tomchi tomib, tosh teshar" (Uzbek proverb: dripping water
+  pierces stone). A seed lies under a heavy stone. Drop after drop falls from a
+  leaf onto the stone. The same water soaks down and wakes the seed. The shoot
+  hits the stone and pushes; the stone does not move. Each drop lengthens a
+  crack. When the crack reaches the bottom, a thread of light enters the dark;
+  the shoot finds it. A last, heavy drop and one more push: the stone splits,
+  light floods in and a red tulip (lola) opens. The proverb writes itself.
+Duration 38 s; 9:16; 1080x1920; 24 fps.
+Drawing reference: the skill's pencil studies (examples/sketchbook-bird.html).
+Looks: pencil + watercolour wash. Mixed media reason: colour IS the light. The
+  world is graphite while the seed is in the dark; the first colour is the gold
+  thread through the crack; at the split the colour spreads out of the crack.
+  What crosses the boundary: the shoot (same drawing), the stone halves, the
+  leaf and its drops, the camera move.
+Techniques used: whole cels with assisted inbetweens (shoot, leaves, tulip,
+  seed), reveal of fixed drawings for growth that happens at a tip (roots,
+  crack, lettering), rigid halves for the stone, washes (pigmentWash).
+Palette and bindings: graphite on warm paper; paper grain belongs to the
+  screen; hatching belongs to each object (stone marks rotate with its halves);
+  colour washes belong to the world and to each moving object.
+Mark language: long pressure-tapered contours; stone hatching at one hand
+  angle, denser on the lower-left, crossed only in the darkest part; soil tone
+  darker with depth; light areas stay open.
+Hardest action: crack-through -> the shoot turns to the light -> last drop ->
+  push -> split. The drop hits on T_SPLIT; the halves open on that frame; the
+  shoot rises on ones for 9 frames.
+Exposure: 24 fps. Drops, splats, spray, chips and the stone opening on ones;
+  shoot, leaves, tulip, seed and lettering on twos; long holds while pressing.
+Camera: wide -> down to the seed -> medium for the time-lapse -> tilt up with
+  the shoot -> wide for the lettering. A short jolt on the split.
+Beat sheet (s): 0 rain stops, first drop 1.8 | 3.2-7 water soaks down |
+  6.6 seed breathes, 8 cracks | 8.3-10.8 shoot rises, touches the stone |
+  11.8, 13.0 pushes with the drops | 15-19 drops quicken, crack grows |
+  19.1 crack through: gold thread | 20-21.8 shoot finds it | 21-22.7 heavy
+  drop swells | 23.2 split, light, colour | 25-27 leaves | 26.4-30 tulip |
+  32.4-35.2 lettering | 38 end.
+Sound: each drop is a note; the time-lapse becomes a run; silence and a
+  heartbeat before the split; a low hit and a chord; a rising line as it grows.
+Sources: all drawings and lettering are original and code-authored. Engine:
+  hand-drawn-canvas-animation skill (MIT, Alexey Fateev).
+*/
+{
+const FPS = 24, fr = s => Math.round(s*FPS);
+const INK = '#2e2823', PAPER = '#f3eee2';
+const LW = 2.3;                                   // stroke widths are authored thin; scaled for a 1080-wide frame
+const PRESS = [[0,.1],[.12,.8],[.4,1],[.73,.65],[1,.05]];
+const EVEN = [[0,1],[1,1]];
+const DEG = Math.PI/180;
+const lp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+const cbez = (a, b, c, d, n = 5) => Array.from({length: n}, (_, k) => {
+ const t = k/(n - 1), u = 1 - t, w = [u*u*u, 3*u*u*t, 3*u*t*t, t*t*t];
+ return [0, 1].map(j => w[0]*a[j] + w[1]*b[j] + w[2]*c[j] + w[3]*d[j]);
+});
+const ring = (c, rx, ry, a0, sweep, n, tilt = 0) => Array.from({length: n}, (_, k) => {
+ const a = a0 + sweep*k/(n - 1), x = rx*Math.cos(a), y = ry*Math.sin(a);
+ return [c[0] + x*Math.cos(tilt) - y*Math.sin(tilt), c[1] + x*Math.sin(tilt) + y*Math.cos(tilt)];
+});
+const ease01 = (t, a, b, e = easeInOutSine) => e(clamp((t - a)/(b - a), 0, 1));
+function drawing() {
+ const strokes = [];
+ return {strokes, add(id, points, width = 1.6, opacity = 1, extra = {}) { strokes.push({id, points, width: width*LW, opacity, pressure: PRESS, ...extra}); }};
+}
+function insidePoly(poly, x, y) {
+ let c = false;
+ for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+  const [xi, yi] = poly[i], [xj, yj] = poly[j];
+  if ((yi > y) !== (yj > y) && x < (xj - xi)*(y - yi)/(yj - yi) + xi) c = !c;
+ }
+ return c;
+}
+const pathOf = (pts, close = true) => { const p = new Path2D(); pts.forEach((q, i) => i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])); if (close) p.closePath(); return p; };
+
+// ------------------------------------------------------------------ the set
+// World units: ground at y = 0, x = 0 in the middle of the stone.
+const gy = x => 2*Math.sin(x*.01) + 1.2*Math.sin(x*.031 + 1);
+const STONE_PTS = [[-262, -62], [-214, -122], [-128, -150], [-50, -166], [58, -162], [130, -150], [206, -118], [262, -58], [292, 14], [284, 92],
+ [250, 162], [176, 206], [60, 224], [-62, 222], [-176, 210], [-248, 170], [-292, 96], [-298, 14]];
+const STONE = smoothPts(STONE_PTS, true, 4, .5);
+const nearestOnStone = p => { let bi = 0, bd = 1e9; STONE.forEach((q, i) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; bi = i; } }); return bi; };
+const CRACK0 = [[30, -163], [37, -122], [26, -84], [43, -36], [35, 14], [51, 64], [40, 116], [55, 168], [47, 224]];
+const I_TOP = nearestOnStone(CRACK0[0]), I_BOT = nearestOnStone(CRACK0[CRACK0.length - 1]);
+const CRACK = CRACK0.map((p, i) => i === 0 ? STONE[I_TOP].slice() : i === CRACK0.length - 1 ? STONE[I_BOT].slice() : p);
+const CRACK_TOP = CRACK[0], CRACK_BOT = CRACK[CRACK.length - 1];
+const crackX = y => {
+ for (let i = 1; i < CRACK.length; i++) { const a = CRACK[i - 1], b = CRACK[i]; if (y <= b[1]) return lerp(a[0], b[0], clamp((y - a[1])/(b[1] - a[1]), 0, 1)); }
+ return CRACK_BOT[0];
+};
+const crackMid = y => lerp(CRACK_BOT[0], CRACK_TOP[0], clamp((CRACK_BOT[1] - y)/(CRACK_BOT[1] - CRACK_TOP[1]), 0, 1));
+const arcIdx = (a, b) => { const out = []; for (let i = a; ; i = (i + 1) % STONE.length) { out.push(STONE[i]); if (i === b) break; } return out; };
+const RIGHT_ARC = arcIdx(I_TOP, I_BOT), LEFT_ARC = arcIdx(I_BOT, I_TOP);
+const underside = x => { let best = -1e9; for (const q of STONE) if (q[1] > 100 && Math.abs(q[0] - x) < 5 && q[1] > best) best = q[1]; return best; };
+const SEED = [-40, 440], STEM_BASE = [-40, 428], ROOT_BASE = [-37, 453];
+const LEAF = {tip: [CRACK_TOP[0], -760], w: 30};
+LEAF.base = [LEAF.tip[0] + 150, LEAF.tip[1] - 46];
+LEAF.len = Math.hypot(LEAF.tip[0] - LEAF.base[0], LEAF.tip[1] - LEAF.base[1]);
+LEAF.a0 = Math.atan2(LEAF.tip[1] - LEAF.base[1], LEAF.tip[0] - LEAF.base[0]);
+const TWIG = [[780, -990], [560, -930], [LEAF.base[0] + 96, LEAF.base[1] - 48], [LEAF.base[0] - 10, LEAF.base[1] - 38]];
+LEAF.stem = cbez(...TWIG, 11)[9];
+const SUN = [-330, -560];
+const DROP_R = 10, DROP_HANG = 11;
+const DROP_Y0 = LEAF.tip[1] + DROP_HANG, DROP_Y1 = CRACK_TOP[1] - DROP_R + 2;
+
+// ------------------------------------------------------------------ timing
+const IMPACTS = [1.8, 3.2, 4.6, 5.8, 7.0, 8.2, 9.4, 10.6, 11.8, 13.0, 14.1,
+ 15.0, 15.7, 16.3, 16.8, 17.2, 17.55, 17.85, 18.1, 18.33, 18.53, 18.72, 18.9, 19.06].map(fr);
+const T_THROUGH = IMPACTS[IMPACTS.length - 1];
+const T_SPLIT = fr(23.2), FALL = 12, T_END = fr(38);
+const DROPS = IMPACTS.map((hit, k) => ({hit, rel: hit - FALL, form: clamp((k ? hit - IMPACTS[k - 1] : 30) - FALL - 2, 4, 14), scale: 1}));
+DROPS.push({hit: T_SPLIT, rel: T_SPLIT - FALL, form: fr(1.7), scale: 1.65});
+const T_LAST_DROP = fr(31);                      // one more drop gathers at the end: it goes on
+const CRACK_STEP = IMPACTS.map((_, k) => k === 0 ? 0 : k <= 10 ? .028 : .72/13);
+const crackProgress = f => { let p = 0; IMPACTS.forEach((h, k) => { if (h <= f) p += CRACK_STEP[k]; }); return Math.min(1, p); };
+
+// ------------------------------------------------------------------ drawings
+function stoneParts() {
+ const hatch = [], pits = [], ridges = [];
+ const inner = STONE_PTS.map(([x, y]) => [x*.95, 30 + (y - 30)*.95]);
+ const side = p => p[0] < crackX(p[1]) ? 'L' : 'R';
+ for (let iy = -175; iy <= 232; iy += 9) for (let ix = -300; ix <= 300; ix += 9) {
+  const id = (ix + 400)*1000 + iy + 400, x = ix + hash(id, 3)*6, y = iy + hash(id, 4)*6;
+  const tone = clamp(.2 + .55*(y + 165)/390 + .32*(-x/290) + .3*Math.max(0, Math.hypot(x - 80, y + 80)/260 - .5), 0, .95);
+  if (hash(id, 5) > tone) continue;
+  const a = -.95 + .3*(x/290) + .2*(y/220), L = 11 + hash(id, 6)*12;
+  const p0 = [x - Math.cos(a)*L/2, y - Math.sin(a)*L/2], p2 = [x + Math.cos(a)*L/2, y + Math.sin(a)*L/2], p1 = [x + Math.sin(a)*1.4, y - Math.cos(a)*1.4];
+  if (![p0, p1, p2].every(q => insidePoly(inner, q[0], q[1]))) continue;
+  if ([p0, p1, p2].some(q => Math.abs(q[0] - crackX(q[1])) < 7) || side(p0) !== side(p2)) continue;
+  hatch.push({id: 'hatch/' + id, points: [p0, p1, p2], width: (.55 + hash(id, 7)*.4)*LW, opacity: .3 + tone*.55, pressure: PRESS, side: side(p1)});
+  if (tone > .5 && hash(id, 8) < .7) {
+   const b = a + 1.15, q0 = [x - Math.cos(b)*L*.4, y - Math.sin(b)*L*.4], q1 = [x + Math.cos(b)*L*.4, y + Math.sin(b)*L*.4];
+   if ([q0, q1].every(q => insidePoly(inner, q[0], q[1]) && Math.abs(q[0] - crackX(q[1])) > 7) && side(q0) === side(q1))
+    hatch.push({id: 'cross/' + id, points: [q0, lp2(q0, q1, .5), q1], width: .5*LW, opacity: .25 + tone*.4, pressure: PRESS, side: side(q0)});
+  }
+ }
+ // Marks that cross the future break belong to the unbroken stone only, so
+ // the stone does not show where it will crack before it cracks.
+ for (let iy = -170; iy <= 228; iy += 4.5) for (const dx of [-7, 0, 7]) {
+  const id = Math.round(iy*10)*10 + dx + 5000, x = crackX(iy) + dx + (hash(id, 9) - .5)*4, y = iy + hash(id, 10)*4;
+  const tone = clamp(.2 + .55*(y + 165)/390 + .32*(-x/290) + .3*Math.max(0, Math.hypot(x - 80, y + 80)/260 - .5), 0, .95);
+  if (hash(id, 11) > tone*.75) continue;
+  const a = -.95 + .3*(x/290) + .2*(y/220), L = 11 + hash(id, 12)*12;
+  const p0 = [x - Math.cos(a)*L/2, y - Math.sin(a)*L/2], p2 = [x + Math.cos(a)*L/2, y + Math.sin(a)*L/2];
+  if (![p0, p2].every(q => insidePoly(inner, q[0], q[1]))) continue;
+  hatch.push({id: 'band/' + id, points: [p0, lp2(p0, p2, .5), p2], width: (.55 + hash(id, 13)*.4)*LW, opacity: .3 + tone*.55, pressure: PRESS, side: 'whole'});
+ }
+ for (let k = 0; k < 26; k++) {
+  const x = -240 + hash(k, 21)*480, y = -130 + hash(k, 22)*330, r = 1.8 + hash(k, 23)*3.2;
+  if (!insidePoly(inner, x, y) || Math.abs(x - crackX(y)) < 10) continue;
+  pits.push({id: 'pit/' + k, points: ring([x, y], r, r*.75, 200*DEG, 330*DEG, 7), width: .7*LW, opacity: .55, pressure: PRESS, side: side([x, y])});
+ }
+ [[[-236, -64], [-190, -106], [-120, -128], [-52, -140]], [[132, -130], [200, -100], [246, -46], [264, 16]],
+  [[-272, 40], [-258, 110], [-214, 158], [-150, 190]], [[-176, -30], [-120, -52], [-66, -58]], [[118, 58], [170, 40], [226, 52]],
+  [[-60, 60], [-20, 40], [2, 8]], [[90, 150], [150, 166], [214, 150]]].forEach((pts, k) =>
+  ridges.push({id: 'ridge/' + k, points: pts, width: .8*LW, opacity: .35, pressure: PRESS, side: side(pts[1])}));
+ return [...hatch, ...pits, ...ridges];
+}
+const STONE_MARKS = stoneParts();
+function stoneWhole() {
+ const d = drawing(), s0 = nearestOnStone([-232, -100]);
+ d.add('outline', [...STONE.slice(s0), ...STONE.slice(0, s0), ...STONE.slice(s0, s0 + 12)], 2.2, .95);
+ d.add('outline/search', STONE.slice(nearestOnStone([-150, -150]), nearestOnStone([160, -140])).map(([x, y]) => [x + 1.5, y - 3]), .8, .25);
+ STONE_MARKS.forEach(({side, ...s}) => d.strokes.push(s));
+ return {strokes: d.strokes};
+}
+function stoneHalf(which) {
+ const d = drawing();
+ if (which === 'L') d.add('outline', LEFT_ARC, 2.2, .95); else d.add('outline', RIGHT_ARC, 2.2, .95);
+ d.add('break', CRACK, 1.9, .9, {corner: .5});
+ d.add('break/inner', CRACK.map(([x, y], k) => [x + (which === 'L' ? -3.5 : 3.5), y + (k % 2 ? 2 : -2)]), .8, .45, {corner: .5});
+ STONE_MARKS.filter(s => s.side === which).forEach(({side, ...s}) => d.strokes.push(s));
+ return {strokes: d.strokes};
+}
+function crackDrawing() {
+ const d = drawing();
+ d.add('dent', ring([CRACK_TOP[0], CRACK_TOP[1] + 5], 9, 3.5, 190*DEG, 160*DEG, 6), 1.1, .7);
+ d.add('crack', CRACK, 1.7, .95, {corner: .5});
+ d.add('crack/edge', CRACK.map(([x, y]) => [x + 2.4, y + 1.2]), .7, .5, {corner: .5});
+ [[2, [[-8, 16], [-22, 26]]], [4, [[16, 12], [34, 22], [42, 20]]], [6, [[-12, 18], [-24, 34]]], [3, [[14, -6], [26, -2]]]].forEach(([i, rel], k) => {
+  const o = CRACK[i]; d.add('crack/branch/' + k, [o, ...rel.map(([x, y]) => [o[0] + x, o[1] + y])], .8, .6, {corner: .5, origin: i/(CRACK.length - 1)});
+ });
+ return {strokes: d.strokes};
+}
+function seedDrawing(k) {
+ const d = drawing(), sc = k === 1 ? 1.12 : 1, rx = 25*sc, ry = 15.5*sc, rot = -.35;
+ if (k < 2) {
+  d.add('coat', ring(SEED, rx, ry, -120*DEG, 372*DEG, 13, rot), 1.7, .95);
+  d.add('seam', ring(SEED, rx*.8, ry*.25, 200*DEG, 140*DEG, 5, rot), .9, .6);
+ } else {
+  d.add('coat/a', ring(SEED, rx*1.06, ry*1.05, 205*DEG, 150*DEG, 8, rot), 1.7, .95);
+  d.add('coat/b', ring([SEED[0] + 2, SEED[1] + 3], rx*1.06, ry*1.05, 25*DEG, 150*DEG, 8, rot), 1.7, .95);
+  d.add('seam', ring(SEED, rx*.8, ry*.2, 200*DEG, 140*DEG, 5, rot), .8, .45);
+ }
+ for (let i = 0; i < 5; i++) { const q = ring(SEED, rx*.55, ry*.5, (200 + i*30)*DEG, 1, 2, rot)[0]; d.add('dot/' + i, [q, [q[0] + 2, q[1] + 1.5]], .6, .45); }
+ for (let i = 0; i < 6; i++) { const x = SEED[0] - 18 + i*7; d.add('shade/' + i, [[x, SEED[1] + ry + 3], [x + 5, SEED[1] + ry + 1]], .6, .3); }
+ return {strokes: d.strokes};
+}
+function rootsDrawing() {
+ const d = drawing();
+ const main = [ROOT_BASE, [-33, 500], [-43, 552], [-35, 604], [-45, 656], [-39, 712], [-44, 760]];
+ d.add('root', main, 1.5, .85, {pressure: [[0, 1], [.7, .55], [1, .1]]});
+ const mp = motionPath(main);
+ for (let k = 0; k < 9; k++) {
+  const u = .12 + k*.09, o = mp.at(u).p, s = k % 2 ? 1 : -1, L = 34 + hash(k, 31)*52;
+  d.add('root/' + k, [o, [o[0] + s*L*.45, o[1] + L*.2], [o[0] + s*L*.8, o[1] + L*.5], [o[0] + s*L, o[1] + L*.62 + hash(k, 32)*10]], .8, .6, {origin: u, pressure: [[0, 1], [1, .1]]});
+  for (let j = 0; j < 3; j++) { const q = lp2(o, [o[0] + s*L*.8, o[1] + L*.5], .3 + j*.22); d.add('root/' + k + '/hair/' + j, [q, [q[0] + s*3, q[1] + 7]], .45, .35, {origin: u + .05}); }
+ }
+ return {strokes: d.strokes};
+}
+// The shoot: a centreline of 10 points; edges, tip and fibres are redrawn
+// from it for every key, so ids and point counts match between keys.
+function stemDrawing(pts, wk) {
+ const d = drawing(), mp = motionPath(pts), n = pts.length;
+ const tan = i => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [(b[0] - a[0])/l, (b[1] - a[1])/l]; };
+ const edge = s => pts.map((p, i) => { const t = tan(i), hw = lerp(5.4, 3, i/(n - 1))*wk; return [p[0] - t[1]*hw*s, p[1] + t[0]*hw*s]; });
+ const L = edge(1), R = edge(-1), tip = pts[n - 1], tt = tan(n - 1);
+ d.add('stem/l', L, 1.35, .95); d.add('stem/r', R, 1.35, .95);
+ d.add('stem/tip', [L[n - 1], [tip[0] + tt[0]*3.5*wk, tip[1] + tt[1]*3.5*wk], R[n - 1]], 1.2, .9);
+ for (let k = 0; k < 4; k++) {
+  const u = .18 + k*.2, a = mp.at(u), b = mp.at(u + .07), hw = lerp(5.4, 3, u)*wk*.35;
+  d.add('stem/fibre/' + k, [[a.p[0] - a.tangent[1]*hw, a.p[1] + a.tangent[0]*hw], [b.p[0] - b.tangent[1]*hw, b.p[1] + b.tangent[0]*hw]], .55, .4);
+ }
+ return {strokes: d.strokes};
+}
+const soil = [STEM_BASE, [-30, 375], [-4, 325], [24, 280]];
+const up = (ys, lean = .02) => ys.map(y => y > CRACK_TOP[1] ? [crackMid(y), y] : [CRACK_TOP[0] + (CRACK_TOP[1] - y)*lean, y]);
+const STEMK = {
+ s0: [[STEM_BASE, [-40, 424], [-40, 419], [-40, 414], [-39.5, 409], [-38, 404], [-35, 400.5], [-31, 400], [-28, 402.5], [-27, 406.5]], .6],
+ s1: [[STEM_BASE, [-41, 407], [-42, 386], [-42, 366], [-41, 347], [-38, 331], [-32, 321], [-24, 319], [-18, 324], [-16, 333]], .8],
+ s2: [[STEM_BASE, [-42, 393], [-43, 358], [-43, 323], [-42, 289], [-40, 259], [-35, 239], [-27, 230], [-19, 233], [-15, 242]], .9],
+ s3: [[STEM_BASE, [-51, 395], [-58, 361], [-58, 326], [-51, 292], [-42, 261], [-35, 239], [-27, 230], [-19, 233], [-15, 242]], .92],
+ s2b: [[STEM_BASE, [-46, 394], [-50, 360], [-50, 325], [-46, 291], [-41, 260], [-35, 239], [-27, 230], [-19, 233], [-15, 242]], .95],
+ s3b: [[STEM_BASE, [-60, 397], [-72, 363], [-72, 327], [-60, 293], [-45, 262], [-35, 239], [-27, 230], [-19, 233], [-15, 242]], 1.05],
+ s4: [[STEM_BASE, [-54, 395], [-60, 361], [-56, 326], [-44, 295], [-27, 270], [-9, 250], [9, 235], [23, 229], [33, 231]], 1.05],
+ s5: [[STEM_BASE, [-45, 394], [-43, 360], [-33, 327], [-16, 300], [2, 277], [19, 257], [33, 241], [43, 230], [47, 219]], 1.05],
+ s6: [[STEM_BASE, [-41, 394], [-37, 360], [-27, 328], [-11, 300], [7, 278], [25, 258], [40, 238], [48, 214], [51, 192]], 1.05],
+ s6a: [[STEM_BASE, [-47, 395], [-45, 361], [-35, 329], [-17, 302], [1, 280], [21, 260], [38, 240], [47, 216], [50, 197]], 1.05],
+ s7: [[...soil, ...up([240, 170, 100, 30, -40, -100])], 1.1],
+ s8: [[...soil, ...up([240, 130, 10, -110, -200, -280])], 1.2],
+ s9: [[...soil, ...up([240, 110, -30, -160, -275, -390])], 1.3],
+ s10: [[...soil, ...up([240, 110, -30, -160, -272, -384], -.09)], 1.3],
+};
+const STEM_RAW = Object.fromEntries(Object.entries(STEMK).map(([k, [p, w]]) => [k, stemDrawing(p, w)]));
+// [seconds, key, exposure of the segment that ends here, easing]
+const STEM_TL = [[8.3, 's0'], [9.6, 's1'], [10.8, 's2'], [11.7, 's2'], [12.1, 's3', 2, easeOut], [12.6, 's2b'], [12.95, 's2b'],
+ [13.3, 's3b', 2, easeOut], [19.4, 's3b'], [20.3, 's4'], [21.0, 's5'], [21.8, 's6'], [22.7, 's6'], [23.1, 's6a'],
+ [23.2, 's6a'], [23.58, 's7', 1, easeOut], [25.0, 's8', 2, easeOut], [27.2, 's9'], [29.6, 's10']].map(([t, id, on = 2, e = easeInOutSine]) => ({f: fr(t), id, on, e}));
+function stemState(f) {
+ if (f < STEM_TL[0].f) return null;
+ for (let i = 1; i < STEM_TL.length; i++) {
+  const a = STEM_TL[i - 1], b = STEM_TL[i];
+  if (f < b.f) {
+   const q = a.f + Math.floor((f - a.f)/b.on)*b.on, u = a.id === b.id ? 0 : b.e((q - a.f)/(b.f - a.f));
+   return {a: a.id, b: b.id, u: Math.round(u*200)/200};
+  }
+ }
+ const z = STEM_TL[STEM_TL.length - 1]; return {a: z.id, b: z.id, u: 0};
+}
+function leafBlade(side, v) {
+ // A tulip leaf: folded against the shoot, then opening and arching outward.
+ const s = side, tip = [s*lerp(8, 96, v), lerp(-96, -78 + 10*v*v, v)], ctl = [s*lerp(3, 26, v), lerp(-60, -118, v)];
+ const w = lerp(5, 22, v), axis = t => { const u = 1 - t; return [2*u*t*ctl[0] + t*t*tip[0], 2*u*t*ctl[1] + t*t*tip[1]]; };
+ const nrm = t => { const a = axis(Math.max(0, t - .01)), b = axis(Math.min(1, t + .01)), l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [-(b[1] - a[1])/l, (b[0] - a[0])/l]; };
+ const E = (t, k) => { const p = axis(t), n = nrm(t), h = w*Math.sin(Math.PI*Math.pow(t, .7))*k; return [p[0] + n[0]*h, p[1] + n[1]*h]; };
+ const T = [.1, .3, .55, .8], d = drawing();
+ const outline = [[s*2, 0], ...T.map(t => E(t, 1)), axis(1), ...T.slice().reverse().map(t => E(t, -1)), [-s*2, 4]];
+ d.add('blade', outline, 1.5, .92);
+ d.add('rib', [.08, .35, .65, .95].map(axis), .8, .55);
+ d.add('vein/a', [.15, .45, .75].map(t => E(t, .5)), .55, .35);
+ d.add('vein/b', [.15, .45, .75].map(t => E(t, -.5)), .55, .35);
+ return {cel: {strokes: d.strokes}, outline};
+}
+function tulipDrawing(k) {
+ // k: 0 small bud, 1 full bud, 2 opening, 3 open cup. Three petals seen from the front.
+ const K = [{h: 30, w: 12, fl: 0}, {h: 54, w: 20, fl: .05}, {h: 60, w: 27, fl: .55}, {h: 62, w: 31, fl: 1}][k];
+ const {h, w, fl} = K, d = drawing(), petals = [];
+ const petal = (id, cx, tipX, hh, ww, op) => {
+  const pts = [[cx - ww*.35, 2], [cx - ww*.95, -hh*.3], [lerp(cx - ww*.9, tipX - ww*.35, .6), -hh*.72], [tipX, -hh], [lerp(cx + ww*.9, tipX + ww*.35, .6), -hh*.72], [cx + ww*.95, -hh*.3], [cx + ww*.35, 2]];
+  d.add('petal/' + id, pts, 1.45, op, {corner: 1.1}); petals.push(pts);
+  d.add('petal/' + id + '/line', [[cx, -2], [lerp(cx, tipX, .5), -hh*.5], [lerp(cx, tipX, .85), -hh*.85]], .6, op*.45);
+ };
+ petal('back', 0, 0, h*.9, w*.7, .6);
+ petal('left', -w*.42, -w*.42 - fl*w*.55 - 1, h*.97, w*.62, .9);
+ petal('right', w*.42, w*.42 + fl*w*.55 + 1, h*.97, w*.62, .9);
+ petal('front', 0, 0, h*(1 - .1*fl), w*.66, 1);
+ d.add('base', [[-w*.45, 6], [0, 11], [w*.45, 6]], 1.1, .8);
+ return {cel: {strokes: d.strokes}, petals};
+}
+function stamens() {
+ const d = drawing();
+ [[-9, -38], [0, -43], [9, -38]].forEach(([x, y], k) => { d.add('stamen/' + k, [[x*.3, -12], [x*.8, y*.8], [x, y]], 1.1, .9); d.add('anther/' + k, ring([x, y - 3], 2.6, 4.2, 0, 2*Math.PI, 6), 1.2, .95, {pressure: EVEN}); });
+ return {strokes: d.strokes};
+}
+function leafTopDrawing(lift) {
+ const a = LEAF.a0 + lift, dir = [Math.cos(a), Math.sin(a)], upv = [dir[1], -dir[0]];
+ const axis = s => [LEAF.base[0] + dir[0]*LEAF.len*s + upv[0]*9*Math.sin(Math.PI*s), LEAF.base[1] + dir[1]*LEAF.len*s + upv[1]*9*Math.sin(Math.PI*s)];
+ const half = s => LEAF.w*Math.sin(Math.PI*Math.pow(s, .8));
+ const edge = (k, s) => { const q = axis(s), h = half(s)*k; return [q[0] + upv[0]*h, q[1] + upv[1]*h]; };
+ const S8 = [0, .08, .2, .34, .5, .64, .78, .9, 1], d = drawing();
+ d.add('petiole', [LEAF.stem, [lerp(LEAF.stem[0], LEAF.base[0], .5) + 3, lerp(LEAF.stem[1], LEAF.base[1], .5)], LEAF.base], 1.9, .85);
+ d.add('upper', S8.map(s => edge(1, s)), 1.8, .9);
+ d.add('lower', S8.map(s => edge(-.78, s)), 1.6, .85);
+ d.add('rib', [0, .2, .45, .7, .9, .985].map(axis), 1.2, .7);
+ for (let k = 0; k < 6; k++) {
+  const s = .13 + k*.13;
+  d.add('vein/u/' + k, [axis(s), edge(.5, s + .06), edge(.86, s + .12)], .7, .45);
+  d.add('vein/l/' + k, [axis(s + .03), edge(-.4, s + .08), edge(-.68, s + .13)], .6, .38);
+ }
+ for (let k = 0; k < 11; k++) { const s = .12 + k*.068; d.add('shade/' + k, [edge(-.12, s), edge(-.45, s + .025), edge(-.7, s + .045)], .6, .28); }
+ const outline = [...S8.map(s => edge(1, s)), ...S8.slice().reverse().map(s => edge(-.78, s))];
+ return {cel: {strokes: d.strokes}, tip: axis(1), outline};
+}
+function dropDrawing(sc = 1, stretch = 1) {
+ const d = drawing(), r = DROP_R*sc, cy = DROP_HANG*sc*stretch;
+ d.add('skin', [[0, 0], [4.5*sc, 4*sc*stretch], [r*.95, cy - sc], [r*.9, cy + 6*sc], [4*sc, cy + r], [-3*sc, cy + r*1.02], [-r*.88, cy + 6*sc], [-r*.95, cy - sc], [-4.5*sc, 4*sc*stretch], [.8, -.4]], 1.2, .9, {corner: 1.2});
+ d.add('glint', [[-5.5*sc, cy - sc], [-5*sc, cy - 5*sc], [-2.3*sc, cy - 7.5*sc]], .8, .8);
+ d.add('refract', [[.5*sc, cy + 7.5*sc], [5*sc, cy + 5.5*sc], [7*sc, cy + sc]], .6, .5);
+ return {strokes: d.strokes};
+}
+function fallDrawing(sc = 1) {
+ const d = drawing(), r = DROP_R*sc;
+ d.add('skin', ring([0, 0], r*.92, r*1.15, -95*DEG, 370*DEG, 11), 1.2, .9);
+ d.add('glint', [[-5*sc, 0], [-4.5*sc, -4*sc], [-2*sc, -7*sc]], .8, .8);
+ d.add('trail', [[0, -r*1.15 - 4], [0, -r*1.15 - 16*sc]], .6, .35);
+ return {strokes: d.strokes};
+}
+function splatDrawing(sc = 1) {
+ const d = drawing();
+ d.add('dome', [[-20, 3], [-14, -4], [-4, -7], [6, -6.5], [15, -3], [21, 3]].map(([x, y]) => [x*sc, y*sc]), 1.3, .9);
+ [[-14, -3, -22, -14], [-4, -7, -6, -20], [6, -7, 10, -18], [15, -3, 24, -12]].forEach(([x0, y0, x1, y1], k) =>
+  d.add('spike/' + k, [[x0*sc, y0*sc], [lerp(x0, x1, .6)*sc, lerp(y0, y1, .6)*sc], [x1*sc, y1*sc]], .9, .75));
+ return {strokes: d.strokes};
+}
+const dropletDrawing = r => ({strokes: [{id: 'skin', points: ring([0, 0], r, r*1.1, -100*DEG, 372*DEG, 8), width: .8*LW, opacity: .85, pressure: PRESS}]});
+function backgroundDrawing() {
+ const d = drawing();
+ const run = (id, x0, x1, n, w, o) => d.add(id, Array.from({length: n}, (_, k) => { const x = lerp(x0, x1, k/(n - 1)); return [x, gy(x)]; }), w, o);
+ run('ground/left', -820, -284, 12, 1.8, .85); run('ground/right', 284, 820, 12, 1.8, .85);
+ const tuft = (id, x, n, h, lean) => { for (let k = 0; k < n; k++) {
+  const b = x + (k - n/2)*6, t = h*(.6 + hash(k, x | 0)*.6), l = lean + (k - n/2)*.11;
+  d.add(id + '/' + k, [[b, gy(b)], [b + Math.sin(l)*t*.5, gy(b) - t*.55], [b + Math.sin(l)*t*1.1, gy(b) - t]], 1.1, .75, {pressure: [[0, 1], [.6, .6], [1, .05]]});
+  d.add(id + '/' + k + '/root', [[b, gy(b) + 4], [b + (hash(k, 7) - .5)*10, gy(b) + 18], [b + (hash(k, 8) - .5)*16, gy(b) + 34 + hash(k, 9)*26]], .5, .35);
+ } };
+ tuft('tuft/a', -560, 7, 58, -.1); tuft('tuft/b', -395, 5, 40, .15); tuft('tuft/c', -318, 4, 30, -.25);
+ tuft('tuft/d', 330, 4, 34, .3); tuft('tuft/e', 470, 8, 66, .12); tuft('tuft/f', 640, 5, 44, -.2);
+ [[-470, 10], [-640, 6], [390, 12], [560, 7], [-250, 5]].forEach(([x, r], k) => {
+  d.add('pebble/' + k, ring([x, gy(x) - r*.6], r, r*.66, 170*DEG, 375*DEG, 10), 1.2, .75);
+  d.add('pebble/' + k + '/shade', [[x - r*.2, gy(x) - r*.1], [x + r*.5, gy(x) - r*.3], [x + r*.85, gy(x) - r*.7]], .6, .35);
+ });
+ // Soil: short marks, grains and buried stones, sparser with depth.
+ for (let k = 0; k < 520; k++) {
+  const x = -800 + hash(k, 41)*1600, y = 14 + Math.pow(hash(k, 42), .8)*1200, l = 4 + hash(k, 43)*10;
+  if (insidePoly(STONE_PTS, x, y) || Math.hypot(x - SEED[0], y - SEED[1]) < 40) continue;
+  d.add('soil/' + k, [[x, y], [x + l*.5, y - .8], [x + l, y + .3]], .55, .16 + hash(k, 44)*.2);
+ }
+ for (let k = 0; k < 28; k++) {
+  const x = -760 + hash(k, 51)*1520, y = 60 + hash(k, 52)*1100, r = 4 + hash(k, 53)*11;
+  if (insidePoly(STONE_PTS, x, y) || Math.hypot(x - SEED[0], y - SEED[1]) < 90 || Math.abs(x - SEED[0]) < 70) continue;
+  d.add('grit/' + k, ring([x, y], r, r*.7, hash(k, 54)*6, 5.9, 9), .9, .5);
+ }
+ // The twig enters from beyond the right edge of the frame.
+ const tw = cbez(...TWIG, 12);
+ d.add('twig/top', tw, 2.3, .85);
+ d.add('twig/bottom', tw.slice(0, 11).map(([x, y], k) => [x + 1 + k*.3, y + 11 - k*.8]), 1.5, .7);
+ for (let k = 0; k < 9; k++) { const [x, y] = tw[k + 1]; d.add('twig/bark/' + k, [[x - 2, y + 2], [x + 3, y + 4], [x + 6, y + 7]], .6, .35); }
+ const l2 = tw[3];
+ d.add('twig/leaf2', [[l2[0], l2[1] + 6], [l2[0] - 18, l2[1] + 38], [l2[0] - 20, l2[1] + 82], [l2[0] - 4, l2[1] + 96], [l2[0] + 14, l2[1] + 64], [l2[0] + 10, l2[1] + 26], [l2[0] + 1, l2[1] + 7]], 1.5, .6);
+ d.add('twig/leaf2/rib', [[l2[0], l2[1] + 8], [l2[0] - 6, l2[1] + 50], [l2[0] - 5, l2[1] + 90]], .7, .4);
+ // A low overcast: a few long, light sky strokes.
+ for (let k = 0; k < 34; k++) {
+  const x = -760 + hash(k, 61)*1400, y = -1500 + hash(k, 62)*1300, l = 90 + hash(k, 63)*200;
+  if (y > -1200 && y < -900 && Math.abs(x) < 450) continue;       // keep the lettering area open
+  d.add('sky/' + k, [[x, y], [x + l*.5, y - 4], [x + l, y - 2]], .6, .12 + hash(k, 64)*.1);
+ }
+ return {strokes: d.strokes};
+}
+function dampDrawing() {
+ const d = drawing();
+ for (let k = 0; k < 420; k++) {
+  const x = -620 + hash(k, 71)*1240, y = 8 + hash(k, 72)*640, a = .6 + hash(k, 73)*.3, l = 8 + hash(k, 74)*10;
+  if (insidePoly(STONE_PTS, x, y)) continue;
+  d.add('damp/' + k, [[x, y], [x + Math.cos(a)*l, y + Math.sin(a)*l]], .6, .22 + hash(k, 75)*.2);
+ }
+ return {strokes: d.strokes};
+}
+// Hand lettering drawn as single strokes: no font is needed and every machine
+// renders the same letters.
+const GLYPH = {
+ T: [11, [[[.2, -15.6], [5, -16], [11, -16.3]], [[5.6, -16], [5.4, -8], [5.6, 0]]]],
+ o: [9.4, [ring([4.5, -5], 4.4, 5.1, -60*DEG, 385*DEG, 10)]],
+ m: [12, [[[.3, -10], [.3, 0]], [[.3, -7.2], [1.6, -9.5], [3.4, -10.1], [5, -9], [5.6, -6.5], [5.6, 0]], [[5.6, -7], [7, -9.6], [9, -10], [10.6, -8.6], [11.1, -6], [11.1, 0]]]],
+ c: [8.6, [ring([4.5, -5], 4.4, 5.1, -35*DEG, -290*DEG, 9)]],
+ h: [7.5, [[[.3, -16], [.3, 0]], [[.3, -6.6], [1.8, -9.4], [3.8, -10.1], [5.8, -9], [6.4, -6.5], [6.4, 0]]]],
+ i: [3.2, [[[1, -10], [1, 0]], ring([1.1, -13.8], .7, .7, 0, 2*Math.PI, 5)]],
+ t: [6, [[[2.2, -15], [2.1, -5], [2.4, -1], [4, .1], [5.8, -.8]], [[0, -10], [5.6, -10.2]]]],
+ b: [8.6, [[[.3, -16], [.3, 0]], [[.3, -6.5], [2, -9.4], [4.4, -10.1], [7, -8.5], [7.8, -5], [7, -1.6], [4.4, .1], [1.8, -.4], [.3, -2]]]],
+ s: [7.8, [[[7, -8.8], [5.3, -10], [2.4, -10], [.7, -8.4], [1.4, -6.2], [4, -5.2], [6.3, -4.2], [7.2, -2.2], [5.8, -.3], [2.6, .1], [.3, -1.4]]]],
+ e: [8.8, [[[.6, -5.2], [8, -5.2], [7.6, -7.8], [5.4, -9.9], [2.6, -9.7], [.6, -7.4], [.4, -3.6], [2.2, -.8], [5, .1], [7.8, -1.6]]]],
+ a: [9.2, [[[7.4, -7.6], [5.6, -9.8], [2.8, -9.8], [.7, -7.2], [.4, -3.4], [2, -.6], [4.6, 0], [6.7, -1.8], [7.5, -4.8]], [[7.6, -10], [7.5, -3], [7.9, -.5], [9, 0]]]],
+ r: [6.8, [[[.3, -10], [.3, 0]], [[.3, -6.4], [1.8, -9.2], [3.8, -10.1], [6.2, -9.4]]]],
+ ',': [3, [[[1.4, -1.2], [1.6, .6], [.4, 3.2]]]],
+ '.': [3, [ring([1.3, -.8], .8, .8, 0, 2*Math.PI, 5)]],
+ ' ': [4.2, []],
+};
+function lettering(lines) {
+ const d = drawing(), spans = [];
+ lines.forEach(({text, y, size, t0, t1}, li) => {
+  const width = [...text].reduce((a, ch) => a + GLYPH[ch][0] + 1.6, -1.6);
+  let x = -width/2; const first = d.strokes.length;
+  [...text].forEach((ch, ci) => {
+   const [w, strokes] = GLYPH[ch], dy = (hash(ci, 91 + li) - .5)*.8, rot = (hash(ci, 93 + li) - .5)*.05;
+   strokes.forEach((pts, si) => {
+    const P = pts.map(([px, py]) => { const qx = px*Math.cos(rot) - py*Math.sin(rot), qy = px*Math.sin(rot) + py*Math.cos(rot); return [(x + qx)*size, y + (qy + dy)*size]; });
+    d.add(`line${li}/${ci}/${si}`, P, 1.45, 1, {pressure: [[0, .55], [.15, 1], [.85, .9], [1, .5]], corner: 1.3});
+   });
+   x += w + 1.6;
+  });
+  spans.push({first, last: d.strokes.length, t0: fr(t0), t1: fr(t1)});
+ });
+ return {cel: {strokes: d.strokes}, spans};
+}
+
+// ------------------------------------------------------------------ compile
+const CEL = {};
+const cel = (id, raw, seedId = id) => (CEL[id] ??= compileCel(raw, {id: seedId}));
+cel('stone', stoneWhole()); cel('stoneL', stoneHalf('L')); cel('stoneR', stoneHalf('R'));
+cel('crack', crackDrawing());
+// Effort: short strain marks either side of the arch while it pushes. Two
+// drawings alternate on twos; a deliberate tremble, only while pushing.
+[0, 1].forEach(v => cel('effort' + v, (() => {
+ const d = drawing(), c0 = [-27, 222 - v*1.5];
+ [[-1, 1], [1, 1], [-1, .6], [1, .6]].forEach(([sd, k], i) => {
+  const x = c0[0] + sd*(20 + 6*(1 - k)), y = c0[1] + 12*(1 - k) + 4;
+  d.add('strain/' + i, [[x, y], [x + sd*7*k, y + 6 + v], [x + sd*10*k, y + 13]], 1, .75);
+ });
+ return {strokes: d.strokes};
+})(), 'effort'));
+cel('sun', (() => { const d = drawing(); d.add('rim', ring(SUN, 94, 92, -100*DEG, 375*DEG, 16), 1.3, .7); d.add('rim/search', ring(SUN, 99, 97, 200*DEG, 70*DEG, 5), .7, .3); return {strokes: d.strokes}; })()); cel('roots', rootsDrawing()); cel('damp', dampDrawing()); cel('bg', backgroundDrawing());
+[0, 1, 2].forEach(k => cel('seed' + k, seedDrawing(k), 'seed' + Math.min(k, 1)));
+cel('seed01', inbetweenCel(seedDrawing(0), seedDrawing(1), .5), 'seed0');
+cel('splat', splatDrawing(1)); cel('splat-big', splatDrawing(1.6)); cel('fall', fallDrawing(1)); cel('fall-big', fallDrawing(1.65));
+const DROPLETS = Array.from({length: 7}, (_, k) => {
+ const a = (-168 + k*26 + (hash(k, 81) - .5)*14)*DEG, v = 300 + hash(k, 82)*220;
+ return {vx: Math.cos(a)*v, vy: Math.sin(a)*v - 80, id: cel('droplet' + k, dropletDrawing(2.2 + hash(k, 83)*2.4)).id};
+});
+const TULIP = [0, 1, 2, 3].map(k => tulipDrawing(k));
+const STAMENS = cel('stamens', stamens());
+const TEXT = lettering([{text: 'Tomchi tomib,', y: -1120, size: 6.4, t0: 32.4, t1: 33.8}, {text: 'tosh teshar.', y: -1005, size: 6.4, t0: 34.0, t1: 35.3}]);
+cel('text', TEXT.cel);
+const stemCel = s => {
+ const id = `stem/${s.a}/${s.b}/${s.u}`;
+ return CEL[id] ??= compileCel(s.u ? inbetweenCel(STEM_RAW[s.a], STEM_RAW[s.b], s.u) : STEM_RAW[s.a], {id: 'stem'});
+};
+const leafCache = {};
+const leafAt = (side, v) => { const id = side + '/' + v.toFixed(3); if (!leafCache[id]) { const r = leafBlade(side, v); leafCache[id] = {cel: compileCel(r.cel, {id: 'leaf' + side}), outline: r.outline}; } return leafCache[id]; };
+const tulipCache = {};
+const tulipAt = (k, u) => {
+ const id = k + '/' + u.toFixed(3);
+ if (!tulipCache[id]) {
+  const a = TULIP[k], b = TULIP[Math.min(3, k + 1)];
+  const raw = u ? inbetweenCel(a.cel, b.cel, u) : a.cel;
+  tulipCache[id] = {cel: compileCel(raw, {id: 'tulip'}), petals: a.petals.map((p, i) => p.map((q, j) => lp2(q, b.petals[i][j], u)))};
+ }
+ return tulipCache[id];
+};
+const topLeafCache = {};
+const topLeafAt = lift => { const id = lift.toFixed(3); if (!topLeafCache[id]) { const r = leafTopDrawing(lift); topLeafCache[id] = {cel: compileCel(r.cel, {id: 'topleaf'}), tip: r.tip, outline: r.outline}; } return topLeafCache[id]; };
+const dropCache = {};
+const dropAt = (sc, st) => { const id = sc.toFixed(2) + '/' + st.toFixed(2); return dropCache[id] ??= compileCel(dropDrawing(sc, st), {id: 'drop'}); };
+
+// ------------------------------------------------------------------ drawing helpers
+// Reveal of a fixed drawing: identical marks to drawCel's pencil, drawn up to a
+// fraction of each stroke. Used where growth happens at a tip.
+function drawCelPart(c, compiled, frac, {color = INK, opacity = 1, material = 'pencil'} = {}) {
+ if (material === 'ink') return inkPart(c, compiled, frac, color, opacity);
+ c.save(); c.lineCap = 'butt'; c.lineJoin = 'round';
+ const inherited = c.globalAlpha*opacity;
+ compiled.strokes.forEach((s, si) => {
+  const q = frac(s, si); if (q <= 0) return;
+  const last = Math.max(1, Math.round(Math.min(1, q)*(s.samples.length - 1)));
+  c.strokeStyle = s.color ?? color;
+  for (let pass = 0; pass < 3; pass++) {
+   const spread = (pass - 1)*s.width*.30;
+   const point = a => { const dr = (noise1(a.u*5 + pass*11, s.seed)*.20 + spread)*Math.sin(Math.PI*a.u); return [a.p[0] - a.tangent[1]*dr, a.p[1] + a.tangent[0]*dr]; };
+   for (let i = 1; i <= last; i++) {
+    const a = s.samples[i - 1], b = s.samples[i], tooth = hash(i*3 + pass, s.seed);
+    if (tooth < .08 + .10*(1 - Math.min(1, b.w/s.width))) continue;
+    c.lineWidth = Math.max(.18, Math.max(.04, (a.w + b.w)/2)*.40);
+    c.globalAlpha = inherited*(s.opacity ?? 1)*(.34 + tooth*.30);
+    c.beginPath(); c.moveTo(...point(a)); c.lineTo(...point(b)); c.stroke();
+   }
+  }
+ });
+ c.restore();
+}
+function inkPart(c, compiled, frac, color, opacity) {
+ // Same stroke samples as drawCel's ink brush, cut at the writing position.
+ c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = color;
+ const inherited = c.globalAlpha*opacity;
+ compiled.strokes.forEach((s, si) => {
+  const q = frac(s, si); if (q <= 0) return;
+  const last = Math.max(1, Math.round(Math.min(1, q)*(s.samples.length - 1)));
+  c.globalAlpha = inherited*(s.opacity ?? 1)*.9;
+  for (let i = 1; i <= last; i++) { const a = s.samples[i - 1], b = s.samples[i]; c.lineWidth = Math.max(.04, (a.w + b.w)/2); c.beginPath(); c.moveTo(...a.p); c.lineTo(...b.p); c.stroke(); }
+ });
+ c.restore();
+}
+const pencil = (c, compiled, o = {}) => drawCel(c, compiled, {material: 'pencil', color: INK, ...o});
+const RES = 1.7, sprites = new Map();
+function sprite(id, box, paint, res = RES) {
+ const k = id + '/' + S + '/' + res;
+ if (!sprites.has(k)) {
+  const cnv = document.createElement('canvas'), z = res*S;
+  cnv.width = Math.ceil(box[2]*z); cnv.height = Math.ceil(box[3]*z);
+  const g = cnv.getContext('2d'); g.scale(z, z); g.translate(-box[0], -box[1]); paint(g);
+  sprites.set(k, cnv);
+ }
+ return sprites.get(k);
+}
+const put = (c, id, box, paint, res) => c.drawImage(sprite(id, box, paint, res), box[0], box[1], box[2], box[3]);
+const WORLD = [-820, -1560, 1640, 2820], STONE_BOX = [-310, -190, 620, 430];
+function washFill(c, pts, color, opacity, seed, gran = .1) {
+ const p = pathOf(pts); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+ pts.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); });
+ pigmentWash(c, p, [x0, y0, x1 - x0, y1 - y0], {color, seed, opacity, granulation: gran, edge: .25});
+}
+
+// ------------------------------------------------------------------ the world, per frame
+const T_COLOUR = T_SPLIT;
+const colourRadius = f => f < T_COLOUR ? 0 : 2600*easeOut(clamp((f - T_COLOUR)/fr(2.4), 0, 1));
+const COLOUR_C = [40, 20];
+function paintColourWorld(g) {
+ const rect = (x, y, w, h) => { const p = new Path2D(); p.rect(x, y, w, h); return [p, [x, y, w, h]]; };
+ const wash = ([p, box], color, seed, opacity, granulation = .1, edge = 0) => pigmentWash(g, p, box, {color, seed, opacity, granulation, edge});
+ // Dawn: warm near the ground, fading to the paper high up. Light, not paint.
+ g.save(); g.globalCompositeOperation = 'multiply';
+ const sky = g.createLinearGradient(0, 0, 0, -1560);
+ sky.addColorStop(0, '#f3c39a'); sky.addColorStop(.35, '#f6dcb2'); sky.addColorStop(.8, '#f5ecd8'); sky.addColorStop(1, '#f6f0e4');
+ g.fillStyle = sky; g.fillRect(-820, -1560, 1640, 1562);
+ const sun = g.createRadialGradient(SUN[0], SUN[1], 0, SUN[0], SUN[1], 330);
+ sun.addColorStop(0, 'rgba(240,160,70,.75)'); sun.addColorStop(.26, 'rgba(242,170,80,.6)'); sun.addColorStop(.3, 'rgba(246,200,120,.35)'); sun.addColorStop(1, 'rgba(246,210,140,0)');
+ g.fillStyle = sun; g.fillRect(SUN[0] - 330, SUN[1] - 330, 660, 660);
+ g.restore();
+ wash(rect(-820, -1560, 1640, 1560), '#f2d2a0', 3, .12, .16);
+ wash(rect(-820, 0, 1640, 1260), '#c89c68', 7, .3, .14);
+ [[-560, 58], [-395, 40], [-318, 30], [330, 34], [470, 66], [640, 44]].forEach(([x, h], k) =>
+  wash([pathOf([[x - 26, 2], [x - 10, -h], [x + 10, -h*.9], [x + 26, 2]]), [x - 26, -h, 52, h + 2]], '#7fa451', 20 + k, .35, .1, .2));
+}
+function paintBackground(g, lit = false) {
+ // Underground is darker: a graphite tone that deepens with depth.
+ const soil = new Path2D(); soil.rect(-820, 0, 1640, 1260); soil.moveTo(STONE_PTS[0][0], STONE_PTS[0][1]);
+ STONE_PTS.forEach(p => soil.lineTo(p[0], p[1])); soil.closePath();
+ g.save(); g.clip(soil, 'evenodd');
+ if (!lit) { g.fillStyle = 'rgba(46,38,30,.07)'; g.fillRect(-820, 0, 1640, 1260); }
+ const box = [-820, 0, 1640, 1260], all = new Path2D(); all.rect(...box);
+ graphite(g, all, box, {seed: 11, color: INK, tone: (x, y) => clamp((lit ? -.02 : .03) + y/(lit ? 2600 : 1900), 0, .6), direction: () => -.5, softness: .35});
+ g.restore();
+ pencil(g, CEL.bg);
+}
+const RAIN = Array.from({length: 90}, (_, k) => ({x: -700 + hash(k, 101)*1400, y: hash(k, 102)*1700, v: 1500 + hash(k, 103)*500, l: 22 + hash(k, 104)*20}));
+function drawRain(c, f) {
+ const k = 1 - clamp((f - fr(1.2))/fr(2.2), 0, 1); if (k <= 0) return;
+ c.save(); c.strokeStyle = INK; c.lineCap = 'round'; c.lineWidth = 1.1;
+ for (const r of RAIN) {
+  const y = -1500 + ((r.y + r.v*f/FPS) % 1700), x = r.x + (y + 1500)*.08;
+  const top = x > -290 && x < 290 ? -150 : 0; if (y > top) continue;
+  c.globalAlpha = .28*k; c.beginPath(); c.moveTo(x, y); c.lineTo(x + r.l*.08, y + r.l); c.stroke();
+ }
+ c.restore();
+}
+function topLeafLift(f) {
+ // The leaf dips under a gathering drop and springs back when it lets go (twos).
+ const g = f - (f % 2); let lift = 0;
+ for (const d of DROPS) {
+  if (g >= d.rel - d.form && g < d.rel) lift -= .03*d.scale*(g - (d.rel - d.form))/d.form;
+  if (g >= d.rel) lift += .03*d.scale*Math.exp(-(g - d.rel)/5)*Math.cos((g - d.rel)/3.2);
+ }
+ if (g >= T_LAST_DROP) lift -= .025*clamp((g - T_LAST_DROP)/fr(1.4), 0, 1);
+ return Math.round(lift/.004)*.004;
+}
+function drawDrops(c, f, tip, clr) {
+ for (const d of DROPS) {
+  const big = d.scale > 1;
+  if (f >= d.rel - d.form && f < d.rel) {
+   const g = f - (f % 2), u = clamp((g - (d.rel - d.form))/d.form, 0, 1), sc = d.scale*[.45, .7, .9, 1][Math.min(3, Math.floor(u*4))];
+   c.save(); c.translate(tip[0], tip[1]); pencil(c, dropAt(sc, u > .75 ? 1.2 : 1)); c.restore();
+  } else if (f >= d.rel && f < d.hit) {
+   const y = lerp(DROP_Y0, DROP_Y1, Math.pow((f - d.rel + 1)/(FALL + 1), 2));
+   c.save(); c.translate(CRACK_TOP[0], y); pencil(c, CEL[big ? 'fall-big' : 'fall']); c.restore();
+  } else if (f >= d.hit && f < d.hit + 2) {
+   c.save(); c.translate(CRACK_TOP[0], CRACK_TOP[1] - 3); pencil(c, CEL[big ? 'splat-big' : 'splat']); c.restore();
+  }
+  if (f > d.hit && f <= d.hit + 8) {
+   const t = (f - d.hit)/FPS;
+   for (const q of DROPLETS) {
+    const x = CRACK_TOP[0] + q.vx*t*(big ? 1.4 : 1), y = CRACK_TOP[1] - 8 + q.vy*t*(big ? 1.3 : 1) + .5*2600*t*t;
+    if (y < (Math.abs(x) < 280 ? -120 : -3)) { c.save(); c.translate(x, y); pencil(c, CEL[q.id]); c.restore(); }
+   }
+  }
+ }
+ if (f >= T_LAST_DROP) {
+  const g = f - (f % 2), u = clamp((g - T_LAST_DROP)/fr(1.4), 0, 1), sc = [.45, .7, .9, 1][Math.min(3, Math.floor(u*4))];
+  if (clr) { c.save(); clr(); c.translate(tip[0], tip[1]); washFill(c, ring([0, DROP_HANG*sc], DROP_R*sc, DROP_R*sc*1.05, 0, 2*Math.PI, 16), '#9fc4d8', .35, 9, 0); c.restore(); }
+  c.save(); c.translate(tip[0], tip[1]); pencil(c, dropAt(sc, 1)); c.restore();
+ }
+}
+function stoneOpen(f) {
+ if (f < T_SPLIT) return 0;
+ const t = (f - T_SPLIT)/FPS;
+ return 6.5*DEG*easeOutQuint(clamp(t/.4, 0, 1)) + settle(t, .4, {amp: .5*DEG, freq: 2.6, decay: 6});
+}
+const PIV_L = [-262, 170], PIV_R = [266, 170];
+function withHalf(c, which, th, fn) {
+ const p = which === 'L' ? PIV_L : PIV_R;
+ c.save(); c.translate(p[0], p[1]); c.rotate(which === 'L' ? -th : th); c.translate(-p[0], -p[1]); fn(); c.restore();
+}
+const CHIPS = Array.from({length: 9}, (_, k) => ({vx: (hash(k, 111) - .5)*520, vy: -260 - hash(k, 112)*380, r: 3 + hash(k, 113)*6, spin: (hash(k, 114) - .5)*16, shape: ring([0, 0], 1, .7, 0, 2*Math.PI, 5 + (k % 3))}));
+function drawChips(c, f) {
+ if (f < T_SPLIT || f > T_SPLIT + 20) return;
+ const t = (f - T_SPLIT)/FPS;
+ c.save(); c.strokeStyle = INK; c.lineWidth = 1.6; c.globalAlpha = .75;
+ for (const q of CHIPS) {
+  const x = CRACK_TOP[0] + q.vx*t, y = CRACK_TOP[1] + 4 + q.vy*t + .5*2600*t*t;
+  if (y > (Math.abs(x) < 280 ? -130 : -2)) continue;
+  c.save(); c.translate(x, y); c.rotate(q.spin*t); c.beginPath(); q.shape.forEach(([px, py], i) => i ? c.lineTo(px*q.r, py*q.r) : c.moveTo(px*q.r, py*q.r)); c.closePath(); c.stroke(); c.restore();
+ }
+ // Dust: short pencil scribbles leaving the split, gone in under a second.
+ const k = clamp((f - T_SPLIT)/20, 0, 1);
+ c.globalAlpha = .35*(1 - k); c.lineWidth = 1;
+ for (let i = 0; i < 14; i++) {
+  const a = (-170 + i*12)*DEG, r = 20 + k*90*(.6 + hash(i, 121)*.6), x = CRACK_TOP[0] + Math.cos(a)*r, y = CRACK_TOP[1] - 4 + Math.sin(a)*r*.5;
+  c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a)*8, y + Math.sin(a)*4); c.stroke();
+ }
+ c.restore();
+}
+function drawGrains(c, f) {
+ IMPACTS.forEach((h, k) => {
+  if (k < 8 || f < h || f > h + 14) return;
+  const t = (f - h)/FPS;
+  c.save(); c.fillStyle = INK; c.globalAlpha = .6;
+  for (let i = 0; i < 5; i++) { const x = -70 + hash(k*7 + i, 131)*80, y0 = underside(Math.round(x)) + 2; c.fillRect(x, y0 + .5*1400*t*t + hash(i, k)*3, 2.2, 2.2); }
+  c.restore();
+ });
+}
+function drawBeam(c, f) {
+ if (f < T_THROUGH || f >= T_SPLIT + 6) return;
+ const k = clamp((f - T_THROUGH)/4, 0, 1)*(f >= T_SPLIT ? 1 - (f - T_SPLIT)/6 : 1), b = CRACK_BOT;
+ c.save();
+ const gr = c.createLinearGradient(b[0], b[1], b[0] - 30, b[1] + 420);
+ gr.addColorStop(0, `rgba(250,220,130,${.55*k})`); gr.addColorStop(1, 'rgba(250,220,130,0)');
+ c.fillStyle = gr; c.beginPath(); c.moveTo(b[0] - 3, b[1]); c.lineTo(b[0] + 3, b[1]); c.lineTo(b[0] + 50, b[1] + 420); c.lineTo(b[0] - 110, b[1] + 420); c.closePath(); c.fill();
+ // The crack itself glows: the first colour in the film.
+ c.strokeStyle = `rgba(242,186,72,${.85*k})`; c.lineWidth = 3.2; c.lineJoin = 'round'; c.shadowColor = 'rgba(246,200,90,.9)'; c.shadowBlur = 14;
+ c.beginPath(); CRACK.forEach(([x, y], i) => i ? c.lineTo(x + 1, y) : c.moveTo(x + 1, y)); c.stroke();
+ c.restore();
+}
+function drawStem(c, f, clr) {
+ const s = stemState(f); if (!s) return null;
+ const compiled = stemCel(s);
+ const pts = s.u ? STEMK[s.a][0].map((p, i) => lp2(p, STEMK[s.b][0][i], s.u)) : STEMK[s.a][0];
+ const w = lerp(STEMK[s.a][1], STEMK[s.b][1], s.u);
+ if (clr) {
+  const l = compiled.strokes[0].samples.map(q => q.p), r = compiled.strokes[1].samples.map(q => q.p).reverse();
+  c.save(); clr(); washFill(c, [...l, ...r], '#6f9a4a', .55, 31, .06); c.restore();
+ }
+ pencil(c, compiled);
+ return {pts, w};
+}
+function pointAtY(pts, y) {
+ for (let i = pts.length - 1; i > 0; i--) { const a = pts[i - 1], b = pts[i]; if ((a[1] - y)*(b[1] - y) <= 0) return lp2(a, b, (a[1] - y)/(a[1] - b[1] || 1)); }
+ return pts[pts.length - 1];
+}
+function drawLeaves(c, f, stem, clr) {
+ if (!stem || f < fr(25.2)) return;
+ const g = f - (f % 2), v = Math.round(easeOut(clamp((g - fr(25.2))/fr(2), 0, 1))*24)/24, node = pointAtY(stem.pts, -186);
+ for (const side of [-1, 1]) {
+  const L = leafAt(side, side < 0 ? v : Math.max(0, v - .08));
+  c.save(); c.translate(node[0], node[1]);
+  if (clr) { c.save(); clr(node); washFill(c, L.outline, '#6f9a4a', .5, 40 + side, .06); c.restore(); }
+  pencil(c, L.cel); c.restore();
+ }
+}
+function drawTulip(c, f, stem, clr) {
+ if (!stem || f < fr(26.4)) return;
+ const g = f - (f % 2), T = [[26.4, 0], [28.0, 1], [29.0, 2], [30.0, 3]].map(([t, k]) => [fr(t), k]);
+ let k = 3, u = 0;
+ for (let i = 0; i < T.length - 1; i++) if (g < T[i + 1][0]) { k = T[i][1]; u = Math.round(easeInOutSine((g - T[i][0])/(T[i + 1][0] - T[i][0]))*20)/20; break; }
+ const tp = stem.pts, tip = tp[tp.length - 1], prev = tp[tp.length - 2], ang = Math.atan2(tip[0] - prev[0], prev[1] - tip[1]);
+ const grow = k === 0 ? lerp(.55, 1, u) : 1, D = tulipAt(k, k === 3 ? 0 : u), sc = 1.55*grow;
+ c.save(); c.translate(tip[0], tip[1] + 4); c.rotate(ang); c.scale(sc, sc);
+ if (clr) {
+  c.save(); clr(tip, ang, sc);
+  D.petals.forEach((p, i) => washFill(c, p, i === 0 ? '#a8261e' : '#d4382a', k === 0 ? .35 + .3*u : .72, 50 + i, .08));
+  c.restore();
+ }
+ pencil(c, D.cel);
+ if (k === 3 && g >= fr(30.2)) pencil(c, STAMENS);
+ c.restore();
+}
+
+// ------------------------------------------------------------------ camera
+const CAMK = [[0, 10, -165, 1.05], [5.4, 10, -165, 1.05], [7.8, -10, 300, 1.5], [13.7, -10, 300, 1.5], [15.4, 0, 60, 1.1],
+ [23.2, 0, 60, 1.1], [24.0, 0, 30, 1.1], [27.8, 20, -215, 1.15], [30.4, 20, -215, 1.15], [32.2, 0, -310, .9], [38, 0, -310, .9]];
+const camAt = tau => key(tau, CAMK, easeInOutSine);
+
+// ------------------------------------------------------------------ the shot
+function shot(c, tau) {
+ const f = Math.round(tau*FPS);
+ paper(c, PAPER, null, 41);
+ const [cx, cy, z] = camAt(tau), jolt = settle(tau, T_SPLIT/FPS, {amp: 9, freq: 7, decay: 9});
+ cam(c, cx, cy - jolt, z);
+ // A clip in world space, re-applied inside transformed objects.
+ const R = colourRadius(f), reveal = R > 0 ? pathOf(blob(COLOUR_C[0], COLOUR_C[1], R, R*.92, 17, {amp: .09, n: 72})) : null;
+ const clipWorld = (c2 => () => { const m = c2.getTransform(); cam(c2, cx, cy - jolt, z); c2.clip(reveal); c2.setTransform(m); })(c);
+ const clr = reveal ? clipWorld : null;
+ if (reveal) {
+  // Colour is light: it spreads out of the split in three soft passes and
+  // stays off the stone halves, which carry their own wash.
+  const th = stoneOpen(f), cut = new Path2D(); cut.rect(...WORLD);
+  for (const w of ['L', 'R']) {
+   const p = w === 'L' ? PIV_L : PIV_R, a = w === 'L' ? -th : th, ca = Math.cos(a), sa = Math.sin(a);
+   const poly = (w === 'L' ? [...LEFT_ARC, ...CRACK] : [...RIGHT_ARC, ...CRACK.slice().reverse()]).map(([x, y]) => [p[0] + (x - p[0])*ca - (y - p[1])*sa, p[1] + (x - p[0])*sa + (y - p[1])*ca]);
+   cut.addPath(pathOf(poly));
+  }
+  for (const k of [.9, 1, 1.1]) {
+   c.save(); c.clip(pathOf(blob(COLOUR_C[0], COLOUR_C[1], R*k, R*k*.92, 17, {amp: .09, n: 72}))); c.clip(cut, 'evenodd');
+   c.globalAlpha = 1/3; put(c, 'colour', WORLD, paintColourWorld, .6); c.restore();
+  }
+ }
+ if (reveal) {
+  c.save(); const out = new Path2D(); out.rect(...WORLD); out.addPath(reveal); c.clip(out, 'evenodd'); put(c, 'background', WORLD, paintBackground); c.restore();
+  c.save(); c.clip(reveal); put(c, 'background-lit', WORLD, g => paintBackground(g, true)); pencil(c, CEL.sun); c.restore();
+ } else put(c, 'background', WORLD, paintBackground);
+ // Water soaks down both sides of the stone and reaches the seed.
+ const rd = 500*easeOut(clamp((f - fr(3.2))/fr(3.8), 0, 1));
+ if (rd > 0) { c.save(); const p = new Path2D(); p.arc(-280, 60, rd, 0, 2*Math.PI); p.moveTo(280 + rd, 60); p.arc(280, 60, rd, 0, 2*Math.PI); c.clip(p); put(c, 'damp', [-640, 0, 1280, 680], g => pencil(g, CEL.damp)); c.restore(); }
+ // Roots grow at their tips: the fixed root drawing is revealed.
+ const rp = easeOut(clamp(((f - (f % 2)) - fr(8.1))/fr(22), 0, 1));
+ if (rp > 0) drawCelPart(c, CEL.roots, s => s.origin === undefined ? rp*1.15 : (rp - s.origin)/.28);
+ const seedId = f < fr(6.6) ? 'seed0' : f < fr(7.1) ? 'seed1' : f < fr(7.4) ? 'seed01' : f < fr(8.0) ? 'seed1' : 'seed2';
+ pencil(c, CEL[seedId]);
+ drawBeam(c, f);
+ // Stone: whole with its crack, or two rigid halves after the split.
+ if (f < T_SPLIT) {
+  put(c, 'stone', STONE_BOX, g => pencil(g, CEL.stone), 2);
+  const p = crackProgress(f);
+  if (f >= IMPACTS[0]) drawCelPart(c, CEL.crack, s => s.id === 'dent' ? 1 : s.origin === undefined ? p : (p - s.origin - .02)/.1);
+ } else {
+  const th = stoneOpen(f);
+  for (const w of ['L', 'R']) withHalf(c, w, th, () => {
+   if (clr) { c.save(); clr(); washFill(c, w === 'L' ? [...LEFT_ARC, ...CRACK] : [...RIGHT_ARC, ...CRACK.slice().reverse()], '#d3b797', .26, w === 'L' ? 61 : 62, .12); c.restore(); }
+   put(c, 'stone' + w, STONE_BOX, g => pencil(g, CEL['stone' + w]), 2);
+  });
+ }
+ drawGrains(c, f);
+ const stem = drawStem(c, f, clr);
+ const pushing = (f >= fr(11.95) && f < fr(12.6)) || (f >= fr(13.15) && f < fr(14.5)) || IMPACTS.some((h, k) => k > 10 && f >= h && f < h + 5);
+ if (pushing) pencil(c, CEL['effort' + ((f >> 1) & 1)]);
+ drawLeaves(c, f, stem, clr);
+ drawTulip(c, f, stem, clr);
+ drawChips(c, f);
+ const lf = topLeafAt(topLeafLift(f));
+ if (clr) { c.save(); clr(); washFill(c, lf.outline, '#7fa451', .45, 71, .08); c.restore(); }
+ pencil(c, lf.cel);
+ drawDrops(c, f, lf.tip, clr);
+ drawRain(c, f);
+ // The proverb writes itself, on twos, stroke by stroke.
+ const g = f - (f % 2);
+ if (g >= TEXT.spans[0].t0) {
+  const L = CEL.text.strokes.map(s => s.samples.length), frac = [];
+  for (const sp of TEXT.spans) {
+   let tot = 0; for (let i = sp.first; i < sp.last; i++) tot += L[i];
+   let acc = 0; const done = clamp((g - sp.t0)/(sp.t1 - sp.t0), 0, 1)*tot;
+   for (let i = sp.first; i < sp.last; i++) { frac[i] = clamp((done - acc)/L[i], 0, 1); acc += L[i]; }
+  }
+  drawCelPart(c, CEL.text, (s, i) => frac[i], {material: 'ink', color: '#3a2a22'});
+ }
+}
+
+// ------------------------------------------------------------------ score
+function score(ac, t0, dest) {
+ const m = ac.createGain(); m.gain.value = .9; m.connect(dest);
+ const at = f => f/FPS, B = 262;
+ const bell = (o, s, t, d = .6, g = .08, type = 'sine') => note(ac, m, pentHz(o, s, B), t0, t, d, type, g);
+ const melody = [2, 4, 3, 1, 2, 4, 5, 4, 3, 5, 6];
+ IMPACTS.forEach((h, k) => {
+  const lapse = k > 10, step = lapse ? 5 + (k - 11) : melody[k];
+  bell(1 + Math.floor(step/5), step % 5, at(h), lapse ? .35 : .7, lapse ? .05 + (k - 11)*.004 : .085);
+  noiseBurst(ac, m, t0, at(h), .03, .03, 3 + k);
+ });
+ note(ac, m, pentHz(-1, 0, B), t0, 6.6, 7.5, 'triangle', .06);             // underground
+ note(ac, m, pentHz(-1, 2, B), t0, 11.8, 1.2, 'triangle', .09);            // first push
+ note(ac, m, pentHz(-1, 1, B), t0, 13.3, 1.6, 'triangle', .1);             // harder push
+ note(ac, m, pentHz(-1, 0, B), t0, 14.8, 4.5, 'triangle', .05);
+ bell(3, 2, at(T_THROUGH) + .05, 1.8, .05); bell(3, 4, at(T_THROUGH) + .3, 2.2, .04);   // the thread of light
+ [21.1, 21.8, 22.3, 22.65].forEach(t => note(ac, m, pentHz(-1, 0, B), t0, t, .28, 'triangle', .13));   // heartbeat
+ const hit = at(T_SPLIT);
+ noiseBurst(ac, m, t0, hit, .6, .3, 77);
+ note(ac, m, pentHz(-2, 0, B)*2, t0, hit, 3, 'triangle', .22);
+ [[0, 0], [0, 2], [0, 3], [1, 0], [1, 2]].forEach(([o, s], k) => bell(o, s, hit + .15 + k*.05, 4.5, .045, k % 2 ? 'triangle' : 'sine'));
+ [[0, 0], [0, 2], [0, 3], [0, 4], [1, 0], [1, 2], [1, 3], [1, 4]].forEach(([o, s], k) => bell(o, s, 24.2 + k*.62, 1.6, .05));
+ [[1, 0], [1, 2], [1, 4], [2, 0]].forEach(([o, s], k) => bell(o, s, 30.0 + k*.08, 3.5, .05));
+ [32.4, 33.2, 34.0, 34.7].forEach((t, k) => bell(2, [0, 2, 3, 4][k], t, .6, .035));
+ [[-1, 0], [0, 0], [0, 3], [1, 0], [1, 2]].forEach(([o, s], k) => note(ac, m, pentHz(o, s, B), t0, 35.4 + k*.06, 3.5, k ? 'sine' : 'triangle', k ? .045 : .08));
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: PAPER}, format: {ar: '9:16', width: 1080}, fps: 24,
+ timeline: [{name: 'tosh-teshar', dur: T_END/FPS, fn: shot}], score});
+}
+</script>
