@@ -33,6 +33,10 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/kitob-reklama/`](films/kitob-reklama/) — **"Ishonmang, lekin
+  bajarib ko‘ring!"** kitobi reklamasi (Dilshod Mannopov). 36 soniyalik
+  vertikal video: kitobdagi limon tajribasi tomoshabin bilan birga o'tkaziladi,
+  oxirida muqova chiqadi.
 - [`films/pochtam-reklama/`](films/pochtam-reklama/) — **Pochtam
   (pochtam.uz) uchun reklama**. 33 soniyalik vertikal video: savollar
   chalkashligi → Pochtam belgisi → bitta aniq yo'l → quti eshik oldida →

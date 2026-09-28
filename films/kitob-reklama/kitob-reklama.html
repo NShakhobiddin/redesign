@@ -1,0 +1,359 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Ishonmang, lekin bajarib ko‘ring — kitob reklamasi</title>
+<style>body{margin:0;background:#06262c;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="studio.js"></script>
+<script src="cels.js"></script>
+<script src="materials.js"></script>
+<script src="book-assets.js"></script>
+<script>
+'use strict';
+/* Film brief
+Book: "Ishonmang, lekin bajarib ko‘ring!" — Dilshod Mannopov, psychologist-
+  trainer. Practical psychology, 4 chapters, 4 practices: the lemon effect, the
+  "18-year code", overcoming the mind's resistance, the inner guards. Author's
+  one condition: read it upright and smiling.
+Subject and beat: the video performs the book's lemon experiment on the viewer.
+  A lemon draws itself, is cut, juice drips, it is bitten; a drawn face puckers.
+  "Stop. Where is the lemon?" It vanishes. The body believed it anyway. Then
+  the book's key idea (5% word / 95% imagination, attributed), the chapters,
+  and the real cover with the title as the call to action.
+Duration 36 s; 9:16; 1080x1920; 24 fps. For Reels / Telegram.
+Look: brush ink with flat print colour, in the cover's own palette: deep teal
+  #0a3f48, lemon #f6ca44, cream #fbf7ea; the cover's typefaces (Fraunces,
+  Literata italic, Poppins), embedded. Paper grain belongs to the screen.
+Techniques: self-drawn ink lemon, rigid halves, a replacement bitten slice,
+  whole-cel face (neutral, surprise, sour x2 tremble, relief), reverse draw
+  for the vanishing, lettering in the book's fonts, the cover from the PDF.
+Exposure: cut, drops, bite and spray on ones; drawing-on, tremble, scent
+  lines on twos; long holds on captions and the cover.
+Claims: only the book's own statements, quoted and attributed; the ad adds no
+  medical promise. Salivation at an imagined lemon is the shared experience.
+Beat sheet (s): 0.3 "Ishonmang." 1.3 "Lekin bajarib ko‘ring." | 2.8 "20
+  soniyalik tajriba" | 4.4 lemon draws, fills | 8.4 cut, 9.2 drips | 11.0
+  slice, 12.0 bite "G‘ARCHCH!" | 13.6 face, 14.3 sour | 16.8 "To‘xtang." 17.6
+  "Qani limon?" lemon vanishes | 19.8 "Limon yo‘q edi..." 21.8 quote | 23.6
+  5% / 95% | 27.0 chapters | 30.2 cover | 36 end.
+Sources: drawings and animation original; cover and text from the author's
+  PDF supplied by the client. Engine: hand-drawn-canvas-animation (MIT).
+*/
+{
+const TEAL = '#0a3f48', DEEP = '#062d34', CREAM = '#fbf7ea', LEMON = '#f6ca44', RIND = '#e3a92a', PULP = '#fbe38b', LEAF = '#8cbf5a';
+for (const f of BOOK_FONTS) { const ff = new FontFace(f.family, `url(${f.src})`, {weight: f.family === 'Fraunces' ? '100 900' : f.weight, style: f.style, unicodeRange: f.range}); document.fonts.add(ff); _photoLoads.push(ff.load()); }
+_photoLoads.push(document.fonts.load('900 60px Fraunces'), document.fonts.load('italic 400 40px Literata'), document.fonts.load('600 30px Poppins'));
+const COVER = new Image(); COVER.src = BOOK_COVER; _photoLoads.push(COVER.decode());
+
+const FPS = 24, LW = 2.3, DEG = Math.PI/180, PRESS = [[0,.15],[.15,.9],[.5,1],[.85,.8],[1,.2]];
+const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
+const outBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(t - 1, 3) + c1*Math.pow(t - 1, 2); };
+const lp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+const ring = (c, rx, ry, a0, sweep, n, tilt = 0) => Array.from({length: n}, (_, k) => {
+ const a = a0 + sweep*k/(n - 1), x = rx*Math.cos(a), y = ry*Math.sin(a);
+ return [c[0] + x*Math.cos(tilt) - y*Math.sin(tilt), c[1] + x*Math.sin(tilt) + y*Math.cos(tilt)];
+});
+const pathOf = (pts, close = true) => { const p = new Path2D(); pts.forEach((q, i) => i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])); if (close) p.closePath(); return p; };
+const smoothPath = (pts, close = true) => pathOf(smoothPts(pts, close, 3, .6), close);
+function drawing() { const strokes = []; return {strokes, add(id, points, width = 1.6, opacity = 1, extra = {}) { strokes.push({id, points, width: width*LW, opacity, pressure: PRESS, ...extra}); }}; }
+const CELS = {}, cel = (id, raw) => CELS[id] ??= compileCel(raw, {id});
+const brush = (c, compiled, color = DEEP, o = {}) => drawCel(c, compiled, {material: 'ink', color, ...o});
+// An ink brush drawn on up to u of the whole drawing (strokes in order).
+function brushPart(c, compiled, u, color = DEEP) {
+ c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = color;
+ const all = compiled.strokes.reduce((a, s) => a + s.samples.length - 1, 0); let budget = u*all;
+ for (const s of compiled.strokes) {
+  const last = Math.min(s.samples.length - 1, Math.floor(budget)); budget -= s.samples.length - 1; if (last < 1) break;
+  c.globalAlpha = (s.opacity ?? 1)*.9;
+  for (let i = 1; i <= last; i++) { const a = s.samples[i - 1], b = s.samples[i]; c.lineWidth = Math.max(.04, (a.w + b.w)/2); c.beginPath(); c.moveTo(...a.p); c.lineTo(...b.p); c.stroke(); }
+ }
+ c.restore();
+}
+function fillP(c, pts, color, alpha = 1, dx = 0, dy = 0) { c.save(); c.globalAlpha *= alpha; c.fillStyle = color; c.translate(dx, dy); c.fill(smoothPath(pts)); c.restore(); }
+function type(c, str, x, y, {font = 'Fraunces', size = 80, weight = 900, style = 'normal', color = CREAM, align = 'center', alpha = 1, ls = null, outline = null, rot = 0, scale = 1} = {}) {
+ if (alpha <= 0) return;
+ c.save(); c.translate(x, y); c.rotate(rot); c.scale(scale, scale); c.globalAlpha *= alpha;
+ c.font = `${style} ${weight} ${size}px ${font}`; c.textAlign = align; c.textBaseline = 'alphabetic';
+ if (ls !== null) c.letterSpacing = ls + 'px'; else if (font === 'Fraunces') c.letterSpacing = (-.02*size).toFixed(1) + 'px';
+ if (outline) { c.strokeStyle = outline; c.lineWidth = size*.16; c.lineJoin = 'round'; c.strokeText(str, 0, 0); }
+ c.fillStyle = color; c.fillText(str, 0, 0); c.restore();
+}
+// A caption that rises in and fades out.
+const cap = (c, t, t0, t1, str, x, y, o = {}) => { const a = span(t, t0, t0 + .35, easeOut)*(1 - span(t, t1, t1 + .3)); type(c, str, x, y + 26*(1 - span(t, t0, t0 + .35, easeOut)), {...o, alpha: a*(o.alpha ?? 1)}); };
+
+// ------------------------------------------------------------------ the lemon
+const LEMON_PTS = [[292, 0], [262, -24], [238, -74], [188, -132], [108, -172], [0, -186], [-108, -172], [-188, -132], [-238, -74], [-262, -24], [-292, 0],
+ [-262, 24], [-238, 74], [-188, 132], [-108, 172], [0, 186], [108, 172], [188, 132], [238, 74], [262, 24]];
+const LEAF_PTS = [[-270, -20], [-300, -90], [-350, -150], [-420, -176], [-400, -120], [-356, -64], [-300, -30]];
+function lemonRaw() {
+ const d = drawing();
+ d.add('rind', [...LEMON_PTS, ...LEMON_PTS.slice(0, 3)], 2.2, 1, {corner: 1.1});
+ d.add('stem', [[-282, -6], [-300, -24], [-306, -40]], 1.8, 1);
+ d.add('leaf', [...LEAF_PTS, LEAF_PTS[0]], 1.8, 1, {corner: 1});
+ d.add('leaf/vein', [[-296, -32], [-346, -96], [-408, -164]], 1, .8);
+ d.add('shine', ring([-40, -90], 120, 60, 200*DEG, 70*DEG, 6), 1.3, .9);
+ for (let k = 0; k < 26; k++) { const a = hash(k, 5)*2*Math.PI, r = .2 + .7*Math.sqrt(hash(k, 6)), x = Math.cos(a)*250*r, y = Math.sin(a)*165*r; d.add('pore/' + k, [[x, y], [x + 2.5, y + 1.5]], .9, .55); }
+ return {strokes: d.strokes};
+}
+function lemonWhole(c, x, y, s, rot, t, drawU = 1, fillU = 1) {
+ c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
+ if (fillU > 0) {
+  c.save(); c.beginPath(); c.arc(-60, -40, 700*easeOut(fillU), 0, 2*Math.PI); c.clip();
+  fillP(c, LEMON_PTS, LEMON, 1, 8, 10); fillP(c, LEMON_PTS.map(([px, py]) => [px*.9 + 14, py*.86 + 24]), RIND, .45, 8, 10);
+  fillP(c, LEAF_PTS, LEAF, 1, 6, 8);
+  c.restore();
+ }
+ // Lines are chalk-cream on the dark page until the colour floods in; inside the
+ // flood they turn to dark ink.
+ const lines = col => drawU >= 1 ? brush(c, cel('lemon', lemonRaw()), col) : brushPart(c, cel('lemon', lemonRaw()), drawU, col);
+ const R = 700*easeOut(fillU);
+ if (R <= 0) lines(CREAM);
+ else if (fillU >= 1) lines(DEEP);
+ else {
+  const inner = new Path2D(); inner.arc(-60, -40, R, 0, 2*Math.PI);
+  const outer = new Path2D(); outer.rect(-800, -800, 1600, 1600); outer.arc(-60, -40, R, 0, 2*Math.PI);
+  c.save(); c.clip(outer, 'evenodd'); lines(CREAM); c.restore();
+  c.save(); c.clip(inner); lines(DEEP); c.restore();
+ }
+ c.restore();
+}
+// Half lemons after the cut: rigid pieces with their cut faces showing.
+function halfRaw(side) {
+ const d = drawing(), s = side, P = LEMON_PTS.filter(([px]) => px*s >= 0);
+ const outer = s > 0 ? [[0, -186], ...P.filter(p => p[1] < 0).sort((a, b) => a[0] - b[0]).slice(1), [292, 0], ...P.filter(p => p[1] > 0).sort((a, b) => b[0] - a[0]), [0, 186]]
+  : [[0, 186], ...P.filter(p => p[1] > 0).sort((a, b) => a[0] - b[0]).reverse().slice(1), [-292, 0], ...P.filter(p => p[1] < 0).sort((a, b) => a[0] - b[0]), [0, -186]];
+ d.add('rind', outer, 2.2, 1, {corner: 1.1});
+ d.add('face', ring([0, 0], 66, 186, -90*DEG, 360*DEG, 18), 1.8, 1);
+ d.add('face/pith', ring([0, 0], 54, 162, -90*DEG, 360*DEG, 16), 1, .8);
+ for (let k = 0; k < 8; k++) { const a = k*Math.PI/4; d.add('face/seg/' + k, [[0, 0], [Math.cos(a)*50, Math.sin(a)*150]], 1, .8); }
+ return {strokes: d.strokes, outer};
+}
+function half(c, side, x, y, rot) {
+ const R = halfRaw(side);
+ c.save(); c.translate(x, y); c.rotate(rot); c.scale(1.12, 1.12);
+ fillP(c, [...R.outer], LEMON, 1, 8, 10);
+ c.save(); c.translate(8, 10); c.fillStyle = PULP; c.fill(pathOf(ring([0, 0], 66, 186, 0, 2*Math.PI, 40))); c.restore();
+ brush(c, cel('half' + side, R));
+ c.restore();
+}
+// The slice as on the cover: a wheel of segments. Bitten is a replacement drawing.
+const WHEEL_R = 250;
+function wheelRaw(bitten) {
+ const d = drawing(), n = 10;
+ const bite = (a, r) => { if (!bitten) return r; const da = Math.atan2(Math.sin(a + 55*DEG), Math.cos(a + 55*DEG)); return Math.abs(da) < .55 ? r - 70*Math.pow(Math.cos(da/.55*Math.PI/2), .7)*(1 + .12*Math.sin(a*40)) : r; };
+ const circle = (r, id, w, o) => d.add(id, Array.from({length: 73}, (_, k) => { const a = k/72*2*Math.PI - Math.PI/2; const rr = bite(a, r); return [Math.cos(a)*rr, Math.sin(a)*rr]; }), w, o);
+ circle(WHEEL_R, 'rind', 2.4, 1); circle(WHEEL_R - 26, 'pith', 1.2, .85);
+ for (let k = 0; k < n; k++) {
+  const a0 = k/n*2*Math.PI, a1 = (k + 1)/n*2*Math.PI, m = (a0 + a1)/2, r = WHEEL_R - 40;
+  const pts = [[Math.cos(a0 + .06)*22, Math.sin(a0 + .06)*22], [Math.cos(a0 + .05)*bite(a0, r), Math.sin(a0 + .05)*bite(a0, r)], [Math.cos(m)*bite(m, r + 6), Math.sin(m)*bite(m, r + 6)], [Math.cos(a1 - .05)*bite(a1, r), Math.sin(a1 - .05)*bite(a1, r)], [Math.cos(a1 - .06)*22, Math.sin(a1 - .06)*22]];
+  d.add('seg/' + k, pts, 1.2, .95, {corner: 1});
+  if (k % 3 === 0) d.add('seed/' + k, ring([Math.cos(m)*80, Math.sin(m)*80], 7, 13, 0, 2*Math.PI, 7, m + Math.PI/2), 1, .8);
+ }
+ return {strokes: d.strokes, bite};
+}
+function wheel(c, x, y, s, rot, bitten) {
+ const R = wheelRaw(bitten);
+ const edge = (r) => Array.from({length: 73}, (_, k) => { const a = k/72*2*Math.PI - Math.PI/2, rr = R.bite(a, r); return [Math.cos(a)*rr, Math.sin(a)*rr]; });
+ c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
+ c.save(); c.translate(8, 10); c.fillStyle = LEMON; c.fill(pathOf(edge(WHEEL_R))); c.fillStyle = PULP; c.fill(pathOf(edge(WHEEL_R - 30))); c.restore();
+ brush(c, cel('wheel' + (bitten ? 'B' : ''), R));
+ c.restore();
+}
+function drop(c, x, y, s = 1, color = LEMON) {
+ c.save(); c.translate(x, y); c.scale(s, s); c.fillStyle = color;
+ c.beginPath(); c.moveTo(0, -18); c.bezierCurveTo(8, -6, 12, 2, 12, 8); c.arc(0, 8, 12, 0, Math.PI); c.bezierCurveTo(-12, 2, -8, -6, 0, -18); c.fill();
+ c.fillStyle = CREAM; c.globalAlpha *= .8; c.beginPath(); c.ellipse(-4, 6, 2.5, 4, .4, 0, 2*Math.PI); c.fill(); c.restore();
+}
+
+// ------------------------------------------------------------------ the face (whole cels)
+function faceRaw(k) {
+ // k: neutral | wide | sour | sour2 | relief
+ const d = drawing(), s2 = k === 'sour2' ? 1 : 0;
+ d.add('head', ring([0, 0], 180, 196, -100*DEG, 372*DEG, 18), 2.2, 1);
+ d.add('ear/l', ring([-184, 10], 22, 36, 100*DEG, 170*DEG, 5), 1.6, 1); d.add('ear/r', ring([184, 10], 22, 36, -80*DEG, 170*DEG, 5), 1.6, 1);
+ d.add('hair', [[-150, -110], [-90, -170], [0, -196], [80, -178], [150, -120], [120, -150], [60, -164]], 1.8, 1, {corner: 1});
+ if (k === 'neutral' || k === 'relief') {
+  d.add('eye/l', ring([-66, -20], 12, 14, 0, 2*Math.PI, 8), 2, 1); d.add('eye/r', ring([66, -20], 12, 14, 0, 2*Math.PI, 8), 2, 1);
+  d.add('brow/l', [[-100, -70], [-66, -80], [-36, -72]], 1.6); d.add('brow/r', [[36, -72], [66, -80], [100, -70]], 1.6);
+  d.add('mouth', k === 'neutral' ? [[-50, 80], [0, 92], [50, 80]] : [[-70, 70], [-30, 102], [30, 102], [70, 70]], 1.8);
+  if (k === 'relief') { d.add('cheek/l', [[-120, 50], [-104, 56]], 1.2, .8); d.add('cheek/r', [[104, 56], [120, 50]], 1.2, .8); }
+ } else if (k === 'wide') {
+  d.add('eye/l', ring([-66, -24], 26, 30, 0, 2*Math.PI, 10), 2, 1); d.add('eye/r', ring([66, -24], 26, 30, 0, 2*Math.PI, 10), 2, 1);
+  d.add('pupil/l', ring([-62, -20], 8, 8, 0, 2*Math.PI, 6), 2.4); d.add('pupil/r', ring([62, -20], 8, 8, 0, 2*Math.PI, 6), 2.4);
+  d.add('brow/l', [[-104, -92], [-66, -110], [-30, -96]], 1.6); d.add('brow/r', [[30, -96], [66, -110], [104, -92]], 1.6);
+  d.add('mouth', ring([0, 92], 26, 34, 0, 2*Math.PI, 10), 1.8);
+ } else {
+  const j = s2*3;
+  d.add('eye/l', [[-100, -30 + j], [-60, -14], [-100, 0 - j]], 2.4, 1, {corner: .8}); d.add('eye/r', [[100, -30 + j], [60, -14], [100, 0 - j]], 2.4, 1, {corner: .8});
+  d.add('brow/l', [[-110, -80], [-72, -58], [-40, -54]], 1.8); d.add('brow/r', [[40, -54], [72, -58], [110, -80]], 1.8);
+  d.add('nose', [[-18, 20], [0, 34], [18, 20]], 1.4, .9);
+  d.add('wrinkle/l', [[-34, 6], [-24, 22]], 1.1, .8); d.add('wrinkle/r', [[34, 6], [24, 22]], 1.1, .8);
+  d.add('mouth', ring([6 + s2*3, 92], 16 - s2*2, 13 + s2*2, 0, 2*Math.PI, 8), 2);
+  d.add('pucker', [[-18, 78], [-10, 70]], 1, .8);
+  [0, 1, 2].forEach(i => d.add('shake/' + i, [[-230 - i*8, -60 + i*60 + j], [-252 - i*8, -60 + i*60 + j]], 1.4, .9));
+  [0, 1, 2].forEach(i => d.add('shake/r/' + i, [[230 + i*8, -60 + i*60 - j], [252 + i*8, -60 + i*60 - j]], 1.4, .9));
+ }
+ return {strokes: d.strokes};
+}
+function face(c, t) {
+ const id = t < 14.0 ? 'neutral' : t < 14.3 ? 'wide' : t < 16.0 ? ((Math.floor(t*12) % 2) ? 'sour' : 'sour2') : 'relief';
+ const s = outBack(span(t, 13.6, 13.9))*(1 - span(t, 16.5, 16.75, x => x*x));
+ if (s <= 0) return;
+ const sq = id.startsWith('sour') ? [.94, 1.05] : id === 'wide' ? [1.03, .98] : [1, 1];
+ c.save(); c.translate(540, 860); c.scale(s*sq[0], s*sq[1]);
+ c.fillStyle = id.startsWith('sour') ? '#e8e06a' : '#f3dfb8'; c.fill(pathOf(ring([8, 10], 180, 196, 0, 2*Math.PI, 40)));
+ brush(c, cel('face/' + id, faceRaw(id)));
+ if (id.startsWith('sour')) { drop(c, 32, 136 + span(t, 14.4, 15.4)*40, .9, '#bfe3ee'); }
+ c.restore();
+}
+
+// ------------------------------------------------------------------ the scene
+const T = {cut: 8.4, slice: 11.0, bite: 12.0, stop: 16.8, where: 17.6, gone0: 17.9, gone1: 18.9, cover: 30.2, end: 36};
+const JUICE = Array.from({length: 7}, (_, k) => ({x: -40 + hash(k, 11)*80, t0: 9.2 + k*.22 + hash(k, 12)*.1, s: .7 + hash(k, 13)*.5}));
+const SPRAY = Array.from({length: 12}, (_, k) => ({a: (-150 + k*14 + (hash(k, 21) - .5)*10)*DEG, v: 700 + hash(k, 22)*600, s: .5 + hash(k, 23)*.7}));
+function scene(c, t) {
+ // Hook
+ const hookOut = 1 - span(t, 2.5, 2.9);
+ type(c, 'Ishonmang.', CX, 900 + 30*(1 - span(t, .3, .6, easeOut)), {size: 150, alpha: span(t, .3, .55)*hookOut, scale: lerp(1.15, 1, span(t, .3, .6, easeOut))});
+ type(c, 'Lekin bajarib ko‘ring.', CX, 1040 + 26*(1 - span(t, 1.3, 1.65, easeOut)), {size: 84, color: LEMON, alpha: span(t, 1.3, 1.6)*hookOut});
+ cap(c, t, 2.8, 4.0, '20 SONIYALIK TAJRIBA', CX, 860, {font: 'Poppins', weight: 600, size: 44, ls: 12, color: LEMON});
+ cap(c, t, 3.3, 4.0, 'Tasavvur qiling…', CX, 980, {font: 'Literata', style: 'italic', weight: 400, size: 76});
+ // The lemon: draws itself, colour floods in, scent rises.
+ if (t >= 4.4 && t < T.cut) {
+  const drawU = span(t, 4.45, 5.7, easeInOutSine), fillU = span(t, 5.6, 6.0, easeOut);
+  const bob = Math.sin((Math.floor(t*12)/12)*2.2)*6;
+  lemonWhole(c, 580, 880 + bob, 1.2, -12*DEG, t, drawU, fillU);
+  if (t >= 6.3) {
+   c.save(); c.strokeStyle = CREAM; c.lineCap = 'round'; c.lineWidth = 5; const g = Math.floor(t*12) % 2;
+   [-120, 10, 140].forEach((dx, i) => { const u = span(t, 6.3 + i*.12, 6.9 + i*.12); c.globalAlpha = .7*u*(1 - span(t, 7.8, 8.2)); c.beginPath(); for (let k = 0; k <= 14; k++) { const yy = 620 - k*14*u, xx = 560 + dx + Math.sin(k*.8 + g*1.2 + i)*14; k ? c.lineTo(xx, yy) : c.moveTo(xx, yy); } c.stroke(); });
+   c.restore();
+  }
+ }
+ cap(c, t, 4.6, 6.1, 'Yangi uzilgan, sap-sariq limon.', CX, 1420, {font: 'Literata', style: 'italic', weight: 400, size: 58});
+ cap(c, t, 6.3, 8.0, 'Hidi o‘tkir, nordon…', CX, 1420, {font: 'Literata', style: 'italic', weight: 400, size: 58});
+ // The cut: a knife flash, then two rigid halves; juice drips from the cut.
+ if (t >= T.cut && t < T.slice) {
+  const u = span(t, T.cut, T.cut + .45, easeOut), gap = 70*u;
+  half(c, -1, 580 - gap, 880 + 10*u, (-12 - 8*u)*DEG);
+  half(c, 1, 580 + gap, 880 - 10*u, (-12 + 8*u)*DEG);
+  if (t < T.cut + .2) { const k = span(t, T.cut - .05, T.cut + .15); c.save(); c.strokeStyle = CREAM; c.lineWidth = 10*(1 - k) + 2; c.lineCap = 'round'; c.beginPath(); c.moveTo(560 - 60 + 200*k, 560); c.lineTo(560 + 60 - 200*k + 120, 1200); c.stroke(); c.restore(); }
+  for (const j of JUICE) { if (t < j.t0) continue; const tt = t - j.t0, y = 1060 + .5*2600*tt*tt; if (y < 1330) drop(c, 560 + j.x, y, j.s); else if (tt < 1.2) { c.save(); c.fillStyle = LEMON; c.globalAlpha = .9; c.beginPath(); c.ellipse(560 + j.x, 1336, 14*j.s + 10*span(tt, .3, .6), 5, 0, 0, 2*Math.PI); c.fill(); c.restore(); } }
+  c.save(); c.fillStyle = LEMON; c.globalAlpha = .85; c.beginPath(); c.ellipse(560, 1340, 70*span(t, 9.3, 10.6, easeOut), 12*span(t, 9.3, 10.6, easeOut), 0, 0, 2*Math.PI); c.fill(); c.restore();
+ }
+ cap(c, t, 8.5, 9.9, 'Teng ikkiga kesing — shart!', CX, 1500, {font: 'Literata', style: 'italic', weight: 400, size: 58});
+ cap(c, t, 9.9, 10.9, 'Sharbati tomchilab oqyapti…', CX, 1500, {font: 'Literata', style: 'italic', weight: 400, size: 58});
+ // The slice, then the bite.
+ if (t >= T.slice && t < 13.6) {
+  const u = span(t, T.slice, T.slice + .5, easeOut), push = span(t, T.bite - .5, T.bite, x => x*x), bitten = t >= T.bite;
+  const sh = bitten ? settle(t, T.bite, {amp: 10, freq: 9, decay: 10}) : 0;
+  wheel(c, 540 + sh, 900, lerp(.5, 1, u)*lerp(1, 1.18, push), lerp(30, 0, u)*DEG + (bitten ? -.05 : 0), bitten);
+  cap(c, t, T.slice + .1, T.bite - .1, 'Endi… tishlang!', CX, 1450, {font: 'Literata', style: 'italic', weight: 400, size: 64});
+  if (bitten) {
+   const k = span(t, T.bite, T.bite + .25);
+   type(c, 'G‘ARCHCH!', 560 + sh, 560, {size: 150, color: LEMON, outline: DEEP, rot: -8*DEG, scale: lerp(1.6, 1, outBack(k)), alpha: span(t, T.bite, T.bite + .06)*(1 - span(t, 13.3, 13.6))});
+   const tt = t - T.bite;
+   if (tt < .6) for (const sp of SPRAY) { const x = 540 + 150 + Math.cos(sp.a)*sp.v*tt, y = 900 - 170 + Math.sin(sp.a)*sp.v*tt + .5*2600*tt*tt; drop(c, x, y, sp.s); }
+  }
+ }
+ face(c, t);
+ cap(c, t, 14.4, 16.4, 'Og‘zingizda so‘lak keldimi?', CX, 1320, {font: 'Fraunces', weight: 600, size: 66});
+ // Stop: the lemon was never there.
+ type(c, 'To‘xtang.', CX, 760 + 20*(1 - span(t, T.stop, T.stop + .25, easeOut)), {size: 130, alpha: span(t, T.stop, T.stop + .2)*(1 - span(t, 19.4, 19.7))});
+ type(c, 'Qani limon?', CX, 1440, {size: 96, color: LEMON, alpha: span(t, T.where, T.where + .25)*(1 - span(t, 19.4, 19.7))});
+ if (t >= T.where - .2 && t < T.gone1 + .1) {
+  // The drawing un-draws itself, back to empty paper.
+  const u = 1 - span(t, T.gone0, T.gone1, easeInOutSine), s = 1 - .15*span(t, T.gone0, T.gone1);
+  c.save(); c.globalAlpha = span(t, T.where - .2, T.where + .1); lemonWhole(c, 560, 1060, .7*s, -12*DEG, t, u, t < T.gone0 ? 1 : 0); c.restore();
+  if (t >= T.gone0) { c.save(); c.setLineDash([4, 22]); c.lineCap = 'round'; c.strokeStyle = CREAM; c.globalAlpha = .5*span(t, T.gone0, T.gone1); c.lineWidth = 6; c.translate(560, 1060); c.rotate(-12*DEG); c.scale(.6, .6); c.stroke(smoothPath(LEMON_PTS)); c.restore(); }
+ } else if (t >= T.gone1 + .1 && t < 19.7) { c.save(); c.setLineDash([4, 22]); c.lineCap = 'round'; c.strokeStyle = CREAM; c.globalAlpha = .5*(1 - span(t, 19.3, 19.7)); c.lineWidth = 6; c.translate(560, 1060); c.rotate(-12*DEG); c.scale(.6, .6); c.stroke(smoothPath(LEMON_PTS)); c.restore(); }
+ // The insight, in the book's words.
+ cap(c, t, 19.8, 21.5, 'Limon yo‘q edi.', CX, 820, {size: 104});
+ cap(c, t, 20.5, 21.5, 'Lekin tanangiz ishondi.', CX, 960, {size: 88, color: LEMON});
+ const q = span(t, 21.8, 22.2, easeOut)*(1 - span(t, 23.3, 23.6));
+ if (q > 0) {
+  type(c, '«', CX - 380, 700, {size: 220, color: LEMON, alpha: q});
+  ['Tanangiz uchun reallik', 'bilan tasavvurning', 'zarracha farqi yo‘q.'].forEach((ln, i) => type(c, ln, CX, 760 + i*96 + 20*(1 - q), {font: 'Literata', style: 'italic', weight: 400, size: 72, alpha: q}));
+  type(c, 'DILSHOD MANNOPOV', CX, 1110, {font: 'Poppins', weight: 600, size: 34, ls: 10, color: LEMON, alpha: q});
+ }
+ // 5% / 95%
+ const n = span(t, 23.8, 25.2, easeOut), na = span(t, 23.6, 23.9)*(1 - span(t, 26.6, 26.9));
+ if (na > 0) {
+  type(c, Math.round(5*n) + '%', 300, 1000, {size: 150, alpha: na});
+  type(c, '/', 470, 1000, {size: 150, color: '#3d7480', alpha: na});
+  type(c, Math.round(95*n) + '%', 740, 1030, {size: 250, color: LEMON, alpha: na, scale: lerp(1, 1.06, span(t, 25.2, 25.35)*(1 - span(t, 25.35, 25.6)))});
+  type(c, 'SO‘Z', 300, 1100, {font: 'Poppins', weight: 600, size: 34, ls: 10, alpha: na});
+  type(c, 'TASAVVUR', 740, 1130, {font: 'Poppins', weight: 600, size: 34, ls: 10, color: LEMON, alpha: na});
+  type(c, 'Tanani so‘z emas, jonli obraz boshqaradi.', CX, 1330, {font: 'Literata', style: 'italic', weight: 400, size: 50, alpha: na*span(t, 25.4, 25.8)});
+ }
+ // Chapters.
+ const CH = [['Limon effekti', 'tana nega xayolga bo‘ysunadi?'], ['18 yosh kodi', 'yoshlik xotirasini uyg‘otish'], ['Ongning qarshiligini yengish', '«hurmatli yolg‘onchilar», eshiting!'], ['Ichki qo‘riqchilar', 'tabiat mizojidagi mo‘jiza']];
+ const chOut = 1 - span(t, 29.8, 30.2);
+ if (t >= 26.9 && chOut > 0) {
+  type(c, 'KITOBDA', 150, 610, {font: 'Poppins', weight: 600, size: 38, ls: 12, color: LEMON, align: 'left', alpha: span(t, 26.9, 27.2)*chOut});
+  CH.forEach(([a, b], i) => {
+   const t0 = 27.2 + i*.35, k = span(t, t0, t0 + .3, easeOut)*chOut;
+   if (k <= 0) return;
+   c.save(); c.globalAlpha = k; c.fillStyle = LEMON; c.beginPath(); c.arc(170 + 30*(1 - k), 718 + i*170, 16, 0, 2*Math.PI); c.fill(); c.restore();
+   type(c, a, 214 + 30*(1 - k), 736 + i*170, {weight: 600, size: 58, align: 'left', alpha: k});
+   type(c, b, 214 + 30*(1 - k), 792 + i*170, {font: 'Literata', style: 'italic', weight: 400, size: 38, color: '#cfe0dc', align: 'left', alpha: k});
+  });
+  type(c, '4 bob · 4 amaliyot', CX, 1480, {font: 'Poppins', weight: 600, size: 44, ls: 4, color: LEMON, alpha: span(t, 28.8, 29.1)*chOut});
+ }
+ // The cover, as a book: it slides up and settles; the title is the call to action.
+ if (t >= T.cover) {
+  const u = span(t, T.cover, T.cover + .7, outBack), rot = lerp(-10, -3, span(t, T.cover, T.cover + 1, easeOut))*DEG, w = 600, h = w*COVER.height/COVER.width;
+  c.save(); c.translate(CX, 830 + 700*(1 - span(t, T.cover, T.cover + .7, easeOut))); c.rotate(rot); c.scale(lerp(.8, 1, u), lerp(.8, 1, u));
+  c.fillStyle = 'rgba(0,0,0,.35)'; c.filter = 'blur(18px)'; c.fillRect(-w/2 + 26, -h/2 + 34, w, h); c.filter = 'none';
+  c.fillStyle = '#e9e1c8'; c.beginPath(); c.moveTo(w/2, -h/2 + 4); c.lineTo(w/2 + 18, -h/2 + 16); c.lineTo(w/2 + 18, h/2 + 12); c.lineTo(w/2, h/2); c.fill();
+  c.strokeStyle = 'rgba(0,0,0,.18)'; c.lineWidth = 1.5; for (let k = 1; k < 6; k++) { c.beginPath(); c.moveTo(w/2 + k*3, -h/2 + 6 + k*2); c.lineTo(w/2 + k*3, h/2 + k*2); c.stroke(); }
+  c.drawImage(COVER, -w/2, -h/2, w, h);
+  const gl = span(t, T.cover + .8, T.cover + 1.6);
+  if (gl > 0 && gl < 1) { c.save(); c.beginPath(); c.rect(-w/2, -h/2, w, h); c.clip(); c.globalCompositeOperation = 'screen'; const x = lerp(-w, w, gl); const g = c.createLinearGradient(x - 90, 0, x + 90, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.45)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(-w/2, -h/2, w, h); c.restore(); }
+  c.restore();
+  cap(c, t, T.cover + 1.2, 99, 'Ishonmang —', CX, 1460, {size: 92});
+  cap(c, t, T.cover + 1.6, 99, 'bajarib ko‘ring!', CX, 1560, {size: 92, color: LEMON});
+  cap(c, t, T.cover + 2.4, 99, '«Qomatni rostlang, tabassum qiling!»', CX, 1690, {font: 'Literata', style: 'italic', weight: 400, size: 46, color: '#cfe0dc'});
+  cap(c, t, T.cover + 2.9, 99, 'DILSHOD MANNOPOV · PSIXOLOG-TRENYER', CX, 1790, {font: 'Poppins', weight: 600, size: 30, ls: 6, color: LEMON});
+ }
+}
+function shot(c, tau) {
+ const t = Math.round(tau*FPS)/FPS;
+ paper(c, TEAL, null, 31);
+ resetT(c);
+ // A quiet vignette keeps the eye in the middle of the tall frame.
+ const g = c.createRadialGradient(CX, CY, 300, CX, CY, 1200); g.addColorStop(0, 'rgba(255,255,255,.04)'); g.addColorStop(1, 'rgba(0,0,0,.28)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+ scene(c, t);
+}
+
+// ------------------------------------------------------------------ score
+function score(ac, t0, dest) {
+ const m = ac.createGain(); m.gain.value = .9; m.connect(dest);
+ const B = 220, n = (o, s, t, d = .6, g = .07, type = 'sine') => note(ac, m, pentHz(o, s, B), t0, t, d, type, g);
+ n(1, 0, .3, 1.4, .09, 'triangle'); n(1, 2, 1.3, 1.6, .07); n(1, 4, 1.45, 1.6, .05);
+ n(2, 0, 2.8, .4, .05); n(2, 2, 3.3, 1.2, .04);
+ for (let k = 0; k < 10; k++) noiseBurst(ac, m, t0, 4.45 + k*.12, .05, .02, 5 + k);            // brush on paper
+ [[1, 0], [1, 2], [1, 4], [2, 0]].forEach(([o, s], k) => n(o, s, 5.65 + k*.05, 1.8, .045));
+ n(2, 3, 6.3, .8, .03); n(2, 4, 6.5, .8, .03);
+ noiseBurst(ac, m, t0, T.cut - .06, .12, .12, 20); n(3, 2, T.cut, .25, .05); n(0, 0, T.cut + .1, .3, .12, 'triangle');
+ JUICE.forEach((j, k) => n(3, k % 5, j.t0 + .12, .12, .035));
+ n(1, 0, T.slice, .8, .05); n(1, 2, T.slice + .5, .6, .05); n(1, 3, T.slice + .8, .6, .06);
+ noiseBurst(ac, m, t0, T.bite, .22, .35, 30); noiseBurst(ac, m, t0, T.bite + .08, .12, .2, 31);
+ note(ac, m, pentHz(1, 1, B)*1.06, t0, T.bite + .05, .6, 'sawtooth', .025); note(ac, m, pentHz(1, 1, B), t0, T.bite + .05, .6, 'sawtooth', .025);
+ n(2, 0, 13.6, .15, .05); n(3, 0, 14.0, .2, .05, 'triangle');
+ for (let k = 0; k < 8; k++) n(2, (k % 2) ? 1 : 0, 14.3 + k*.2, .12, .03, 'triangle');
+ n(0, 0, T.stop, 1.5, .12, 'triangle');
+ n(2, 4, T.where, .5, .05); for (let k = 0; k < 6; k++) n(3, 4 - (k % 5), T.gone0 + k*.14, .25, .03);
+ [[0, 0], [0, 2], [0, 4], [1, 0]].forEach(([o, s], k) => n(o, s, 19.8 + k*.04, 3, .045, k % 2 ? 'triangle' : 'sine'));
+ n(1, 4, 20.5, 1.5, .05);
+ [[0, 3], [1, 0], [1, 2]].forEach(([o, s], k) => n(o, s, 21.8 + k*.05, 2.5, .04));
+ for (let k = 0; k < 12; k++) noiseBurst(ac, m, t0, 23.8 + k*.11, .02, .04, 40 + k);
+ n(2, 0, 25.2, .8, .06); n(2, 2, 25.25, .8, .05);
+ [0, 1, 2, 3].forEach(i => n(1, [0, 2, 3, 4][i], 27.2 + i*.35, .8, .06));
+ [[-1, 0], [0, 0], [0, 2], [0, 4], [1, 0], [1, 2]].forEach(([o, s], k) => note(ac, m, pentHz(o, s, B), t0, T.cover + .5 + k*.05, 4.5, k ? 'sine' : 'triangle', k ? .045 : .09));
+ [[1, 4], [2, 0], [2, 2]].forEach(([o, s], k) => n(o, s, T.cover + 1.6 + k*.12, 2.5, .04));
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: TEAL}, format: {ar: '9:16', width: 1080}, fps: 24,
+ timeline: [{name: 'kitob', dur: T.end, fn: shot}], score});
+}
+</script>
