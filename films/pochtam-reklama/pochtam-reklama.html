@@ -1,0 +1,613 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Pochtam — dunyo bir qadam narida</title>
+<style>body{margin:0;background:#101126;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="studio.js"></script>
+<script src="cels.js"></script>
+<script src="materials.js"></script>
+<script src="brand-assets.js"></script>
+<script>
+'use strict';
+/* Film brief
+Client: Pochtam (pochtam.uz) — a mobile web app that helps people in
+  Uzbekistan buy from foreign online stores: 43 stores, 20 couriers with
+  price comparison, customs and landed-cost calculator, 7 step-by-step
+  guides, Pochtam AI, parcel tracking. Tagline: "Global xaridlar biz bilan oson".
+Subject and beat: a dream item sits in a foreign store; questions tangle
+  around it; the Pochtam "p" drops in and the tangle becomes one clear route;
+  a parcel travels the route past what Pochtam does and lands at the door.
+  Message: "Orzuingiz — eshigingiz oldida." End on the app's own brand intro.
+Duration 33 s; 9:16; 1080x1920; 24 fps. For Reels / Telegram.
+Looks: pencil (doubt) -> ink with flat brand colour (clarity). The change has a
+  cause: the brand mark lands and its hexagon carries the colour outwards.
+  What crosses it: the phone and the dream sneaker (same drawings, new
+  material), the tangle that straightens into the route.
+Palette: brand blue #1A1FB0, navy #131429, lime #bbef45, pale #E9EAFD,
+  background #F1F1F8; pencil world on warm paper. Paper grain = screen.
+Lettering: Onest (the app's font, SIL OFL), embedded; logo pieces from the
+  app's intro, embedded. Intro choreography ported from the app unchanged.
+Exposure: drops, pops, the landing, the box and camera on ones; pencil
+  draw-on, tremble and sparkles on twos; long holds on captions.
+Beat sheet (s): 0 dream sneaker draws itself | 5.0 questions pop, tangle grows
+  | 10.6 the p drops, 10.9 lands: colour, route | 12.5 order -> the box |
+  13.4-22.5 route: 5 stops | 22.5 doorstep, 23.4 opens, 23.9 sneaker |
+  26.8 hexagon iris | 27.3 brand intro | 30.2 pochtam.uz | 33 end.
+Sound: synthesized: music box, bubble plucks and ticking, the drop and a
+  chord, a steady pulse for the route with a bell per stop, the intro chime.
+Sources: all drawings original and code-authored; brand assets belong to
+  Pochtam. Engine: hand-drawn-canvas-animation skill (MIT, Alexey Fateev).
+*/
+{
+// ------------------------------------------------------------------ brand
+const BLUE = '#1A1FB0', NAVY = '#131429', LIME = '#bbef45', PALE = '#E9EAFD', PALE2 = '#DCDDFA', BG = '#F1F1F8';
+const PAPER = '#f3eee2', GRAPH = '#2e2823', KRAFT = '#d8a86a';
+const RANGES = {latin: 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212',
+ 'latin-ext': 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+1E00-1E9F, U+20A0-20AB, U+2C60-2C7F, U+A720-A7FF'};
+for (const [k, url] of Object.entries(BRAND_FONT)) { const ff = new FontFace('Onest', `url(${url})`, {weight: '400 800', unicodeRange: RANGES[k]}); document.fonts.add(ff); _photoLoads.push(ff.load()); }
+_photoLoads.push(document.fonts.load('800 40px Onest'), document.fonts.load('600 40px Onest'));
+const IMG = {};
+for (const [k, src] of Object.entries(BRAND_IMG)) { const im = new Image(); im.src = src; IMG[k] = im; _photoLoads.push(im.decode()); }
+
+const FPS = 24, fr = s => Math.round(s*FPS);
+const LW = 2.3, PRESS = [[0,.1],[.12,.8],[.4,1],[.73,.65],[1,.05]], DEG = Math.PI/180;
+const lp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
+const outBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(t - 1, 3) + c1*Math.pow(t - 1, 2); };
+const inOutQuart = t => t < .5 ? 8*t*t*t*t : 1 - Math.pow(-2*t + 2, 4)/2;
+const outElastic = t => { const c4 = 2*Math.PI/3; return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10*t)*Math.sin((t*10 - .75)*c4) + 1; };
+const ring = (c, rx, ry, a0, sweep, n, tilt = 0) => Array.from({length: n}, (_, k) => {
+ const a = a0 + sweep*k/(n - 1), x = rx*Math.cos(a), y = ry*Math.sin(a);
+ return [c[0] + x*Math.cos(tilt) - y*Math.sin(tilt), c[1] + x*Math.sin(tilt) + y*Math.cos(tilt)];
+});
+function rrect(cx, cy, w, h, r, per = 5) {
+ const pts = [], x0 = cx - w/2, y0 = cy - h/2, x1 = cx + w/2, y1 = cy + h/2;
+ const corner = (x, y, a0) => { for (let i = 0; i <= per; i++) { const a = a0 + i/per*Math.PI/2; pts.push([x + r*Math.cos(a), y + r*Math.sin(a)]); } };
+ corner(x1 - r, y0 + r, -Math.PI/2); corner(x1 - r, y1 - r, 0); corner(x0 + r, y1 - r, Math.PI/2); corner(x0 + r, y0 + r, Math.PI);
+ return pts;
+}
+const gesture = pts => [...pts, ...pts.slice(0, 3)];           // a closed shape drawn as one overlapping stroke
+const pathOf = (pts, close = true) => { const p = new Path2D(); pts.forEach((q, i) => i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])); if (close) p.closePath(); return p; };
+function drawing() { const strokes = []; return {strokes, add(id, points, width = 1.4, opacity = 1, extra = {}) { strokes.push({id, points, width: width*LW, opacity, pressure: PRESS, ...extra}); }}; }
+const CELS = {};
+const cel = (id, raw) => CELS[id] ??= compileCel(raw, {id});
+const pencil = (c, compiled, o = {}) => drawCel(c, compiled, {material: 'pencil', color: GRAPH, ...o});
+const ink = (c, compiled, color = NAVY, o = {}) => drawCel(c, compiled, {material: 'ink', color, ...o});
+function fill(c, pts, color, alpha = 1, dx = 0, dy = 0) { c.save(); c.globalAlpha *= alpha; c.fillStyle = color; c.translate(dx, dy); c.fill(pathOf(pts)); c.restore(); }
+function text(c, str, x, y, {size = 48, weight = 800, color = NAVY, align = 'center', alpha = 1, halo = null} = {}) {
+ if (alpha <= 0) return;
+ c.save(); c.font = `${weight} ${size}px Onest`; c.textAlign = align; c.textBaseline = 'alphabetic'; c.globalAlpha *= alpha;
+ c.letterSpacing = (size >= 34 ? -.035*size : size >= 26 ? -.03*size : -.012*size).toFixed(2) + 'px';
+ if (halo) { c.strokeStyle = halo; c.lineWidth = size*.28; c.lineJoin = 'round'; c.strokeText(str, x, y); }
+ c.fillStyle = color; c.fillText(str, x, y); c.restore();
+}
+// A hand-written reveal of a fixed cel: marks identical to drawCel, cut at u.
+function pencilPart(c, compiled, u) {
+ c.save(); c.lineCap = 'butt'; c.strokeStyle = GRAPH;
+ const all = compiled.strokes.reduce((a, s) => a + s.samples.length - 1, 0); let budget = u*all;
+ for (const s of compiled.strokes) {
+  const last = Math.min(s.samples.length - 1, Math.floor(budget)); budget -= s.samples.length - 1; if (last < 1) break;
+  for (let pass = 0; pass < 3; pass++) {
+   const spread = (pass - 1)*s.width*.30;
+   const pt = a => { const d = (noise1(a.u*5 + pass*11, s.seed)*.20 + spread)*Math.sin(Math.PI*a.u); return [a.p[0] - a.tangent[1]*d, a.p[1] + a.tangent[0]*d]; };
+   for (let i = 1; i <= last; i++) {
+    const a = s.samples[i - 1], b = s.samples[i], tooth = hash(i*3 + pass, s.seed);
+    if (tooth < .08 + .10*(1 - Math.min(1, b.w/s.width))) continue;
+    c.lineWidth = Math.max(.18, Math.max(.04, (a.w + b.w)/2)*.40); c.globalAlpha = (s.opacity ?? 1)*(.34 + tooth*.30);
+    c.beginPath(); c.moveTo(...pt(a)); c.lineTo(...pt(b)); c.stroke();
+   }
+  }
+ }
+ c.restore();
+}
+
+// ------------------------------------------------------------------ timing (seconds)
+const T = {
+ draw0: .3, draw1: 1.9, heart: 2.1, cap1a: .5, cap1b: 1.4, capOut: 4.9,
+ B: 5.0, bubbles: [5.2, 6.0, 6.7, 7.3, 7.8], tangle0: 5.0, tangle1: 10.2, tremble0: 8.6,
+ drop: 10.6, land: 10.9, straight1: 11.5, toLogo0: 11.45, toLogo1: 11.95, cap2: 11.7,
+ press: 12.5, pop0: 12.62, pop1: 13.1, go: 13.4,
+ stops: [14.3, 15.7, 17.1, 18.5, 19.9], stay: .5, arrive: 22.5,
+ open0: 23.4, open1: 23.9, jump0: 23.9, jump1: 24.45, cap3: 24.3,
+ iris0: 26.8, iris1: 27.3, url: 30.2, end: 33.0,
+};
+
+// ------------------------------------------------------------------ the dream sneaker
+function sneakerRaw() {
+ const d = drawing();
+ d.add('upper', [[-150, 18], [-156, -14], [-146, -46], [-118, -66], [-86, -68], [-60, -52], [-46, -86], [-14, -92], [4, -62], [40, -38], [92, -16], [138, 2], [160, 20], [156, 28]], 1.6, 1, {corner: 1.2});
+ d.add('collar', [[-118, -66], [-100, -44], [-72, -44], [-60, -52]], 1.1, .9);
+ d.add('midsole', [[-150, 18], [-60, 26], [60, 28], [156, 28]], 1.2, .9);
+ d.add('sole', [[-150, 18], [-154, 48], [-60, 56], [70, 56], [150, 50], [166, 36], [158, 26]], 1.6, 1, {corner: 1.2});
+ [[-40, -64, -8, -72], [-28, -48, 8, -58], [-14, -32, 24, -42], [2, -18, 40, -28]].forEach(([a, b, c2, e], k) => d.add('lace/' + k, [[a, b], [lerp(a, c2, .5), lerp(b, e, .5) - 2], [c2, e]], 1, .9));
+ d.add('panel', [[-122, -12], [-66, -22], [4, -8], [58, 4]], 1.1, .85);
+ d.add('panel/2', [[-116, 4], [-54, -2], [18, 10]], .9, .7);
+ d.add('heel', [[-150, -38], [-166, -50], [-162, -26]], 1, .9);
+ d.add('toecap', [[96, -12], [118, 8], [124, 26]], .9, .75);
+ for (let k = 0; k < 9; k++) { const x = -136 + k*32; d.add('stitch/' + k, [[x, 38 + (k % 2)], [x + 12, 38 + (k % 2)]], .6, .6); }
+ return {strokes: d.strokes};
+}
+const SNEAKER_SOLE = [[-150, 18], [-60, 26], [60, 28], [156, 28], [166, 36], [150, 50], [70, 56], [-60, 56], [-154, 48]];
+const SNEAKER_UPPER = [[-150, 18], [-156, -14], [-146, -46], [-118, -66], [-86, -68], [-60, -52], [-46, -86], [-14, -92], [4, -62], [40, -38], [92, -16], [138, 2], [160, 20], [156, 28], [60, 28], [-60, 26]];
+function sneaker(c, mode, x, y, s = 1, rot = 0, u = 1) {
+ c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
+ if (mode === 'ink') {
+  fill(c, SNEAKER_UPPER, LIME, 1, 4, 4); fill(c, SNEAKER_SOLE, '#ffffff', 1, 4, 4);
+  fill(c, [[-60, -52], [-46, -86], [-14, -92], [4, -62], [-20, -40]], '#a6d83a', 1, 4, 4);
+  ink(c, cel('sneaker', sneakerRaw()));
+ } else if (u >= 1) pencil(c, cel('sneaker', sneakerRaw()));
+ else pencilPart(c, cel('sneaker', sneakerRaw()), u);
+ c.restore();
+}
+
+// ------------------------------------------------------------------ the phone
+const PH = [0, -40], PH_W = 440, PH_H = 860;
+const phoneRaw = () => {
+ const d = drawing();
+ d.add('body', gesture(rrect(PH[0], PH[1], PH_W, PH_H, 64)), 1.8, 1);
+ d.add('screen', gesture(rrect(PH[0], PH[1], PH_W - 44, PH_H - 44, 46)), 1, .6);
+ d.add('notch', gesture(rrect(PH[0], PH[1] - PH_H/2 + 40, 110, 22, 11, 3)), 1, .8);
+ d.add('button', [[PH[0] + PH_W/2 + 3, -330], [PH[0] + PH_W/2 + 3, -250]], 1.4, .8);
+ return {strokes: d.strokes};
+};
+const storePageRaw = () => {
+ const d = drawing();
+ d.add('search', gesture(rrect(20, -372, 300, 46, 23, 3)), .9, .7);
+ [0, 1, 2].forEach(k => d.add('menu/' + k, [[-172, -386 + k*12], [-146, -386 + k*12]], .9, .7));
+ d.add('title/1', [[-160, 60], [60, 60]], 1.6, .45); d.add('title/2', [[-160, 88], [-10, 88]], 1.6, .35);
+ for (let k = 0; k < 5; k++) d.add('star/' + k, ring([-150 + k*26, 120], 9, 9, -90*DEG, 4*Math.PI*.8, 6), .8, k < 4 ? .8 : .35);
+ d.add('buy', gesture(rrect(0, 300, 300, 84, 42)), 1.3, .9);
+ return {strokes: d.strokes};
+};
+function phone(c, mode, t) {
+ if (mode === 'ink') {
+  fill(c, rrect(PH[0], PH[1], PH_W, PH_H, 64), NAVY, 1, 6, 8);
+  fill(c, rrect(PH[0], PH[1], PH_W - 44, PH_H - 44, 46), '#ffffff');
+  // The app screen: brand bar with the mark, the sneaker, the total, a lime order button.
+  c.save(); c.clip(pathOf(rrect(PH[0], PH[1], PH_W - 44, PH_H - 44, 46)));
+  fill(c, [[-220, -470], [220, -470], [220, -330], [-220, -330]], BLUE);
+  c.restore();
+  if (t >= T.toLogo1) {
+   c.drawImage(IMG.hex, -176, -440, 60, 65); c.drawImage(IMG.p, -176 + 60*.54 - 11, -440 + 65*.62 - 17, 22, 36);
+  }
+  text(c, 'Pochtam', -104, -388, {size: 40, color: '#ffffff', align: 'left'});
+  const a0 = T.toLogo1 - .05, pop = k => outBack(span(t, a0 + k*.08, a0 + k*.08 + .3)), fade = k => span(t, a0 + k*.08, a0 + k*.08 + .2);
+  if (pop(0) > 0) sneaker(c, 'ink', 0, -170, pop(0));
+  text(c, '$89', -170, 60, {size: 56, align: 'left', alpha: fade(1)});
+  text(c, 'Jami narx hisoblandi', -170, 104, {size: 26, weight: 600, color: '#4E4F6B', align: 'left', alpha: fade(2)});
+  text(c, 'boj: 0 so\'m · kuryer tanlandi', -170, 140, {size: 24, weight: 500, color: '#6B6C85', align: 'left', alpha: fade(2)});
+  const press = (t >= T.press && t < T.press + .12 ? .94 : 1)*pop(3);
+  if (press > 0) { c.save(); c.translate(0, 300); c.scale(press, press); fill(c, rrect(0, 0, 300, 84, 42), LIME); text(c, 'Buyurtma', 0, 13, {size: 36}); c.restore(); }
+  ink(c, cel('phone', phoneRaw()), NAVY);
+ } else {
+  pencil(c, cel('phone', phoneRaw()));
+  pencil(c, cel('storepage', storePageRaw()));
+  const u = span(t, T.draw0, T.draw1);
+  const fade = t >= T.tremble0 ? .45 : 1;
+  c.save(); c.globalAlpha = fade; sneaker(c, 'pencil', 0, -170, 1, 0, u); c.restore();
+  text(c, '$89', -170, 176, {size: 44, weight: 700, color: GRAPH, align: 'left', alpha: span(t, 1.6, 2.0)*fade});
+  text(c, 'Sotib olish', 0, 312, {size: 32, weight: 600, color: GRAPH, alpha: span(t, 1.8, 2.2)});
+  // Want: a small pencil heart pops beside the shoe.
+  if (t >= T.heart) {
+   const s = outBack(span(t, T.heart, T.heart + .3)), h = drawing();
+   h.add('heart', [[0, 10], [-16, -4], [-18, -16], [-10, -24], [0, -18], [10, -24], [18, -16], [16, -4], [0, 10]], 1.3, 1, {corner: .9});
+   c.save(); c.translate(150, -270); c.scale(s*1.6, s*1.6); pencil(c, cel('heart', h)); c.restore();
+  }
+ }
+}
+
+// ------------------------------------------------------------------ doubts
+const BUBBLES = [
+ {text: 'Qaysi do\'kon?', x: -240, y: -600, w: 360, rot: -.06, tail: [60, 70]},
+ {text: 'Qaysi kuryer?', x: 250, y: -430, w: 350, rot: .05, tail: [-70, 70]},
+ {text: 'Boj qancha?', x: -270, y: 130, w: 320, rot: .04, tail: [80, -60]},
+ {text: 'Jami necha pul?', x: 230, y: 330, w: 380, rot: -.05, tail: [-70, -60]},
+ {text: 'Qachon keladi?', x: -40, y: 600, w: 380, rot: .03, tail: [0, -70]},
+];
+function bubbleRaw(b) {
+ const d = drawing(), h = 108, pts = rrect(0, 0, b.w, h, 40), [tx, ty] = b.tail;
+ // Insert the tail on the edge nearest the phone.
+ const i = pts.reduce((bi, p, k) => Math.hypot(p[0] - tx, p[1] - ty) < Math.hypot(pts[bi][0] - tx, pts[bi][1] - ty) ? k : bi, 0);
+ const a = pts[(i + pts.length - 1) % pts.length], c2 = pts[(i + 1) % pts.length];
+ const out = [...pts.slice(0, i), lp2(a, pts[i], .5), [tx*1.25, ty*1.3], lp2(pts[i], c2, .5), ...pts.slice(i + 1)];
+ d.add('outline', gesture(out), 1.4, 1, {corner: .9});
+ return {strokes: d.strokes};
+}
+function bubbles(c, t) {
+ const g = Math.floor(t*12);
+ BUBBLES.forEach((b, k) => {
+  const t0 = T.bubbles[k]; if (t < t0) return;
+  let s = outBack(span(t, t0, t0 + .25));
+  if (t >= T.land) s *= 1 - span(t, T.land + .04 + k*.05, T.land + .2 + k*.05, x => x*x);
+  if (s <= .01) return;
+  const jit = t >= T.tremble0 && t < T.land ? [((g + k) % 2 ? 3 : -3), ((g + k*3) % 2 ? 2 : -2)] : [0, 0];
+  c.save(); c.translate(b.x + jit[0], b.y + jit[1]); c.rotate(b.rot); c.scale(s, s);
+  fill(c, rrect(0, 0, b.w, 108, 40), PAPER, .92);
+  pencil(c, cel('bubble' + k, bubbleRaw(b)));
+  text(c, b.text, 0, 14, {size: 42, weight: 700, color: GRAPH});
+  c.restore();
+ });
+}
+// The tangle: one long searching line. It straightens into the route.
+const TANGLE_N = 120;
+const TANGLE = Array.from({length: TANGLE_N}, (_, k) => {
+ const a = k*.55 + noise1(k*.21, 3)*2.4, r = 90 + 330*(.5 + .5*noise1(k*.13, 7)) + 60*Math.sin(k*.9);
+ return [PH[0] + Math.cos(a)*r*1.05, PH[1] + Math.sin(a)*r*1.35];
+});
+const STRAIGHT = Array.from({length: TANGLE_N}, (_, k) => [0, lerp(-760, 640, k/(TANGLE_N - 1))]);
+function tangleRaw(u) { const d = drawing(); d.add('line', TANGLE.map((p, k) => lp2(p, STRAIGHT[k], u)), 1.5, .9); return {strokes: d.strokes}; }
+
+// ------------------------------------------------------------------ the route
+const ROUTE_Y0 = 640, ROUTE_Y1 = 4560, STOP_Y = [1120, 1780, 2440, 3100, 3760];
+const routeX = y => y <= ROUTE_Y0 ? 0 : 88*Math.sin((y - ROUTE_Y0)/560)*Math.min(1, (ROUTE_Y1 - y)/500);
+const ROUTE_END = 4030;                           // the drawn route stops at the door; the parcel hops the last bit
+const ROUTE = Array.from({length: 200}, (_, k) => { const y = lerp(ROUTE_Y0, ROUTE_END, k/199); return [routeX(y) + noise1(y*.01, 5)*2, y]; });
+function boxY(t) {
+ if (t < T.go) return ROUTE_Y0;
+ const K = [[T.go, ROUTE_Y0]];
+ T.stops.forEach((s, k) => { K.push([s, STOP_Y[k]]); K.push([s + T.stay, STOP_Y[k]]); });
+ K.push([T.arrive, ROUTE_Y1]);
+ for (let i = 1; i < K.length; i++) if (t < K[i][0]) return lerp(K[i - 1][1], K[i][1], easeInOutSine((t - K[i - 1][0])/(K[i][0] - K[i - 1][0])));
+ return ROUTE_Y1;
+}
+function route(c, t) {
+ const y = boxY(t);
+ c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+ c.strokeStyle = '#c9cbf3'; c.lineWidth = 8; c.setLineDash([2, 22]); c.stroke(pathOf(ROUTE, false)); c.setLineDash([]);
+ const done = ROUTE.filter(p => p[1] <= y); if (y <= ROUTE_END) done.push([routeX(y), y]);
+ if (t >= T.go && done.length > 1) {
+  c.strokeStyle = BLUE; c.lineWidth = 12; c.stroke(pathOf(done, false));
+  c.strokeStyle = LIME; c.lineWidth = 4.5; c.stroke(pathOf(done, false));
+ }
+ const e = ROUTE[ROUTE.length - 1];
+ c.beginPath(); c.arc(e[0], e[1], 16, 0, 2*Math.PI); c.fillStyle = y >= ROUTE_END ? LIME : '#ffffff'; c.fill(); c.lineWidth = 5; c.strokeStyle = BLUE; c.stroke();
+ STOP_Y.forEach((sy, k) => {
+  const x = routeX(sy), on = t >= T.stops[k];
+  c.beginPath(); c.arc(x, sy, 22, 0, 2*Math.PI); c.fillStyle = on ? LIME : '#ffffff'; c.fill(); c.lineWidth = 5; c.strokeStyle = BLUE; c.stroke();
+  if (on) { const u = span(t, T.stops[k], T.stops[k] + .2); c.beginPath(); c.moveTo(x - 10, sy); c.lineTo(x - 10 + 7*Math.min(1, u*2), sy + 7*Math.min(1, u*2)); if (u > .5) c.lineTo(x - 3 + 14*(u - .5)*2, sy + 7 - 16*(u - .5)*2); c.strokeStyle = NAVY; c.lineWidth = 4.5; c.stroke(); }
+ });
+ c.restore();
+}
+
+// ------------------------------------------------------------------ stop art: ink over flat brand colour
+const STOPS = [
+ {title: '43 ta do\'kon', sub: 'dunyo bo\'ylab, bir joyda', art: 'store'},
+ {title: '20 ta kuryer', sub: 'narxini solishtiring', art: 'van'},
+ {title: 'Boj va jami narx', sub: 'oldindan hisoblang', art: 'calc'},
+ {title: 'Qo\'llanma va AI', sub: 'har qadamda yordam', art: 'guide'},
+ {title: 'Kuzatib boring', sub: 'jo\'natmangiz qayerda?', art: 'pin'},
+];
+function artRaw(kind) {
+ const d = drawing(), F = [];
+ const shape = (id, pts, color, w = 1.5, o = 1) => { F.push([pts, color]); d.add(id, gesture(pts), w, o, {corner: .8}); };
+ if (kind === 'store') {
+  shape('body', rrect(0, 30, 200, 130, 10), '#ffffff');
+  const aw = []; for (let k = 0; k <= 5; k++) aw.push([-110 + k*44, -34]);
+  shape('awning', [[-110, -70], [110, -70], [110, -34], ...aw.slice().reverse().flatMap(p => [[p[0] + 22, -24], p]).slice(2)], BLUE);
+  for (let k = 0; k < 5; k += 2) F.push([[[-110 + k*44, -70], [-66 + k*44, -70], [-66 + k*44, -34], [-110 + k*44, -34]], '#ffffff']);
+  shape('door', rrect(-48, 58, 54, 76, 6), PALE);
+  shape('window', rrect(46, 30, 74, 52, 6), PALE);
+  d.add('sign', [[-60, -92], [60, -92]], 1.2, .8);
+  shape('bag', [[30, 46], [64, 46], [60, 84], [34, 84]], LIME, 1.1);
+ } else if (kind === 'van') {
+  shape('box', [[-120, -60], [30, -60], [30, 50], [-120, 50]], '#ffffff');
+  shape('cab', [[30, -30], [80, -30], [112, 10], [112, 50], [30, 50]], BLUE);
+  shape('glass', [[42, -18], [74, -18], [98, 12], [42, 12]], PALE, 1.1);
+  shape('wheel/a', ring([-70, 54], 22, 22, 0, 2*Math.PI, 12), NAVY); shape('wheel/b', ring([72, 54], 22, 22, 0, 2*Math.PI, 12), NAVY);
+  shape('hub/a', ring([-70, 54], 8, 8, 0, 2*Math.PI, 8), '#ffffff', 1); shape('hub/b', ring([72, 54], 8, 8, 0, 2*Math.PI, 8), '#ffffff', 1);
+  shape('mark', ring([-45, -5], 30, 30, -90*DEG, 2*Math.PI, 7), BLUE, 1.2);
+  shape('mark/p', rrect(-40, 0, 16, 30, 7, 2), LIME, .8);
+  [0, 1, 2].forEach(k => d.add('speed/' + k, [[-150 - k*6, -30 + k*28], [-190 - k*10, -30 + k*28]], 1.2, .7));
+ } else if (kind === 'calc') {
+  shape('body', rrect(0, 0, 170, 220, 22), '#ffffff');
+  shape('screen', rrect(0, -62, 130, 54, 10), BLUE, 1.2);
+  for (let r = 0; r < 3; r++) for (let q = 0; q < 3; q++) shape(`key/${r}/${q}`, rrect(-44 + q*44, 10 + r*38, 32, 26, 7, 2), r === 2 && q === 2 ? LIME : PALE, 1);
+  shape('shield', [[92, -96], [132, -84], [130, -40], [92, -12], [56, -40], [54, -84]], LIME, 1.3);
+  d.add('shield/tick', [[76, -60], [88, -46], [110, -72]], 1.6, 1);
+ } else if (kind === 'guide') {
+  shape('left', [[-6, -40], [-60, -58], [-118, -50], [-118, 64], [-60, 56], [-6, 72]], '#ffffff');
+  shape('right', [[-6, -40], [48, -58], [106, -50], [106, 64], [48, 56], [-6, 72]], PALE);
+  [0, 1, 2].forEach(k => { d.add('text/l/' + k, [[-100, -22 + k*22], [-24, -12 + k*22]], .9, .6); d.add('text/r/' + k, [[12, -12 + k*22], [88, -22 + k*22]], .9, .6); });
+  shape('chat', [[40, -150], [150, -150], [150, -86], [96, -86], [74, -64], [76, -86], [40, -86]], BLUE, 1.3);
+ } else if (kind === 'pin') {
+  const P = [[0, 70], [-38, 10], [-52, -30], [-40, -70], [0, -92], [40, -70], [52, -30], [38, 10]];
+  shape('pin', P, BLUE);
+  shape('dot', ring([0, -34], 20, 20, 0, 2*Math.PI, 10), '#ffffff', 1.2);
+  shape('box', [[-12, -44], [12, -44], [12, -24], [-12, -24]], KRAFT, .9);
+  shape('ground', ring([0, 78], 70, 16, 0, 2*Math.PI, 14), PALE, 1);
+  d.add('arc', [[-150, 70], [-120, 20], [-80, -4]], 1.2, .6);
+ }
+ return {cel: {strokes: d.strokes}, fills: F};
+}
+const ART = {}; for (const k of ['store', 'van', 'calc', 'guide', 'pin']) ART[k] = artRaw(k);
+function stopArt(c, k, t) {
+ const t0 = T.stops[k]; if (t < t0 - .05) return;
+ const side = k % 2 ? 1 : -1, x = side*280, y = STOP_Y[k] - 40, s = outBack(span(t, t0 - .05, t0 + .3));
+ const A = ART[STOPS[k].art], fadeOut = 1 - span(t, T.arrive + .1, T.arrive + .7);
+ if (fadeOut <= 0) return;
+ c.save(); c.globalAlpha = fadeOut; c.translate(x, y); c.scale(s, s);
+ A.fills.forEach(([pts, col]) => fill(c, pts, col, 1, 5, 6));
+ ink(c, cel('art/' + k, A.cel));
+ if (STOPS[k].art === 'guide') {                       // the AI answers: dots, then a lime tick
+  const u = span(t, t0 + .3, t0 + 1.1);
+  if (u < .7) [0, 1, 2].forEach(i => { c.beginPath(); c.arc(78 + i*18, -118 + (Math.floor(t*12 + i) % 2 ? -3 : 0), 5, 0, 2*Math.PI); c.fillStyle = '#ffffff'; c.fill(); });
+  else { c.beginPath(); c.moveTo(80, -120); c.lineTo(92, -106); c.lineTo(116, -132); c.strokeStyle = LIME; c.lineWidth = 7; c.lineCap = 'round'; c.stroke(); }
+ }
+ if (STOPS[k].art === 'calc') {
+  const n = Math.round(lerp(0, 101, span(t, t0 + .2, t0 + .9, easeOut)));
+  text(c, '$' + n, 50, -48, {size: 34, color: '#ffffff', align: 'right'});
+ }
+ c.restore();
+ const a = span(t, t0 + .12, t0 + .4, easeOut)*fadeOut;
+ text(c, STOPS[k].title, x - side*10, y + 190 + 16*(1 - a), {size: 52, alpha: a, halo: BG});
+ text(c, STOPS[k].sub, x - side*10, y + 238 + 16*(1 - a), {size: 31, weight: 600, color: '#4E4F6B', alpha: a, halo: BG});
+}
+
+// ------------------------------------------------------------------ the parcel
+function box(c, x, y, {s = 1, rot = 0, open = 0, sq = 0} = {}) {
+ c.save(); c.translate(x, y); c.rotate(rot); c.scale(s*(1 + sq), s*(1 - sq));
+ const front = [[-70, -40], [70, -40], [70, 60], [-70, 60]], side = [[70, -40], [104, -70], [104, 30], [70, 60]], top = [[-70, -40], [-36, -70], [104, -70], [70, -40]];
+ fill(c, side, '#c48f52'); fill(c, front, KRAFT);
+ if (open <= 0) {
+  fill(c, top, '#e6be8a');
+  fill(c, [[-8, -40], [8, -40], [42, -70], [26, -70]], BLUE);                   // tape across the lid
+ } else {
+  fill(c, top, '#8a5f33');
+  const fl = (a, b, dir) => { const L = 46*open; return [a, b, [b[0] + dir[0]*L, b[1] + dir[1]*L], [a[0] + dir[0]*L, a[1] + dir[1]*L]]; };
+  const back = fl([-36, -70], [104, -70], [0, -1.1]), left = fl([-70, -40], [-36, -70], [-1, -.35]), right = fl([104, -70], [70, -40], [1, -.2]), frontF = fl([-70, -40], [70, -40], [.1, -.55]);
+  [back, left, right].forEach(p => fill(c, p, '#e6be8a'));
+  fill(c, frontF, '#f0cf9f');
+ }
+ fill(c, [[-8, -40], [8, -40], [8, 60], [-8, 60]], BLUE);                      // tape down the front
+ c.drawImage(IMG.hex, -58, -22, 40, 43); c.drawImage(IMG.p, -58 + 40*.54 - 7.5, -22 + 43*.62 - 12, 15, 24);
+ const d = drawing();
+ d.add('front', gesture(front), 1.3); d.add('side', [[70, -40], [104, -70], [104, 30], [70, 60]], 1.3); d.add('top', [[-70, -40], [-36, -70], [104, -70]], 1.3);
+ ink(c, cel('box/lines', d));
+ c.restore();
+}
+
+// ------------------------------------------------------------------ the doorstep
+const DOOR_Y = 4640;
+function doorRaw() {
+ const d = drawing();
+ d.add('floor', [[-560, DOOR_Y], [560, DOOR_Y]], 1.4, .9);
+ d.add('frame', [[-196, DOOR_Y], [-196, 4060], [196, 4060], [196, DOOR_Y]], 1.8, 1, {corner: .8});
+ d.add('door', [[-166, DOOR_Y], [-166, 4088], [166, 4088], [166, DOOR_Y]], 1.4, 1, {corner: .8});
+ d.add('panel/a', gesture(rrect(0, 4230, 250, 180, 12)), 1, .7); d.add('panel/b', gesture(rrect(0, 4460, 250, 200, 12)), 1, .7);
+ d.add('knob', ring([124, 4350], 12, 12, 0, 2*Math.PI, 9), 1.2);
+ d.add('mat', gesture(rrect(0, DOOR_Y - 12, 330, 26, 12)), 1.2, .9);
+ d.add('pot', [[250, DOOR_Y], [236, 4560], [320, 4560], [306, DOOR_Y]], 1.3, 1, {corner: .8});
+ [[-.5, 110], [-.1, 150], [.35, 120], [.7, 90]].forEach(([a, L], k) => d.add('leaf/' + k, [[278, 4560], [278 + Math.sin(a)*L*.5, 4560 - L*.55], [278 + Math.sin(a)*L, 4560 - L]], 1.2, .9));
+ d.add('lamp', gesture(rrect(-260, 4200, 36, 60, 10, 2)), 1.1, .9);
+ return {strokes: d.strokes};
+}
+function doorstep(c) {
+ fill(c, [[-560, 4000], [560, 4000], [560, DOOR_Y], [-560, DOOR_Y]], PALE);
+ fill(c, [[-196, DOOR_Y], [-196, 4060], [196, 4060], [196, DOOR_Y]], '#ffffff', 1, 5, 6);
+ fill(c, [[-166, DOOR_Y], [-166, 4088], [166, 4088], [166, DOOR_Y]], BLUE, 1, 5, 6);
+ fill(c, rrect(0, DOOR_Y - 12, 330, 26, 12), LIME, 1, 4, 4);
+ fill(c, [[250, DOOR_Y], [236, 4560], [320, 4560], [306, DOOR_Y]], '#ffffff', 1, 4, 4);
+ fill(c, rrect(-260, 4200, 36, 60, 10, 2), LIME, 1, 3, 3);
+ fill(c, [[-560, DOOR_Y], [560, DOOR_Y], [560, 6600], [-560, 6600]], '#E3E4EE');
+ ink(c, cel('door', doorRaw()));
+ fill(c, rrect(282, 4150, 64, 50, 10, 2), '#ffffff', 1, 3, 3); c.save(); c.strokeStyle = NAVY; c.lineWidth = 3; c.stroke(pathOf(rrect(282, 4150, 64, 50, 10, 2))); c.restore();
+ text(c, '12', 282, 4163, {size: 32, color: BLUE});
+}
+function sparkles(c, t, cx, cy) {
+ const t0 = T.jump0 + .1; if (t < t0) return;
+ const g = Math.floor((t - t0)*12);
+ for (let k = 0; k < 8; k++) {
+  const a = (-160 + k*20)*DEG, r = 150 + (k % 3)*40, s = outBack(span(t, t0 + k*.04, t0 + k*.04 + .25))*(k % 2 ? 1 : .7)*((g + k) % 3 ? 1 : .8);
+  const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r*.8;
+  c.save(); c.translate(x, y); c.scale(s, s); c.fillStyle = k % 3 ? LIME : BLUE;
+  c.beginPath(); for (let i = 0; i < 8; i++) { const rr = i % 2 ? 6 : 20, aa = i*Math.PI/4; c.lineTo(Math.cos(aa)*rr, Math.sin(aa)*rr); } c.closePath(); c.fill(); c.restore();
+ }
+}
+
+// ------------------------------------------------------------------ camera
+function camera(t) {
+ if (t < T.B) return [0, -10, lerp(1.2, 1.28, easeInOutSine(t/T.B))];
+ if (t < T.press - .1) return [0, lerp(-10, -40, span(t, T.B, T.B + 1, easeInOutSine)), lerp(1.28, 1.0, span(t, T.B, T.B + 1, easeInOutSine))];
+ const follow = tt => boxY(tt) + 250;
+ if (t < T.go + .4) { const u = span(t, T.press - .1, T.go + .4, easeInOutSine); return [0, lerp(-40, follow(t - .12), u), lerp(1, 1.1, u)]; }
+ if (t < T.arrive) return [0, follow(t - .12), 1.1];
+ const u = span(t, T.arrive, T.arrive + 1.2, easeInOutSine), z = lerp(1.1, 1.3, span(t, T.arrive, T.cap3 + 1.5, easeInOutSine));
+ return [0, lerp(follow(T.arrive - .12), 4420, u), z];
+}
+
+// ------------------------------------------------------------------ one world, two materials
+const HEX = (cx, cy, R) => { const p = []; for (let i = 0; i < 6; i++) { const a = -Math.PI/2 + i*Math.PI/3; p.push([cx + R*Math.cos(a), cy + R*Math.sin(a)]); } return p; };
+const revealR = t => t < T.land ? 0 : 2600*span(t, T.land, T.land + 1.15, easeOut);
+function world(c, t, mode) {
+ // Everything in world units after the camera transform.
+ if (mode === 'ink') {
+  c.save(); c.fillStyle = 'rgba(10,12,153,.10)';
+  const [cx, cy, z] = camera(t), y0 = Math.floor((cy - 1100/z)/60)*60;
+  for (let y = y0; y < cy + 1100/z; y += 60) for (let x = -540; x <= 540; x += 60) { c.beginPath(); c.arc(x + 30, y + 30, 2.2, 0, 2*Math.PI); c.fill(); }
+  c.restore();
+ }
+ const land = t >= T.land, straightU = span(t, T.land + .05, T.straight1, inOutQuart);
+ const tangleU = span(t, T.tangle0, T.tangle1, x => x*x*.6 + x*.4);
+ if (mode === 'ink' && t >= T.arrive - 1.6) doorstep(c);
+ if (mode === 'ink' && t >= T.go - .8) route(c, t);
+ // The tangle is on top of the phone while it is a tangle; the line goes behind once straight.
+ const tangle = () => {
+  if (t < T.tangle0) return;
+  const id = 'tangle/' + Math.round(straightU*48);
+  const compiled = CELS[id] ??= compileCel(tangleRaw(Math.round(straightU*48)/48), {id: 'tangle'});
+  if (straightU <= 0) pencilPart(c, compiled, tangleU);
+  else if (mode === 'ink') ink(c, compiled, BLUE); else pencil(c, compiled);
+ };
+ if (land) tangle();
+ if (t < T.go + 1.2) phone(c, mode, t);
+ if (!land) tangle();
+ if (t < T.land + .5) bubbles(c, t);
+ if (mode === 'ink') {
+  STOP_Y.forEach((_, k) => stopArt(c, k, t));
+ }
+ // The lime p: drops, lands on the screen, then settles into the app's mark.
+ if (t >= T.drop && t < T.toLogo1) {
+  const u = span(t, T.drop, T.land, x => x*x*x), sq = t >= T.land ? Math.sin(Math.PI*span(t, T.land, T.land + .34))*.15 : 0;
+  const pS = u < 1 ? lerp(.7, .86, u) : lerp(.86, 1, outBack(span(t, T.land, T.land + .5)));
+  const k = span(t, T.toLogo0, T.toLogo1, easeInOutSine), px = lerp(PH[0], -146, k), py = lerp(PH[1] - 520*(1 - u), -407, k), sc = lerp(1, .11, k);
+  const hx = lerp(PH[0] - 20, -146, k), hy = lerp(PH[1] - 10, -407, k), hS = t < T.land - .06 ? 0 : outBack(span(t, T.land - .04, T.land + .5))*lerp(1, .117, k);
+  if (hS > 0) { c.save(); c.translate(hx, hy); c.scale(hS, hS); c.globalAlpha = span(t, T.land - .06, T.land + .1); c.drawImage(IMG.hex, -260, -284, 520, 568); c.restore(); }
+  c.save(); c.translate(px + 20*(1 - k)*(t >= T.land ? 1 : 0), py); c.rotate(-14*DEG*(1 - u)); c.scale(pS*(1 + sq)*sc, pS*(1 - sq)*sc);
+  c.drawImage(IMG.p, -100, -164, 200, 328); c.restore();
+ }
+ // The parcel.
+ if (t >= T.pop0) {
+  let x, y, s = 1, rot = 0, sq = 0, open = 0;
+  if (t < T.pop1) { const u = span(t, T.pop0, T.pop1); x = 0; y = lerp(300, ROUTE_Y0, u) - Math.sin(Math.PI*u)*240; s = lerp(.3, 1, easeOut(u)); rot = (1 - u)*.4; }
+  else {
+   y = boxY(t); x = routeX(y);
+   const v = (boxY(t + 1/FPS) - boxY(t - 1/FPS))*FPS/2;
+   rot = clamp(v/9000, -.12, .12);
+   const lastStop = T.stops.reduce((a, s0) => t >= s0 ? s0 : a, -9);
+   sq = t < T.go ? Math.sin(Math.PI*span(t, T.pop1, T.pop1 + .25))*.12 : lastStop > 0 ? Math.sin(Math.PI*span(t, lastStop, lastStop + .22))*.08 : 0;
+   if (t >= T.arrive) { sq = Math.sin(Math.PI*span(t, T.arrive, T.arrive + .3))*.14; rot = 0; y = DOOR_Y - 60; x = 0; open = span(t, T.open0, T.open1, easeOut); }
+   if (Math.abs(v) > 250 && t < T.arrive) { c.save(); c.strokeStyle = BLUE; c.lineWidth = 4; c.lineCap = 'round'; c.globalAlpha = .5; [-40, 0, 40].forEach((dx, i) => { c.beginPath(); c.moveTo(x + dx, y - 110 - i*10); c.lineTo(x + dx, y - 150 - i*10 - Math.min(80, Math.abs(v)/20)); c.stroke(); }); c.restore(); }
+  }
+  if (t >= T.jump0) {
+   // Once up, the sneaker floats: a small bob on twos, the only motion in the hold.
+   const u = span(t, T.jump0, T.jump1), up = outBack(u), bob = t > T.jump1 ? Math.sin((Math.floor(t*12)/12 - T.jump1)*3.2)*7 : 0, sy = DOOR_Y - 130 - 200*up + bob;
+   sparkles(c, t, 20, sy);
+   sneaker(c, 'ink', 20, sy, lerp(.3, .82, up), lerp(-.5, -.12, up));
+  }
+  if (mode === 'ink') box(c, x, y, {s, rot, sq, open}); else box(c, x, y, {s, rot, sq});
+ }
+}
+function background(c, mode) { paper(c, mode === 'ink' ? BG : PAPER, null, 23); }
+
+// ------------------------------------------------------------------ captions (screen space)
+function captions(c, t) {
+ resetT(c);
+ const outA = 1 - span(t, T.capOut, T.capOut + .4);
+ const a1 = span(t, T.cap1a, T.cap1a + .4, easeOut), a2 = span(t, T.cap1b, T.cap1b + .4, easeOut);
+ text(c, 'Orzuingizdagi narsa', CX, 190 + 20*(1 - a1), {size: 64, color: GRAPH, alpha: a1*outA, halo: PAPER});
+ text(c, 'dunyoning narigi chekkasidami?', CX, 262 + 20*(1 - a2), {size: 46, weight: 600, color: GRAPH, alpha: a2*outA, halo: PAPER});
+ const b = span(t, T.cap2, T.cap2 + .35, easeOut)*(1 - span(t, T.press - .05, T.press + .3));
+ text(c, 'Endi hammasi aniq.', CX, 200 + 20*(1 - b), {size: 70, alpha: b, halo: BG});
+ const d = span(t, T.cap3, T.cap3 + .4, easeOut), d2 = span(t, T.cap3 + .35, T.cap3 + .75, easeOut);
+ text(c, 'Orzuingiz —', CX, 1590 + 20*(1 - d), {size: 76, alpha: d, halo: '#E3E4EE'});
+ text(c, 'eshigingiz oldida.', CX, 1680 + 20*(1 - d2), {size: 76, color: BLUE, alpha: d2, halo: '#E3E4EE'});
+ if (d2 > .5) { c.save(); c.strokeStyle = LIME; c.lineWidth = 12; c.lineCap = 'round'; c.beginPath(); c.moveTo(CX - 300, 1712); c.lineTo(CX - 300 + 600*span(t, T.cap3 + .6, T.cap3 + 1.1, easeOut), 1712); c.stroke(); c.restore(); }
+}
+
+// ------------------------------------------------------------------ the brand intro, ported from the app (1080x1920 stage)
+const MS = .68, MW = 765*MS, MH = 835*MS, MARK = {x: (1080 - MW)/2, y: 560, w: MW, h: MH};
+const PSZ = {w: 295*MS, h: 482*MS}, PC = {x: MARK.x + (410 + 147.5)*MS, y: MARK.y + (274 + 241)*MS}, WS = .40;
+const GLYPHS = [{k: 'P', x: 897, w: 206}, {k: 'o', x: 1123, w: 214}, {k: 'c', x: 1361, w: 198}, {k: 'h', x: 1585, w: 194}, {k: 't', x: 1804, w: 134}, {k: 'a', x: 1966, w: 218}, {k: 'm', x: 2228, w: 303}, {k: 'dot', x: 2567, w: 52}];
+const WORD_W = (2619 - 897)*WS, WORD_X = (1080 - WORD_W)/2, WORD_Y = MARK.y + MH + 96, WORD_H = 288*WS;
+const TAG = {x: WORD_X, y: WORD_Y + WORD_H + 34, w: WORD_W, h: 96*WS}, HEX_C = {x: MARK.x + 382.5*MS, y: MARK.y + 417.5*MS};
+const LAND_CUE = 0, WORD_CUE = 1.05;
+const an = (from, to, s, e, ease = easeOut) => T0 => from + (to - from)*ease(clamp((T0 - s)/(e - s), 0, 1));
+const ILAND = LAND_CUE + .3;
+const IA = {
+ u: an(0, 1, LAND_CUE, ILAND, x => x*x*x), landS: an(.86, 1, ILAND, ILAND + .5, outBack), pOp: an(0, 1, LAND_CUE, LAND_CUE + .15),
+ outline: an(0, 1, LAND_CUE, ILAND, inOutQuart), ringS: an(1, 1.6, ILAND, ILAND + .8), ringOp: an(1, 0, ILAND, ILAND + .7),
+ hexOp: an(0, 1, ILAND - .06, ILAND + .1), hexS: an(.86, 1, ILAND - .04, ILAND + .55, outBack),
+ glowA: an(0, .5, ILAND - .1, ILAND + .25), glowB: an(1, .55, ILAND + .25, ILAND + 1.2), glowS: an(.5, 1, ILAND - .1, ILAND + 1.1),
+ gX: an(-260, WORD_W + 260, WORD_CUE + .45, WORD_CUE + 1.15, inOutQuart), gOpA: an(0, 1, WORD_CUE + .45, WORD_CUE + .6), gOpB: an(1, 0, WORD_CUE + .95, WORD_CUE + 1.2),
+ tagCut: an(100, 0, WORD_CUE + .6, WORD_CUE + 1.2, inOutQuart), tagOp: an(0, 1, WORD_CUE + .6, WORD_CUE + .72),
+ curA: an(0, 1, WORD_CUE + .52, WORD_CUE + .68), curB: an(1, 0, WORD_CUE + 1.2, WORD_CUE + 1.4), back: an(0, 1, ILAND - .15, ILAND + .5),
+};
+function hexRounded() {
+ const cx = HEX_C.x, cy = HEX_C.y, R = 431.3*MS, k = 150*.577*MS, pts = HEX(cx, cy, R), p = new Path2D();
+ for (let i = 0; i < 6; i++) {
+  const q = pts[i], pr = pts[(i + 5) % 6], nx = pts[(i + 1) % 6], l1 = Math.hypot(pr[0] - q[0], pr[1] - q[1]), l2 = Math.hypot(nx[0] - q[0], nx[1] - q[1]);
+  const a = [q[0] + (pr[0] - q[0])/l1*k, q[1] + (pr[1] - q[1])/l1*k], b = [q[0] + (nx[0] - q[0])/l2*k, q[1] + (nx[1] - q[1])/l2*k];
+  i ? p.lineTo(...a) : p.moveTo(...a); p.quadraticCurveTo(q[0], q[1], ...b);
+ }
+ p.closePath(); return p;
+}
+const HEX_PATH = hexRounded(), HEX_LEN = 6*(431.3*MS - 2*150*.577*MS) + 6*150*.577*MS*1.6;
+function endCard(c, t) {
+ const T0 = t - T.iris1;
+ resetT(c); c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+ const back = IA.back(T0), zoom = lerp(1.12, 1, back), fy = lerp(PC.y - 60, 960, back);
+ c.save(); c.translate(540, 960); c.scale(zoom, zoom); c.translate(-540, -fy);
+ const gridOp = lerp(1, .35, clamp((T0 - ILAND)/(WORD_CUE + .6 - ILAND), 0, 1));
+ c.save(); c.fillStyle = `rgba(10,12,153,${.11*gridOp})`; for (let y = -1200; y < 3120; y += 60) for (let x = -600; x < 1680; x += 60) { c.beginPath(); c.arc(x + 30, y + 30, 2.25, 0, 2*Math.PI); c.fill(); } c.restore();
+ const gs = IA.glowS(T0), go = IA.glowA(T0)*IA.glowB(T0);
+ if (go > 0) { const g = c.createRadialGradient(HEX_C.x, HEX_C.y, 0, HEX_C.x, HEX_C.y, 700*gs); g.addColorStop(0, `rgba(10,12,153,${.12*go})`); g.addColorStop(.28, `rgba(10,12,153,${.06*go})`); g.addColorStop(.6, `rgba(10,12,153,${.015*go})`); g.addColorStop(.85, 'rgba(10,12,153,0)'); c.fillStyle = g; c.fillRect(HEX_C.x - 700, HEX_C.y - 700, 1400, 1400); }
+ const ro = IA.ringOp(T0);
+ if (ro > 0) { c.save(); c.translate(HEX_C.x, HEX_C.y); c.scale(IA.ringS(T0), IA.ringS(T0)); c.translate(-HEX_C.x, -HEX_C.y); c.globalAlpha = ro; c.strokeStyle = LIME; c.lineWidth = 12; c.lineCap = 'round'; c.lineJoin = 'round'; c.setLineDash([HEX_LEN*IA.outline(T0), HEX_LEN*2]); c.stroke(HEX_PATH); c.restore(); }
+ const hs = IA.hexS(T0);
+ c.save(); c.globalAlpha = IA.hexOp(T0); c.translate(MARK.x + MARK.w/2, MARK.y + MARK.h/2); c.scale(hs, hs); c.drawImage(IMG.hex, -MARK.w/2, -MARK.h/2, MARK.w, MARK.h); c.restore();
+ GLYPHS.forEach((g, i) => {
+  const st = WORD_CUE + i*.05, dy = an(60, 0, st, st + (g.k === 'dot' ? .8 : .5), g.k === 'dot' ? outElastic : outBack)(T0), op = an(0, 1, st, st + .15)(T0);
+  if (op <= 0) return;
+  c.save(); c.globalAlpha = op; c.drawImage(IMG[g.k], WORD_X + (g.x - 897)*WS, WORD_Y + dy, g.w*WS, WORD_H); c.restore();
+ });
+ const gl = IA.gOpA(T0)*IA.gOpB(T0);
+ if (gl > 0) { c.save(); c.beginPath(); c.rect(WORD_X, WORD_Y - 12, WORD_W, WORD_H + 24); c.clip(); c.globalCompositeOperation = 'screen'; c.globalAlpha = gl; c.translate(WORD_X + IA.gX(T0), WORD_Y - 40); c.transform(1, 0, Math.tan(-14*DEG), 1, 0, 0); const gg = c.createLinearGradient(0, 0, 140, 0); gg.addColorStop(0, 'rgba(255,255,255,0)'); gg.addColorStop(.5, 'rgba(255,255,255,.85)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gg; c.fillRect(0, 0, 140, WORD_H + 100); c.restore(); }
+ const cut = IA.tagCut(T0), to = IA.tagOp(T0);
+ if (to > 0) { c.save(); c.globalAlpha = to; c.beginPath(); c.rect(TAG.x, TAG.y - TAG.h*.14, TAG.w*(1 - cut/100), TAG.h*1.28); c.clip(); c.drawImage(IMG.tagline, TAG.x, TAG.y, TAG.w, TAG.h); c.restore();
+  const co = to*IA.curA(T0)*IA.curB(T0); if (co > 0) { c.save(); c.globalAlpha = co; c.fillStyle = LIME; c.beginPath(); c.roundRect(TAG.x + TAG.w*(1 - cut/100) - 3, TAG.y - 8, 6, TAG.h + 16, 3); c.fill(); c.restore(); } }
+ const u = IA.u(T0), pS = u < 1 ? lerp(.7, .86, u) : IA.landS(T0), sq = Math.sin(Math.PI*clamp((T0 - ILAND)/.34, 0, 1))*.15;
+ c.save(); c.globalAlpha = IA.pOp(T0); c.translate(PC.x, PC.y - 520*(1 - u)); c.rotate(-14*DEG*(1 - u)); c.scale(pS*(1 + sq), pS*(1 - sq)); c.drawImage(IMG.p, -PSZ.w/2, -PSZ.h/2, PSZ.w, PSZ.h); c.restore();
+ c.restore();
+ // The address, after the app's own intro has finished.
+ const a = span(t, T.url, T.url + .4, easeOut);
+ text(c, 'pochtam.uz', CX, 1640 + 24*(1 - a), {size: 92, color: BLUE, alpha: a});
+ if (a > .6) { c.save(); c.strokeStyle = LIME; c.lineWidth = 14; c.lineCap = 'round'; const L = 470*span(t, T.url + .25, T.url + .7, easeOut); c.beginPath(); c.moveTo(CX - 235, 1676); c.lineTo(CX - 235 + L, 1676); c.stroke(); c.restore(); }
+ text(c, 'Orzu qiling — qolganini biz hal qilamiz', CX, 1790, {size: 36, weight: 600, color: '#4E4F6B', alpha: span(t, T.url + .6, T.url + 1.0, easeOut)});
+}
+
+// ------------------------------------------------------------------ the frame
+function shot(c, tau) {
+ const f = Math.round(tau*FPS), t = f/FPS;
+ if (t >= T.iris1) return endCard(c, t);
+ const [cx, cy, z] = camera(t), R = revealR(t);
+ const hexR = pathOf(HEX(PH[0], PH[1], R));
+ const pass = mode => { background(c, mode); cam(c, cx, cy, z); world(c, t, mode); };
+ if (R <= 0) pass('pencil');
+ else if (R >= 2600) pass('ink');
+ else {
+  pass('pencil');
+  c.save(); cam(c, cx, cy, z); c.clip(hexR); resetT(c); pass('ink'); c.restore();
+  cam(c, cx, cy, z); c.save(); c.strokeStyle = LIME; c.lineJoin = 'round'; c.lineWidth = 16*(1 - R/2600) + 3; c.stroke(hexR); c.restore();
+ }
+ captions(c, t);
+ // Iris: the box's hexagon grows into the brand card.
+ if (t >= T.iris0) {
+  const u = span(t, T.iris0, T.iris1, x => x*x*x), sx = (-40 - cx)*z + CX, sy = (DOOR_Y - 60 - cy)*z + CY;
+  resetT(c); c.fillStyle = '#ffffff'; c.fill(pathOf(HEX(sx, sy, 20 + 2400*u)));
+ }
+}
+
+// ------------------------------------------------------------------ score
+function score(ac, t0, dest) {
+ const m = ac.createGain(); m.gain.value = .9; m.connect(dest);
+ const B = 262, n = (o, s, t, d = .5, g = .07, type = 'sine') => note(ac, m, pentHz(o, s, B), t0, t, d, type, g);
+ [[1, 0], [1, 2], [1, 4], [2, 0], [1, 3], [1, 4]].forEach(([o, s], k) => n(o, s, .4 + k*.5, 1.2, .05));       // music box
+ n(2, 2, T.heart, .25, .06);
+ T.bubbles.forEach((b, k) => { n(0, [1, 3, 2, 4, 3][k], b, .3, .08, 'triangle'); n(0, [1, 3, 2, 4, 3][k] + 1, b + .06, .25, .05, 'triangle'); });
+ for (let t = 7.4, d = .5; t < T.drop - .05; t += d, d = Math.max(.12, d*.86)) noiseBurst(ac, m, t0, t, .03, .06, 3 + Math.round(t*10));   // ticking
+ note(ac, m, pentHz(-1, 0, B), t0, 6.0, 4.6, 'triangle', .04);
+ noiseBurst(ac, m, t0, T.drop, .3, .05, 41);
+ note(ac, m, pentHz(-1, 0, B), t0, T.land, .5, 'triangle', .25); noiseBurst(ac, m, t0, T.land, .08, .2, 42);
+ [[0, 0], [0, 2], [0, 4], [1, 0], [1, 2]].forEach(([o, s], k) => n(o, s, T.land + .05 + k*.03, 2.2, .045, k % 2 ? 'triangle' : 'sine'));
+ [[2, 0], [2, 2], [2, 4], [3, 0]].forEach(([o, s], k) => n(o, s, T.land + .3 + k*.08, .4, .03));
+ noiseBurst(ac, m, t0, T.press, .04, .1, 43); n(1, 0, T.pop0, .15, .07, 'triangle'); n(1, 3, T.pop0 + .1, .2, .07, 'triangle'); n(0, 2, T.pop1, .2, .1, 'triangle');
+ for (let t = T.go, k = 0; t < T.arrive; t += .5, k++) note(ac, m, pentHz(-1, [0, 0, 3, 2][k % 4], B), t0, t, .3, 'triangle', .09);   // the route pulse
+ T.stops.forEach((s, k) => { [[1, k % 5], [1, (k + 2) % 5], [2, k % 5]].forEach(([o, q], i) => n(o, q, s + i*.02, 1, .045)); noiseBurst(ac, m, t0, s, .05, .08, 60 + k); });
+ note(ac, m, pentHz(-1, 0, B), t0, T.arrive, .4, 'triangle', .22); noiseBurst(ac, m, t0, T.arrive, .1, .15, 70);
+ noiseBurst(ac, m, t0, T.open0, .25, .04, 71);
+ [[1, 0], [1, 2], [1, 4], [2, 0], [2, 2]].forEach(([o, s], k) => n(o, s, T.jump0 + k*.07, .9, .06));
+ [0, 1, 2, 3, 4, 5].forEach(k => n(3, k % 5, T.jump0 + .15 + k*.09, .2, .02));
+ noiseBurst(ac, m, t0, T.iris0 + .1, .35, .04, 72);
+ const I = T.iris1;
+ note(ac, m, pentHz(-1, 0, B), t0, I + ILAND, .5, 'triangle', .22); noiseBurst(ac, m, t0, I + ILAND, .06, .15, 73);
+ [[0, 0], [0, 4], [1, 2]].forEach(([o, s], k) => n(o, s, I + ILAND + .04 + k*.03, 2, .05));
+ GLYPHS.forEach((g, i) => n(2, i % 5, I + WORD_CUE + i*.05, .15, .025));
+ for (let k = 0; k < 6; k++) noiseBurst(ac, m, t0, I + WORD_CUE + .6 + k*.1, .015, .04, 80 + k);
+ [[0, 0], [0, 2], [0, 4], [1, 0], [1, 4], [2, 0]].forEach(([o, s], k) => n(o, s, T.url + k*.04, 2.8, .045, k % 2 ? 'triangle' : 'sine'));
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: PAPER}, format: {ar: '9:16', width: 1080}, fps: 24,
+ timeline: [{name: 'pochtam', dur: T.end, fn: shot}], score});
+}
+</script>

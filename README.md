@@ -33,6 +33,10 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/pochtam-reklama/`](films/pochtam-reklama/) — **Pochtam
+  (pochtam.uz) uchun reklama**. 33 soniyalik vertikal video: savollar
+  chalkashligi → Pochtam belgisi → bitta aniq yo'l → quti eshik oldida →
+  ilovaning brend introsi.
 - [`films/tosh-teshar/`](films/tosh-teshar/) — **"Tomchi tomib, tosh
   teshar"**. 38 soniyalik vertikal (9:16) motivatsion film: tomchilar toshni
   yoradi, tosh ostidagi urug' nurga yo'l topib, lola bo'lib ochiladi. Qalam
