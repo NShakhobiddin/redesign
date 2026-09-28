@@ -38,9 +38,9 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
   vertikal video: kitobdagi limon tajribasi tomoshabin bilan birga o'tkaziladi,
   oxirida muqova chiqadi.
 - [`films/pochtam-reklama/`](films/pochtam-reklama/) — **Pochtam
-  (pochtam.uz) uchun reklama**. 33 soniyalik vertikal video: savollar
-  chalkashligi → Pochtam belgisi → bitta aniq yo'l → quti eshik oldida →
-  ilovaning brend introsi.
+  (pochtam.uz) uchun reklama**. 54 soniyalik vertikal video, ilovaning
+  haqiqiy ekranlarida 5 qadam: do'konni topish → skrinshot yuklash → jami
+  narx → qo'llanma → buyurtma va kuzatish. Oxirida brend introsi.
 - [`films/tosh-teshar/`](films/tosh-teshar/) — **"Tomchi tomib, tosh
   teshar"**. 38 soniyalik vertikal (9:16) motivatsion film: tomchilar toshni
   yoradi, tosh ostidagi urug' nurga yo'l topib, lola bo'lib ochiladi. Qalam

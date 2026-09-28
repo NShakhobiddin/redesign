@@ -1,82 +1,73 @@
-# Pochtam — reklama-motivatsion video
+# Pochtam — 5 qadamda chet eldan xarid (reklama video, v2)
 
-[pochtam.uz](https://pochtam.uz) uchun 33 soniyalik vertikal (9:16) reklama.
-Instagram Reels, Telegram va TikTok uchun mos.
+[pochtam.uz](https://pochtam.uz) uchun 54 soniyalik vertikal (9:16)
+reklama-tushuntirish videosi. Instagram Reels, Telegram va TikTok uchun.
+Video ilovadan qanday foydalanishni xaridor bosadigan tartibda, **ilovaning
+haqiqiy ekranlarida** ko'rsatadi.
 
-![Pochtam reklamasi](out/pochtam-reklama-preview.gif)
+![Pochtam: 5 qadam](out/pochtam-reklama-preview.gif)
 
-## G'oya: "Orzuingiz — eshigingiz oldida"
+## Ketma-ketlik
 
-Chet eldan xarid qilishdagi eng katta to'siq — noaniqlik. Film shu
-noaniqlikni ko'rsatadi va Pochtam uni qanday bitta aniq yo'lga
-aylantirishini namoyish qiladi.
+| Vaqt | Sahna | Ekranda (haqiqiy ilova) | Nima ko'rsatiladi |
+| --- | --- | --- | --- |
+| 0–6 s | **Muammo** (qalam) | chizilgan do'kon sahifasi | *"Chet eldan xarid qilmoqchimisiz?"*; atrofda "Qaysi do'kon? Qaysi kuryer? Boj qancha? Jami necha pul? Qachon keladi?" pufakchalari va chalkash chiziq |
+| 6–8.9 s | **Pochtam** | — | Yashil p ilova introsidagidek tushadi, dunyo brend ranglariga kiradi: *"Pochtam bilan — 5 qadam"*, 5 nuqta paydo bo'ladi |
+| 8.9 s | **1. Do'konni toping** | Do'konlar → Pochtam AI | Turlar bo'yicha 43 do'kon; "erkaklar krossovkasi 42" deb yozilganda AI Taobao, Poizon va Amazon'ni tavsiya qiladi |
+| 15.2 s | **2. Skrinshot yuklang** | do'kon sahifasi → Boshlash → skaner | Narx halqaga olinadi, "chik" — skrinshot olinadi. Keyin "Topdim — qanchaga tushadi?" bosiladi va "AI narxni o'qiyapti…" |
+| 21.5 s | **3. Jami narxni biling** | Jami narx | "Sizga jami tushadi $102.20 · 1 292 890 so'm", keyin narx tarkibi: tovar, kargo, boj va yig'im (me'yor ichida — 0) |
+| 27.8 s | **4. Qo'llanmani oching** | "Qanday buyurtma qilaman?" → Taobao qo'llanmasi | Qo'llanmaning 11 qadami ekran ostida birin-ketin o'tadi: kuryer va ID → ro'yxatdan o'tish → … → qabul qilish |
+| 34.1 s | **5. Buyurtma bering** | Kuryer siz uchun sotib oladi → Xaridlarim | "Yozish" bosilganda kuryerga tayyor xabar ketadi. Xaridlarim'da "Buyurtma qildim" bosiladi, holat "Yo'lda"ga o'tadi |
+| 40.4 s | **Ilovada yana** | Ma'lumotnoma | Do'konlar, Kuryerlar, Bojxona, Qo'llanmalar, Pochtam AI, Mutaxassis yordami, Sozlamalar; *O'zbekcha · Ўзбекча · Русский* |
+| 43.6 s | **Natija** | — | Quti eshik oldiga tushadi, ochiladi: *"Orzuingiz — eshigingiz oldida."* |
+| 47.4 s | **Brend** | — | Ilovaning haqiqiy logotip introsi, **pochtam.uz**, *"Orzu qiling — qolganini biz hal qilamiz"* |
 
-| Vaqt | Sahna | Ekranda |
-| --- | --- | --- |
-| 0–5 s | **Orzu.** Qalamda chizilgan telefon, chet el do'konida orzu krossovkasi o'zini chizadi, yurakcha paydo bo'ladi | *"Orzuingizdagi narsa dunyoning narigi chekkasidami?"* |
-| 5–10.5 s | **Savollar.** Atrofda savol pufakchalari chiqadi, ular orasida chalkash chiziq o'sadi, hammasi xavotirdan titraydi | *Qaysi do'kon? Qaysi kuryer? Boj qancha? Jami necha pul? Qachon keladi?* |
-| 10.6–12.5 s | **Pochtam.** Yashil **p** ilova introsidagidek tushib, ko'k olti burchakka o'tiradi. Olti burchak kengayib, dunyoni brend ranglariga bo'yaydi. Chalkash chiziq bitta to'g'ri yo'lga aylanadi, telefon Pochtam ilovasiga o'zgaradi | *"Endi hammasi aniq."* |
-| 12.5–22.5 s | **Yo'l.** "Buyurtma" bosiladi, Pochtam qutisi yo'lga tushadi. Yo'lda 5 bekat bor, har birida belgi yashilga aylanadi | *43 ta do'kon · 20 ta kuryer · Boj va jami narx · Qo'llanma va AI · Kuzatib boring* |
-| 22.5–26.8 s | **Eshikda.** Quti eshik oldiga tushadi, ochiladi, krossovka yulduzchalar bilan chiqadi | *"Orzuingiz — eshigingiz oldida."* |
-| 26.8–33 s | **Brend.** Qutidagi olti burchak butun ekranni egallaydi, ilovaning haqiqiy introsi o'ynaydi | *Pochtam. Global xaridlar biz bilan oson · pochtam.uz · "Orzu qiling — qolganini biz hal qilamiz"* |
+Tepada 5 nuqtali chiziq tomoshabinga qaysi qadamda turganini doim ko'rsatib
+turadi. Muhim tugma va raqamlar qo'lda chizilgan salat rangli halqa bilan
+belgilanadi, bosish joyi to'lqin bilan ko'rsatiladi, izohlar yorliqlarda.
 
-Raqamlar saytdan olingan: 43 do'kon, 20 kuryer, bojxona va jami narx
-kalkulyatori, 7 qo'llanma, Pochtam AI, jo'natmalarni kuzatish.
+## Haqiqiy ekranlar qanday olindi
 
-## Uslub
+[`tools/capture-screens.mjs`](tools/capture-screens.mjs) Pochtachi
+repozitoriyasidagi ilovani lokal serverda ochadi va oqimni bosib chiqadi:
+do'konlar, AI so'rovi, skrinshot yuklash, natija, qo'llanma va Xaridlarim.
 
-- **Qalam → siyoh va brend rangi.** Shubha qalamda, iliq qog'ozda chizilgan.
-  Aniqlik siyoh chiziq va tekis brend ranglarida: ko'k `#1A1FB0`,
-  to'q ko'k `#131429`, salat `#bbef45`, fon `#F1F1F8`. O'tishning sababi
-  bor: uni brend belgisi boshlaydi. Telefon, krossovka va chiziq o'tish
-  chegarasidan uzilmay o'tadi.
-- **Brend aniqligi.** Logotip bo'laklari (olti burchak, yashil p, harflar,
-  shior) va Onest shrifti ilova repozitoriyasidan olingan
-  ([`NShakhobiddin/Pochtachi`](https://github.com/NShakhobiddin/Pochtachi)).
-  Yakundagi intro ilovadagi xoreografiyaning aynan ko'chirmasi: vaqtlar,
-  easing'lar va o'lchamlar o'zgarmagan.
-- **Animatsiya.** Tushish, sakrash, quti va kamera birtadan (24 fps).
-  Qalam chizilishi, titrash va yulduzchalar ikkitadan. Oxirgi pauza
-  qimirlamaydi, faqat krossovka yengil tebranadi.
-- **Ovoz sintezlangan:** musiqa qutisi, pufakchalar va soat chiqillashi,
-  tushish va akkord, yo'l ritmi va har bekatda qo'ng'iroq, intro ohangi.
+- **Oflayn ishlaydi.** Tashqariga ketadigan barcha so'rovlar bloklanadi
+  (o'lchov beacon'i ham). AI javoblari va valyuta kursi ilovaning o'z smoke
+  testidagi soxta javoblardan olinadi. Pochtam serveriga hech narsa
+  yuborilmadi, AI byudjeti sarflanmadi.
+- Summalar ($102.20, 1 292 890 so'm, kargo $4.40) ilovaning o'z
+  formulalari bilan hisoblangan. Kurs 1 USD = 12 650 so'm — test qiymati,
+  haqiqiy kurs boshqacha bo'lishi mumkin.
+- Suratga olinayotgan do'kon sahifasi
+  ([`tools/demo-store-page.html`](tools/demo-store-page.html)) umumiy
+  maket. U hech qaysi do'konning dizaynini takrorlamaydi.
+- Ekranlar [`app-screens.js`](app-screens.js) ichida WebP data-URL
+  ko'rinishida saqlangan. Muhim elementlarning koordinatalari ham shu yerda.
 
 ## Fayllar
 
-- [`pochtam-reklama.html`](pochtam-reklama.html) — film manbasi: brief, beat
-  sheet, chizmalar, kamera, intro va ovoz
-- [`brand-assets.js`](brand-assets.js) — logotip bo'laklari va Onest shrifti,
-  data-URL ko'rinishida (canvas "ifloslanmasligi" va oflayn render uchun)
+- [`pochtam-reklama.html`](pochtam-reklama.html) — film manbasi: brief,
+  vaqtlar (`T`), qadamlar (`STEPS`), izohlar (`stepAnnos`), ovoz
+- [`brand-assets.js`](brand-assets.js) — logotip bo'laklari va Onest
+  shrifti (lotin va kirill)
 - [`out/pochtam-reklama-final.mp4`](out/pochtam-reklama-final.mp4) — ovozli video;
-  [`out/pochtam-reklama-poster.jpg`](out/pochtam-reklama-poster.jpg) — muqova;
-  [`out/pochtam-reklama-contact.jpg`](out/pochtam-reklama-contact.jpg) — kontakt varag'i
-- Dvigatel: `core.js`, `studio.js`, `cels.js`, `materials.js`, `render.mjs` —
-  [`hand-drawn-canvas-animation`](../../.claude/skills/hand-drawn-canvas-animation/)
-  skill'idan o'zgartirilmasdan nusxa olingan (MIT)
-
-## Render qilish
+  [`out/pochtam-reklama-poster.jpg`](out/pochtam-reklama-poster.jpg);
+  [`out/pochtam-reklama-contact.jpg`](out/pochtam-reklama-contact.jpg)
 
 ```bash
 cd films/pochtam-reklama
 npm i --no-audit --no-fund
-node render.mjs pochtam-reklama.html --grid 36 --out out       # tezkor ko'rik
-node render.mjs pochtam-reklama.html --strip 252,36 --out out  # p tushishi
-node render.mjs pochtam-reklama.html --out out                 # to'liq MP4 + ovoz (~1 daqiqa)
+node render.mjs pochtam-reklama.html --grid 48 --out out   # tezkor ko'rik
+node render.mjs pochtam-reklama.html --out out             # to'liq MP4 + ovoz (~2 daqiqa)
 ```
-
-Matnlar, raqamlar va vaqtlar `pochtam-reklama.html` ichida joylashgan:
-`T` (vaqtlar), `STOPS` (bekatlar), `BUBBLES` (savollar) va `captions()`.
 
 ## Tekshiruv va cheklovlar
 
-- MP4 xatosiz ochiladi: 792 kadr, 33,0 s, 1080×1920. Ovoz balandligi eng
-  yuqori nuqtada -9,4 dB. Oxirgi pauzadagi kadrlar aynan bir xil.
-- Harakat ketma-ket kadrlar lentasi va alohida kadrlar orqali tekshirildi.
-  Bu muhitda videoni odatiy tezlikda tomosha qilish va ovozni eshitish
-  imkoni bo'lmadi.
-- Krossovka va do'kon sahifasi umumiy tarzda chizilgan, hech qaysi brendga
-  o'xshatilmagan. Uchinchi tomon do'kon va kuryer logotiplari ataylab
-  ishlatilmagan.
-- `$89` va `$101` misol sifatida olingan summalar, real narx emas.
-- Brend assetlari Pochtam'ga tegishli. Onest shrifti SIL Open Font License
-  1.1 ostida.
+- MP4 xatosiz ochiladi: 1291 kadr, 53,8 s, 1080×1920. Ovoz balandligi eng
+  yuqori nuqtada -9,4 dB. Oxirgi pauzadagi kadrlar bir xil.
+- Kadrlar va kontakt varag'i tekshirildi. Bu muhitda videoni odatiy
+  tezlikda tomosha qilish va ovozni eshitish imkoni bo'lmadi.
+- Ilova yangilansa, ekranlarni `tools/capture-screens.mjs` bilan qayta olish
+  kerak. Qolgan kod o'zgarmaydi.
+- Oldingi versiya (33 s, 5 bekatli yo'l) git tarixida saqlangan.
