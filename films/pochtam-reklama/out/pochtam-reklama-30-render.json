@@ -1,0 +1,17 @@
+{
+  "file": "/home/user/redesign/films/pochtam-reklama/pochtam-reklama-30.html",
+  "fps": 24,
+  "frames": 720,
+  "outputFps": 24,
+  "outputFrames": 720,
+  "duration": 30,
+  "size": {
+    "w": 1080,
+    "h": 1920,
+    "W": 1080,
+    "H": 1920,
+    "S": 1
+  },
+  "look": null,
+  "audio": true
+}

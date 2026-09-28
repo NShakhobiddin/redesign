@@ -26,6 +26,27 @@ Tepada 5 nuqtali chiziq tomoshabinga qaysi qadamda turganini doim ko'rsatib
 turadi. Muhim tugma va raqamlar qo'lda chizilgan salat rangli halqa bilan
 belgilanadi, bosish joyi to'lqin bilan ko'rsatiladi, izohlar yorliqlarda.
 
+## 30 soniyalik qisqa versiya
+
+[`pochtam-reklama-30.html`](pochtam-reklama-30.html) →
+[`out/pochtam-reklama-30-final.mp4`](out/pochtam-reklama-30-final.mp4)
+(720 kadr, 30,0 s, 1080×1920, ovozli). Chizmalar, ekranlar va brend introsi
+uzun versiya bilan bir xil, faqat sur'at tezroq:
+
+| Vaqt | Sahna |
+| --- | --- |
+| 0–4.8 s | Muammo va savollar → p tushadi → *"Pochtam bilan — 5 qadam"* |
+| 4.8 / 8.5 / 12.2 / 15.9 / 19.6 s | 5 qadam, har biri 3,7 s: do'kon → skrinshot → jami narx → qo'llanma → buyurtma ("Yo'lda!") |
+| 23.3 s | Quti eshik oldida: *"Orzuingiz — eshigingiz oldida."* |
+| 26.3–30 s | Brend introsi va **pochtam.uz** |
+
+Qisqa versiyada "Ilovada yana" kadri va qo'llanmaning muqova ekrani yo'q.
+Beshinchi qadamda Xaridlarim darhol "Yo'lda" holatiga o'tadi.
+
+```bash
+node render.mjs pochtam-reklama-30.html --out out
+```
+
 ## Haqiqiy ekranlar qanday olindi
 
 [`tools/capture-screens.mjs`](tools/capture-screens.mjs) Pochtachi
