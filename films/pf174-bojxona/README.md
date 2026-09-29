@@ -62,6 +62,20 @@ Har bir sahnaning oxirgi holati: `out/qism-N-scenes.jpg` (masalan,
 - Har bir qism oxirida: *"Video farmon mazmunini soddalashtirib tushuntiradi,
   huquqiy maslahat emas. Rasmiy matn: lex.uz."*
 
+## Diktor ovozi uchun matn
+
+[`diktor-matni.md`](diktor-matni.md) — 50 sahnaning har biri uchun o'qiladigan
+matn (jami 1227 so'z, daqiqasiga ~114 so'z sur'atida taxminan 10:45). Har bir
+sahnada ovoz qo'yiladigan vaqt oralig'i (qism ichida va 13:54 lik to'liq
+videoda), so'z soni va shu oraliqqa sig'ishi ko'rsatilgan. Matn mavjud
+sahnalarga moslab yozilgan, videoni qayta montaj qilish shart emas.
+
+Raqamlar so'z bilan yozilgan, talaffuz jadvali va yozib olish talablari
+(har sahna alohida fayl, `qism-1-03.wav`) shu faylning boshida.
+
+Matnning o'zi [`diktor-vo.mjs`](diktor-vo.mjs) faylida. Uni o'zgartirgach,
+`node tools/diktor.mjs` vaqtlar va sig'ish tekshiruvini yangilaydi.
+
 ## Fayllar
 
 - [`series.js`](series.js) — dvigatel: ranglar, qo'lda chizilgan ikonkalar,
@@ -78,6 +92,9 @@ Har bir sahnaning oxirgi holati: `out/qism-N-scenes.jpg` (masalan,
   joylashuvi (xavfsiz hududdan chiqib ketgan karta bo'lsa, ogohlantiradi)
 - [`tools/shots.mjs`](tools/shots.mjs) — tanlangan lahzalar yoki har bir
   sahna oxiridan ko'rik varag'i
+- [`diktor-vo.mjs`](diktor-vo.mjs), [`tools/diktor.mjs`](tools/diktor.mjs) —
+  diktor matni va undan [`diktor-matni.md`](diktor-matni.md) ni yig'uvchi
+  skript
 
 ```bash
 cd films/pf174-bojxona

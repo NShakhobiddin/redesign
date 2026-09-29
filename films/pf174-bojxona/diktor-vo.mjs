@@ -1,0 +1,68 @@
+// Voice-over script for the PF-174 series: one entry per scene, in film order
+// (cover, the part's scenes, the closing card). Numbers are written as spoken
+// so the word count matches what the narrator says. Plain apostrophes become
+// Uzbek ʻ/ʼ in the generated script. tools/diktor.mjs builds diktor-matni.md.
+export const VO = {
+1: [
+  "Bojxona islohoti — sodda tilda. Birinchi qism: farmon nima haqida?",
+  "Prezidentning ikki ming yigirma oltinchi yil yigirma yettinchi avgustdagi farmoni bojxona xizmatini isloh qilishga bag'ishlangan. U yetti bo'lim, yigirma bir band va uchta ilovadan iborat.",
+  "Asosiy g'oya — zamonaviy axborot texnologiyalari yordamida bojxonani «Intellektual bojxona»ga aylantirish. Maqsad — ochiq, shaffof, ishonchli va korrupsiyadan xoli tizim.",
+  "Ikki ming o'ttizinchi yilgacha maqsadlar: inson omilisiz rasmiylashtiruv — oltmish foiz; bojxona tushumlari — yalpi ichki mahsulotning to'rt butun o'ndan to'rt foizi; rasmiylashtiruv vaqti — ikki barobar kam. Tadbirkorlarning bojxonaga ishonchi ham mustahkamlanadi.",
+  "Strategiyaga ko'ra, o'rtacha rasmiylashtiruv vaqti importda ikki soatga, eksportda esa o'ttiz daqiqaga tushishi kerak.",
+  "Farmon bilan «Yangi O'zbekiston bojxonasi — ikki ming o'ttiz» strategiyasi tasdiqlandi. Uning beshta yo'nalishi: tadbirkor va fuqarolarga qulaylik, sun'iy intellekt bilan raqamlashtirish, bojxona ma'murchiligi, kadrlar va komplayens hamda xalqaro hamkorlik.",
+  "Hozir deklaratsiyalarning yetmish to'qqiz foizi soddalashtirilgan «sariq» va «yashil» yo'lakdan o'tadi. O'n foizi inson omilisiz, avtomatik rasmiylashtiriladi. O'n bir foizi esa «qizil» yo'lakda to'liq tekshiriladi.",
+  "Ikki ming yigirma beshinchi yilda bojxona tushumi yetmish olti trillion so'mdan oshdi, o'sish — yigirma bir foiz. Jahon banki indeksida O'zbekiston bojxona samaradorligi bo'yicha bir yuz qirqinchi o'rindan yetmish to'rtinchi o'ringa ko'tarildi. Rasmiylashtiruv vaqti uch baravar qisqardi.",
+  "Lekin muammolar ham bor: axborot tizimlari ko'p, ammo o'zaro yaxshi bog'lanmagan; ayrim postlar infratuzilmasi talabga javob bermaydi; chegarada jismoniy tekshiruvlar ko'p va yuk to'xtab qoladi; import haqida oldindan keladigan ma'lumotlar sifati past. Strategiya shu muammolarni hal qilishni ko'zlaydi.",
+  "Keyingi qismda — tadbirkorlar uchun yengilliklar: nimalar bekor qilindi va nimalar arzonlashadi. Rasmiy matn — lex.uz saytida.",
+],
+2: [
+  "Ikkinchi qism: tadbirkorlarga yengilliklar.",
+  "Ikki ming yigirma oltinchi yil birinchi sentabrdan tashqi savdoda beshta talab bekor qilinadi. Keling, ularni birma-bir ko'raylik.",
+  "Birinchi: shartnomasiz, invoys asosida importda xorijiy hamkorga oldindan to'lov o'tkazish cheklovi. Ikkinchi: xuddi shunday eksportda oldindan ellik foiz tushum ta'minlash talabi. Ikkalasi ham bekor.",
+  "Uchinchi: so'mda eksport qilishda oldindan to'lov yoki akkreditiv, bank kafolati, sug'urta polisi talab qilinmaydi.",
+  "To'rtinchi: oziq-ovqat namunasi sinovga yetmasa, sanitariya-epidemiologik xulosa talab qilinmaydi — vakolatli organ bu haqda xat beradi. Beshinchi: kimyoviy moddalar, oziq-ovqat qo'shimchalari, polimer va kosmetika uchun ruxsatnoma, dori va tibbiy jihozlar uchun guvohnoma endi bojxonada so'ralmaydi. Ular muvofiqlikni baholashda tekshiriladi.",
+  "Birinchi oktabrdan importda to'langan qo'shilgan qiymat solig'ini o'zaro hisobga olish mumkin bo'ladi. Bu imkoniyat soliq organlarida xavf darajasi past va QQS guvohnomasi faol bo'lgan tashqi savdo ishtirokchilari uchun.",
+  "Eksportda esa bojxona rasmiylashtiruvi, fitosanitariya sertifikati, fumigatsiya va kelib chiqish sertifikati uchun yig'imlar o'ttiz foizga kamayadi. Sabab — nazorat raqamlashtiriladi.",
+  "Keyingi qadamlar. Ikki ming yigirma sakkizinchi yilgacha bojxonaning barcha xizmat va to'lovlari bitta mobil ilovaga jamlanadi. Bojxona to'lovlarida bank foizlarini bekor qilish bo'yicha qonun loyihasi tayyorlanadi. Tadbirkorlar postlar va xodimlarga baho bera oladi. Dastur ishtirokchilari esa to'lovni bir yuz yigirma kungacha bo'lib to'lay oladi.",
+  "Keyingi qismda — ikki ming yigirma yettinchi yildan bojxona qiymati va hujjatlar bilan bog'liq o'zgarishlar. Rasmiy matn — lex.uz saytida.",
+],
+3: [
+  "Uchinchi qism: bojxona qiymati va hujjatlar.",
+  "Ikki ming yigirma yettinchi yil birinchi yanvardan bojxona qiymati nazorati soddalashadi. Xavfi past ishtirokchilarda qiymat tovar chiqarilgandan keyin tekshiriladi. Qat'iy bojxona qiymati belgilash taqiqlanadi. Qiymat bo'yicha dastlabki qaror olish mumkin bo'ladi. Rasmiy diller narxlari ham hisobga olinadi.",
+  "Birinchi apreldan import bilan shug'ullanuvchi tadbirkorlarda sayyor soliq va bojxona tekshiruvlari birgalikda o'tkaziladi.",
+  "Birinchi iyundan kelib chiqish sertifikati bo'yicha ham yengilliklar bor. Tovar xususiyatiga ta'sir qilmaydigan kichik tafovutlar sertifikatni rad etishga asos bo'lmaydi. To'g'ri sertifikat bir yil ichida berilsa, imtiyozli rejim tiklanadi. Tovar chiqarilgandan keyin xato topilsa, uch yil ichida tarif preferensiyasini tiklash mumkin.",
+  "Ortiqcha to'langan bojxona to'lovlarini qaytarish markazlashgan va elektron bo'ladi. Reeksportda talablar bajarilsa, ilgari to'langan boj va soliqlar qaytariladi. Eksportda ekologik sertifikat ixtiyoriy bo'ladi. Vakolatli iqtisodiy operatorlarga esa eksport bo'yicha muddati o'tgan debitor qarzdorlik uchun jarima qo'llanmaydi.",
+  "Dastlabki deklaratsiya ham o'zgaradi. U sertifikat va ruxsatnomalar uchun ariza sifatida qabul qilinadi. Xavfi past tovarlarga hujjatlar oldindan beriladi, yakuniy deklaratsiyada ularni qayta ko'rsatish shart emas. Tovar chegaraga yetganda tezroq chiqariladi. Tranzit deklaratsiyasi ham chegaraga yetib kelishdan oldin topshiriladi.",
+  "Keyingi qismda — fuqarolar uchun: yagona bojxona to'lovi, yig'imlar va imtiyozlar. Rasmiy matn — lex.uz saytida.",
+],
+4: [
+  "To'rtinchi qism: fuqarolar va bojxona to'lovlari.",
+  "Ikki ming yigirma yettinchi yil birinchi yanvardan yagona bojxona to'lovi stavkasi — tovar bojxona qiymatining yigirma foizi. Lekin har bir kilogramm uchun kamida ikki AQSH dollari.",
+  "Misol. Qiymati uch yuz dollar, og'irligi besh kilogramm bo'lsa: yigirma foiz — oltmish dollar, kilogramm hisobida — o'n dollar. Kattasi, oltmish dollar olinadi. Qiymati qirq dollar, og'irligi sakkiz kilogramm bo'lsa, o'n olti dollar to'lanadi.",
+  "Birinchi iyundan: fuqaro notijorat maqsadda olib o'tadigan tovar uchun yagona bojxona to'lovi yig'imlardan kam bo'lsa, bu yig'imlar undirilmaydi. Ya'ni kichik to'lov ustiga qo'shimcha yig'im qo'shilmaydi.",
+  "Amaldagi bojdan ozod qilish va nol stavka imtiyozlari muddati tugaguncha saqlanadi. Muddatsiz berilgan boj imtiyozlari esa ikki ming yigirma to'qqizinchi yil birinchi yanvargacha amal qiladi. Qonun loyihasi uch oyda kiritiladi.",
+  "Yo'lovchilar uchun ham rejalar bor. Naqd valyutani olib chiqish me'yorini o'n ming dollar qilish bo'yicha qonun loyihasi tayyorlanadi: undan oshsagina deklaratsiya qilinadi. Chegara postlarida sun'iy intellektli robotlar maslahat beradi. Bojxona jarimasini esa «Customs fine» ilovasida ko'rib, imtiyozli muddatda to'lash mumkin bo'ladi.",
+  "Keyingi qismda — inson omilisiz bojxona: avtomatik rasmiylashtiruv va «AI-tahlil». Rasmiy matn — lex.uz saytida.",
+],
+5: [
+  "Beshinchi qism: inson omilisiz bojxona.",
+  "Hozir deklaratsiyalarning o'n foizi inson omilisiz, avtomatik rasmiylashtiriladi. Ikki ming o'ttizinchi yilga qadar bu ko'rsatkichni oltmish foizga yetkazish ko'zlangan. Ya'ni olti barobar ko'p.",
+  "Ikki ming yigirma yettinchi yildan xavfi past tadbirkorlar uchun deklaratsiya avtomatik rasmiylashadi, agar to'rt shart birga bajarilsa: tovar bir shartnoma bo'yicha bir necha bor kelgan; qo'shimcha to'lov bazaviy hisoblash miqdorining o'n baravarigacha; g'azna hisobida yetarli mablag' bor; va deklarant qo'shimcha to'lov avtomatik undirilishiga rozi.",
+  "Erkin savdo hamkori davlatlarda ishlab chiqarilgan tovarlar ham avtomatik o'tadi — agar ma'lumotlar mos kelsa va eksportyor davlat deklaratsiyasi rekvizitlari ko'rsatilsa. Deklarant rozi bo'lsa, xodim aralashuvisiz rasmiylashtiriladi, lekin bosh ta'minot majburiy.",
+  "Ikki ming yigirma sakkizinchi yildan «AI-tahlil» ishga tushadi. Tizim tafovut topsa, tadbirkorga avtomatik xabar yuboradi, u esa uni tekshiruvgacha o'z ixtiyori bilan bartaraf etadi.",
+  "Qayta ishlash rejimida: muddat tugab, tovar o'ttiz kun ichida olib chiqilmasa, to'lovlar so'zsiz undiriladi. Tovar amalda qayta ishlanmasa yoki faqat qadoqlash kabi sodda ishlar bajarilsa, har bir kun uchun Markaziy bank asosiy stavkasi bo'yicha foiz olinadi.",
+  "Strategiyada boshqa raqamli vositalar ham bor: hujjatlarni avtomatik o'qiydigan OCR, sun'iy intellekt bilan qiymat nazorati, raqamlarni o'qiydigan «Smart CCTV» kameralari, GPS elektron plombalar va transport turini o'lchamidan aniqlash.",
+  "Oxirgi, oltinchi qismda — raqamli markaz, chegara infratuzilmasi va farmon ijrosini kim nazorat qilishi. Rasmiy matn — lex.uz saytida.",
+],
+6: [
+  "Oltinchi qism: raqamli markaz, chegara va ijro.",
+  "Bojxona qo'mitasining axborot texnologiyalari boshqarmasi negizida alohida yuridik shaxs — Raqamli texnologiyalar markazi tuziladi. U sun'iy intellekt, kiberxavfsizlik va axborot tizimlari bilan shug'ullanadi, xorijiy bojxonalarga IT xizmat va dasturlar eksport qila oladi.",
+  "Markaz budjet, Bojxona qo'mitasining budjetdan tashqari mablag'lari va xalqaro grantlar hisobidan moliyalashtiriladi. Unga xorijiy avtotransport kirish va tranzit yig'imining o'n foizi hamda bojxona hamrohligi yig'imlarining yuz foizi ham yo'naltiriladi.",
+  "«Bojxona-servis» davlat muassasasi xorijiy investitsiya bilan mas'uliyati cheklangan jamiyatga aylantiriladi. Hukumat ikki oyda uning faoliyati va «Safe Customs» yagona raqamli ekotizimi bo'yicha hujjat qabul qiladi.",
+  "Ikki ming yigirma oltinchi — yigirma sakkizinchi yillarda chegara postlari yonida avtoturargoh va terminallar quriladi: Andijondagi «Xonobod», Surxondaryodagi «Ayritom» va Toshkent viloyatidagi «S. Najimov» postlari yonida. Hokimliklar uch oyda yer ajratadi.",
+  "Strategiya uchun besh yilga bir butun o'ndan yetti trillion so'm kapital qo'yilma baholangan. Asosiy qismi — Bojxona qo'mitasining budjetdan tashqari jamg'armalaridan. Bu dastlabki hisob.",
+  "Ijroni kim nazorat qiladi? Bir oyda monitoring guruhi tuziladi, vazirliklar har oy ma'lumot beradi. Uch oyda qonunchilikka takliflar kiritiladi. Strategiya uchun Bojxona qo'mitasi raisi shaxsan mas'ul, umumiy nazorat — Bosh vazir o'rinbosari zimmasida.",
+  "Xulosa: ikki ming o'ttizinchi yilga borib rasmiylashtiruvning oltmish foizi inson omilisiz, importda o'rtacha ikki soat, eksportda o'ttiz daqiqa. Maqsad — ochiq, shaffof, korrupsiyadan xoli va raqamli bojxona.",
+  "Seriya shu yerda yakunlandi. Farmonning to'liq va rasmiy matni — lex.uz saytida. E'tiboringiz uchun rahmat!",
+],
+};
