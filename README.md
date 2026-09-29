@@ -33,6 +33,12 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/pf174-bojxona/`](films/pf174-bojxona/) — **"Bojxona islohoti:
+  PF-174 sodda tilda"**. Prezidentning 2026-yil 27-avgustdagi PF-174-son
+  bojxona farmoni bo'yicha 6 qismli vertikal tushuntirish seriyasi (jami
+  ~14 daqiqa) va hammasi ulangan bitta uzun video: maqsadlar va strategiya,
+  tadbirkorlarga yengilliklar, bojxona qiymati va hujjatlar, fuqarolar va
+  to'lovlar, inson omilisiz bojxona, raqamli markaz va ijro nazorati.
 - [`films/kitob-reklama/`](films/kitob-reklama/) — **"Ishonmang, lekin
   bajarib ko‘ring!"** kitobi reklamasi (Dilshod Mannopov). 36 soniyalik
   vertikal video: kitobdagi limon tajribasi tomoshabin bilan birga o'tkaziladi,
