@@ -12,7 +12,7 @@ const out = path.resolve(outDir); mkdirSync(out, {recursive: true});
 const tmp = path.join(out, `.shots-${n}`); rmSync(tmp, {recursive: true, force: true}); mkdirSync(tmp);
 const browser = await puppeteer.launch({executablePath: process.env.CHROME || '/usr/local/bin/chromium', headless: true});
 const page = await browser.newPage();
-const url = pathToFileURL(path.join(dir, `qism-${n}.html`)); url.searchParams.set('bare', '1');
+const url = pathToFileURL(path.join(dir, String(n).endsWith('.html') ? n : `qism-${n}.html`)); url.searchParams.set('bare', '1');
 await page.goto(url.href, {waitUntil: 'load'});
 await page.waitForFunction('window.__ready === true || window.__error', {timeout: 60000});
 const scenes = await page.evaluate(() => window.__pfScenes), N = await page.evaluate(() => window.__NDRAW);

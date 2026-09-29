@@ -35,8 +35,8 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 - [`films/pf174-bojxona/`](films/pf174-bojxona/) — **"Bojxona islohoti:
   PF-174 sodda tilda"**. Prezidentning 2026-yil 27-avgustdagi PF-174-son
-  bojxona farmoni bo'yicha 6 qismli vertikal tushuntirish seriyasi (jami
-  ~14 daqiqa) va hammasi ulangan bitta uzun video: maqsadlar va strategiya,
+  bojxona farmoni bo'yicha 6 qismli vertikal tushuntirish seriyasi va
+  12:51 lik bitta yaxlit film: maqsadlar va strategiya,
   tadbirkorlarga yengilliklar, bojxona qiymati va hujjatlar, fuqarolar va
   to'lovlar, inson omilisiz bojxona, raqamli markaz va ijro nazorati.
   Burchakda **shopo** logotipi, sintez qilingan fon musiqasi va effektlar,

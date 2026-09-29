@@ -545,8 +545,9 @@ function coverScene(P) {
   };
   return sc;
 }
-function outroScene(P) {
+function outroScene(P, full = false) {
   const last = P.n === PARTS.length;
+  if (full) return {eyebrow: 'Yakun', title: 'Rahmat!', blocks: [{t: 'text', s: "Videoda ko'rib chiqilgan mavzular:", size: 36, color: MUTED}, {t: 'series', cur: P.n, gap: 20}, {t: 'note', s: DISCLAIMER}], hold: 3.6, outro: true};
   return last ? {eyebrow: 'Seriya yakuni', title: 'Rahmat!', blocks: [{t: 'text', s: "Seriyaning barcha qismlari:", size: 36, color: MUTED}, {t: 'series', cur: P.n, gap: 20}, {t: 'note', s: DISCLAIMER}], hold: 3.2, outro: true}
     : {eyebrow: 'Seriya davom etadi', title: 'Keyingi qism', blocks: [{t: 'next', n: P.n + 1}, {t: 'series', cur: P.n}, {t: 'note', s: DISCLAIMER}], hold: 2.4, outro: true};
 }
@@ -573,10 +574,10 @@ function footer(c) { label(c, 'Manba: Prezident Farmoni PF-174, 27.08.2026', XC,
 
 // ---------------------------------------------------------------- sound
 // Every sound cue comes from the same timings as the pictures (sound.js).
-function soundEvents(P, scenes) {
+function soundEvents(scenes) {
   const ev = [];
   for (const sc of scenes) {
-    if (sc.cover) { ev.push({t: sc.start + .25, kind: 'sting'}); if (P.icon === 'gate') ev.push({t: sc.start + 2.55, kind: 'gate'}); continue; }
+    if (sc.cover) { ev.push({t: sc.start + .25, kind: 'sting'}); if (sc.P.icon === 'gate') ev.push({t: sc.start + 2.55, kind: 'gate'}); continue; }
     ev.push({t: sc.start + .05, kind: 'sweep'});
     for (const it of sc.L.items) for (const [dt, kind] of it.sfx ?? [[0, 'tick']]) ev.push({t: sc.start + it.t0 + dt, kind});
   }
@@ -585,23 +586,33 @@ function soundEvents(P, scenes) {
 
 // ---------------------------------------------------------------- film
 let PARTS = [];
+// film(n): one part (cover, its scenes, a "next part" card).
+// film('all'): the whole series as one film — the part covers become chapter
+// cards, the in-between "next part" cards go, the music runs through.
 function film(n) {
-  PARTS = PF_PARTS; const P = PARTS[n - 1];
-  const scenes = [coverScene(P), ...P.scenes, outroScene(P)];
+  PARTS = PF_PARTS;
+  const full = n === 'all', list = full ? PARTS : [PARTS[n - 1]], scenes = [];
+  for (const P of list) {
+    const tag = (sc, i) => Object.assign(sc, {P, vo: `${P.n}-${String(i + 1).padStart(2, '0')}`});   // vo: the scene's line in diktor-vo.mjs
+    scenes.push(tag(coverScene(P), 0));
+    P.scenes.forEach((sc, i) => scenes.push(tag(sc, i + 1)));
+    if (!full || P.n === PARTS.length) scenes.push(tag(outroScene(P, full), P.scenes.length + 1));
+  }
   let t = 0;
-  scenes.forEach((sc, i) => { sc.key = sc.key ?? `p${n}s${i}`; sc.idx = i; if (!sc.cover) timeScene(sc); sc.start = t; t += sc.dur; });
+  scenes.forEach((sc, i) => { sc.key = sc.key ?? `${full ? 'f' : 'p'}${sc.P.n}s${i}`; sc.idx = i; if (!sc.cover) timeScene(sc); sc.start = t; t += sc.dur; });
   const total = t, last = scenes[scenes.length - 1];
-  window.__pfScenes = scenes.map(s => ({key: s.key, start: +s.start.toFixed(2), dur: +s.dur.toFixed(2), title: s.title ?? (s.cover ? 'cover' : '')}));
+  window.__pfScenes = scenes.map(s => ({key: s.key, vo: s.vo, part: s.P.n, start: +s.start.toFixed(2), dur: +s.dur.toFixed(2), title: s.title ?? (s.cover ? 'cover' : '')}));
   function shot(c, tau) {
     const t = Math.round(tau*FPS)/FPS;
     paper(c, PAPER, null, 7);
     const sc = scenes.find(s => t < s.start + s.dur) ?? last, lt = t - sc.start;
     if (sc.cover) sc.draw(c, lt); else drawScene(c, sc, lt, sc !== last);
-    header(c, P, t, total); footer(c);
+    header(c, sc.P, t, total); footer(c);
   }
   // Layouts need the fonts; the score needs the layouts. Both wait for the fonts.
+  const breaks = scenes.filter(s => s.cover && s.start > 0).map(s => [s.start, s.start + s.dur]);
   const score = (ac, t0, dest) => { scenes.forEach(sc => { if (!sc.cover) sc.L ??= layoutScene(sc); });
-    return PF_SOUND.score({total, introEnd: scenes[0].dur, outroStart: last.start, events: soundEvents(P, scenes)})(ac, t0, dest); };
+    return PF_SOUND.score({total, introEnd: scenes[0].dur, outroStart: last.start, events: soundEvents(scenes), breaks})(ac, t0, dest); };
   defineFilm({palette: {...PALETTES.pencilMinimal, paper: PAPER}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: `pf174-${n}`, dur: total, fn: shot}], score});
   Promise.all(_photoLoads).then(() => document.fonts.ready).then(() => scenes.forEach(sc => { if (!sc.cover) sc.L ??= layoutScene(sc); }));
 }

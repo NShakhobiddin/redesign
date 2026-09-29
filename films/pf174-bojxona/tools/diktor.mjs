@@ -1,6 +1,6 @@
 // Builds diktor-matni.md: the voice-over script laid on the films' own scene
-// timings. Each scene gets its time window (in the part and in the full cut),
-// the text, its word count and whether it fits at the planning pace.
+// timings. Each scene gets its time window (in its part and in the single full
+// film), the text, its word count and whether it fits at the planning pace.
 // node tools/diktor.mjs [words-per-second]      (default 1.9 ≈ 115 words/min)
 import puppeteer from 'puppeteer-core';
 import {writeFileSync} from 'node:fs';
@@ -27,16 +27,22 @@ for (const n of [1, 2, 3, 4, 5, 6]) {
   if (r.scenes.length !== VO[n].length) throw new Error(`qism-${n}: ${r.scenes.length} scenes, ${VO[n].length} voice-over entries`);
   parts.push({n, dur: r.N/24, scenes: r.scenes, title: r.title[n - 1]}); await page.close();
 }
+// The single full film: the same scenes, without the "next part" cards between parts.
+const fullPage = await browser.newPage(), furl = pathToFileURL(path.join(dir, 'pf174-toliq.html')); furl.searchParams.set('bare', '1');
+await fullPage.goto(furl.href, {waitUntil: 'load'}); await fullPage.waitForFunction('window.__ready === true || window.__error', {timeout: 60000});
+const full = await fullPage.evaluate(() => ({scenes: window.__pfScenes, N: window.__NDRAW}));
+const inFull = Object.fromEntries(full.scenes.map(s => [s.vo, s])), fullDur = full.N/24, fullLast = full.scenes[full.scenes.length - 1].vo;
 await browser.close();
 
-let off = 0, out = [], summary = [], over = 0;
+let out = [], summary = [], over = 0;
 for (const P of parts) {
-  P.off = off; off += P.dur;
+  P.off = inFull[P.scenes[0].vo].start;
   P.rows = P.scenes.map((s, i) => {
     const last = i === P.scenes.length - 1, a = s.start + LEAD, b = s.start + s.dur - (last ? .3 : TAIL);
-    const text = uz(VO[P.n][i]), w = count(text), est = w/RATE;
+    const text = uz(VO[P.n][i]), w = count(text), est = w/RATE, f = inFull[s.vo];
     if (est > b - a) over++;
-    return {i, a, b, text, w, est, fit: est <= b - a, title: s.title === 'cover' ? `Muqova: ${P.n}-qism` : uz(s.title)};
+    return {i, a, b, text, w, est, fit: est <= b - a, title: s.title === 'cover' ? `Muqova: ${P.n}-qism` : uz(s.title),
+      fa: f ? f.start + LEAD : null, fb: f ? f.start + f.dur - (f.vo === fullLast ? .3 : TAIL) : null};
   });
   P.words = P.rows.reduce((x, r) => x + r.w, 0);
   summary.push(`| ${P.n}. ${uz(P.title)} | ${mmss(P.dur)} | ${mmss(P.off)} | ${P.scenes.length} | ${P.words} | ${mmss(P.words/RATE)} |`);
@@ -54,10 +60,10 @@ Bu fayl [\`tools/diktor.mjs\`](tools/diktor.mjs) orqali
 yaratilgan. Matnni o'zgartirsangiz, skriptni qayta ishga tushiring: vaqtlar va
 sig'ish tekshiruvi yangilanadi.
 
-| Qism | Davomiyligi | To'liq videoda boshlanishi | Sahnalar | So'zlar | Taxminiy o'qish |
+| Qism | Davomiyligi | To'liq filmda boshlanishi | Sahnalar | So'zlar | Taxminiy o'qish |
 | --- | --- | --- | --- | --- | --- |
 ${summary.join('\n')}
-| **Jami** | **${mmss(off)}** | | **${parts.reduce((x, P) => x + P.scenes.length, 0)}** | **${total}** | **${mmss(total/RATE)}** |
+| **Alohida qismlar jami** | **${mmss(parts.reduce((x, P) => x + P.dur, 0))}** | **To'liq film: ${mmss(fullDur)}** | **${parts.reduce((x, P) => x + P.scenes.length, 0)}** | **${total}** | **${mmss(total/RATE)}** |
 
 ## Diktorga ko'rsatmalar
 
@@ -74,8 +80,10 @@ ${summary.join('\n')}
   \`qism-1-03.wav\` (1-qism, 3-sahna). 48 kHz, 24 bit, mono; jim xona, fon
   musiqasiz (musiqa videoda bor). Fayl boshida taxminan 0,3 soniya jimlik
   qoldiring.
-- Har bir sahnada **"Vaqt"** — ovoz qo'yiladigan oraliq (qism ichida),
-  **"To'liq videoda"** — 13:54 lik bitta videodagi o'rni.
+- Har bir sahnada **"Vaqt"** — ovoz qo'yiladigan oraliq (alohida qism
+  videosida), **"To'liq filmda"** — ${mmss(fullDur)} lik bitta yaxlit videodagi o'rni.
+  Yaxlit filmda qismlar orasidagi "Keyingi qism" kartalari yo'q, ularning
+  matni faqat alohida qism videolari uchun.
 
 ### Talaffuz
 
@@ -95,10 +103,10 @@ ${summary.join('\n')}
 | «S. Najimov» | post nomi, yozilganidek: Es. Najimov |
 `);
 for (const P of parts) {
-  out.push(`\n## ${P.n}-qism. ${uz(P.title)}\n\nDavomiyligi ${mmss(P.dur)}; to'liq videoda ${mmss(P.off)} dan boshlanadi. ${P.words} so'z.\n`);
+  out.push(`\n## ${P.n}-qism. ${uz(P.title)}\n\nDavomiyligi ${mmss(P.dur)}; to'liq filmda ${mmss(P.off)} dan boshlanadi. ${P.words} so'z.\n`);
   for (const r of P.rows) {
     const id = `${P.n}-${String(r.i + 1).padStart(2, '0')}`;
-    out.push(`**${id} · ${r.title}**  \nVaqt: ${tc(r.a)}–${tc(r.b)} · To'liq videoda: ${tc(P.off + r.a)}–${tc(P.off + r.b)}\n\n> ${r.text}\n\n<sub>${r.w} so'z · ~${dec(r.est)} s / oyna ${dec(r.b - r.a)} s ${r.fit ? '✓' : '⚠ sigʻmaydi'}</sub>\n`);
+    out.push(`**${id} · ${r.title}**  \nVaqt: ${tc(r.a)}–${tc(r.b)} · To'liq filmda: ${r.fa == null ? "yo'q (faqat alohida qismda)" : `${tc(r.fa)}–${tc(r.fb)}`}\n\n> ${r.text}\n\n<sub>${r.w} so'z · ~${dec(r.est)} s / oyna ${dec(r.b - r.a)} s ${r.fit ? '✓' : '⚠ sigʻmaydi'}</sub>\n`);
   }
 }
 out.push(`\n---\n\nMatn farmon mazmunini soddalashtirib tushuntiradi, huquqiy maslahat emas.\nRasmiy matn: lex.uz (PF-174, 27.08.2026).\n`);

@@ -2,6 +2,8 @@
 // no licensed music. A quiet background track (C major, 100 BPM:
 // Cadd9 – G/B – Am7 – Fmaj7) and sound effects tuned to the same key, so every
 // tick, stamp and chime sits inside the music instead of on top of it.
+// Only pitched sounds: no noise bursts, hats or swooshes, which read as hiss
+// or crackle on phone speakers.
 // Load after core.js; series.js calls PF_SOUND.score(...).
 'use strict';
 const PF_SOUND = (() => {
@@ -30,11 +32,11 @@ function kit(ac) {
     env(g.gain, t, a, gain, d); s.connect(fl); fl.connect(g); g.connect(dest); s.start(t, (seed*.137) % 1.4, a + d + .05);
   };
   // struck wood: fundamental plus the bar's 4th partial, which dies first
-  const marimba = (f, t, dest, gain, d = .32) => { tone('sine', f, t, d, dest, gain, .003); tone('sine', f*3.93, t, d*.3, dest, gain*.22, .002); };
+  const marimba = (f, t, dest, gain, d = .32) => { tone('sine', f, t, d, dest, gain, .003); tone('sine', f*3.93, t, d*.25, dest, gain*.12, .003); };
   // soft FM chime (harmonic ratio, falling brightness)
   const bell = (f, t, dest, gain, d = 1.2) => {
     const c = ac.createOscillator(), m = ac.createOscillator(), mg = ac.createGain(), g = ac.createGain();
-    c.frequency.value = f; m.frequency.value = f*2; mg.gain.setValueAtTime(f*1.6, t); mg.gain.exponentialRampToValueAtTime(f*.02, t + d);
+    c.frequency.value = f; m.frequency.value = f*2; mg.gain.setValueAtTime(f*.9, t); mg.gain.exponentialRampToValueAtTime(f*.02, t + d*.7);
     m.connect(mg); mg.connect(c.frequency); env(g.gain, t, .003, gain, d); c.connect(g); g.connect(dest);
     c.start(t); m.start(t); c.stop(t + d + .1); m.stop(t + d + .1);
   };
@@ -43,6 +45,8 @@ function kit(ac) {
     const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + d*.4);
     env(g.gain, t, .002, gain, d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .05);
   };
+  // a soft upward strum: harp-like triangle notes a few ms apart
+  const strum = (notes, t, dest, gain, gap = .04, d = .6) => notes.forEach((m, i) => tone('triangle', mtof(m), t + i*gap, d, dest, gain*(1 - i*.08), .008));
   const reverb = (seconds, decay, seed) => {
     const len = Math.ceil(sr*seconds), b = ac.createBuffer(2, len, sr);
     for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch), rr = rng(seed + ch); for (let i = 0; i < len; i++) d[i] = (rr()*2 - 1)*Math.pow(1 - i/len, decay); }
@@ -50,16 +54,17 @@ function kit(ac) {
   };
   const gain = (v, dest) => { const g = ac.createGain(); g.gain.value = v; if (dest) g.connect(dest); return g; };
   const filter = (type, f, q, dest) => { const fl = ac.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q; if (dest) fl.connect(dest); return fl; };
-  return {env, tone, noiseHit, marimba, bell, thump, reverb, gain, filter};
+  return {env, tone, noiseHit, marimba, bell, thump, strum, reverb, gain, filter};
 }
 
 // ---------------------------------------------------------------- background track
 // Intro (cover): pad, sparse plucks. Body: bass, eighth-note plucks, a soft
 // kick / finger-snap / hat groove. Outro card: the groove drops out and the
 // last chord rings into the fade.
-function music(ac, K, out, t0, total, introEnd, outroStart) {
+function music(ac, K, out, t0, total, introEnd, outroStart, breaks = []) {
+  const end = ac.length ? ac.length/ac.sampleRate + 1 : Infinity;                 // an offline chunk schedules only its own window
   const bus = K.gain(1, out);
-  bus.gain.setValueAtTime(0, t0); bus.gain.linearRampToValueAtTime(1, t0 + 1.5);
+  if (t0 >= 0) { bus.gain.setValueAtTime(0, t0); bus.gain.linearRampToValueAtTime(1, t0 + 1.5); }   // t0 < 0: a later chunk of a long film
   bus.gain.setValueAtTime(1, t0 + total - 2.6); bus.gain.linearRampToValueAtTime(0, t0 + total - .05);
   const pads = K.gain(1, K.filter('lowpass', 1100, .4, bus)), bassBus = K.gain(1, K.filter('lowpass', 700, .5, bus)), drums = K.gain(.8, bus);
   const plucks = K.gain(1, K.filter('lowpass', 3200, .5, bus));
@@ -68,7 +73,10 @@ function music(ac, K, out, t0, total, introEnd, outroStart) {
   const bars = Math.floor((total - 1.5)/BAR) + 1;
   for (let b = 0; b < bars; b++) {
     const s = b*BAR, tb = t0 + s, ch = PROG[b % 4], lastBar = s + BAR >= total - 1.5;
-    const body = s >= introEnd - .01 && s < outroStart - BAR*.5, intro = s < introEnd - .01;
+    if (tb < 0) continue;
+    if (tb > end) break;
+    const inBreak = breaks.some(([a, z]) => s + BAR > a + .3 && s < z - .3);             // chapter cards: the groove rests
+    const body = s >= introEnd - .01 && s < outroStart - BAR*.5 && !inBreak, intro = s < introEnd - .01;
     // pad: two detuned saws per note, slow swell, overlapping release
     const hold = lastBar ? total - s : BAR;
     for (const m of ch.pad) for (const det of [-8, 8]) {
@@ -85,50 +93,49 @@ function music(ac, K, out, t0, total, introEnd, outroStart) {
     const pat = ARP[(b >> 1) % 2];
     for (let i = 0; i < 8; i++) { if (!body && i % 2) continue; const t = tb + i*BEAT/2;
       K.tone('triangle', mtof(ch.arp[pat[i]]), t, .42, plucks, .045*VEL[i]*(body ? 1 : .8)); }
-    if (b % 2 === 0) K.bell(mtof(ch.top + 12), tb, bus, intro ? .018 : .012, 1.8);
-    // groove, body only: soft kick on 1 and 3, finger snap on 2 and 4, hats on eighths
+    if (b % 2 === 0) K.bell(mtof(ch.top), tb, bus, intro ? .02 : .014, 1.8);
+    // pulse, body only: a soft felt kick on 1 and 3, a muted wooden tap on 2 and 4
     if (!body) continue;
-    const fill = b % 8 === 7;
-    for (const beat of [0, 2]) K.thump(tb + beat*BEAT, drums, .22, 140, 58, .26);
-    for (const beat of [1, 3]) { K.noiseHit(tb + beat*BEAT, .09, drums, {gain: .09, f: 2300, q: 1.4, seed: b*4 + beat}); K.noiseHit(tb + beat*BEAT + .012, .07, drums, {gain: .05, f: 1600, q: 1, seed: b*4 + beat + 2}); }
-    for (let i = 0; i < (fill ? 12 : 8); i++) { const step = fill && i >= 6 ? 6 + (i - 6)*.5 : i, t = tb + step*BEAT/2;
-      K.noiseHit(t, .035, drums, {gain: step % 1 || (i % 2) ? .028 : .016, type: 'highpass', f: 8000, q: .5, seed: b*16 + i}); }
+    for (const beat of [0, 2]) K.thump(tb + beat*BEAT, drums, .16, 110, 55, .24);
+    for (const beat of [1, 3]) K.marimba(mtof(ch.bass + 24), tb + beat*BEAT, drums, .018, .12);
   }
 }
 
 // ---------------------------------------------------------------- effects
 const FX = {
-  // a card lands: a woody note in key and a little air
-  tick: (ac, K, o, t, k) => { K.marimba(mtof(pent(k*2, 1)), t, o, .06); K.noiseHit(t, .08, o, {gain: .02, f: 3500, q: 1.2, seed: k}); },
-  pop: (ac, K, o, t, k) => { const f = mtof(pent(k, 1)), osc = ac.createOscillator(), g = ac.createGain(); osc.frequency.setValueAtTime(f*1.7, t); osc.frequency.exponentialRampToValueAtTime(f, t + .05);
-    K.env(g.gain, t, .003, .07, .14); osc.connect(g); g.connect(o); osc.start(t); osc.stop(t + .2); },
-  check: (ac, K, o, t) => { K.bell(mtof(76), t, o, .045, .7); K.bell(mtof(79), t + .08, o, .045, .9); K.marimba(mtof(88), t + .08, o, .025, .2); },
-  thud: (ac, K, o, t, k) => { K.thump(t, o, .3, 190, 62, .28); K.noiseHit(t, .07, o, {gain: .2, type: 'lowpass', f: 1400, q: .4, seed: k}); K.noiseHit(t, .02, o, {gain: .06, f: 3200, q: 1, seed: k + 3});
-    K.tone('sine', mtof(43), t + .005, .45, o, .08, .004); },
-  count: (ac, K, o, t) => { [60, 62, 64, 67, 69, 72, 74].forEach((m, i) => K.marimba(mtof(m + 12), t + i*.1, o, .025 + i*.004, .2)); },
-  ding: (ac, K, o, t) => { K.bell(mtof(84), t, o, .04, 1.1); K.bell(mtof(91), t + .05, o, .022, 1.3); K.bell(mtof(88), t + .1, o, .015, 1.4); },
-  down: (ac, K, o, t) => { [69, 67, 64].forEach((m, i) => K.marimba(mtof(m + 12), t + i*.11, o, .04, .25));
-    const g = ac.createGain(), s = ac.createOscillator(); s.frequency.setValueAtTime(mtof(72), t); s.frequency.exponentialRampToValueAtTime(mtof(64), t + .35); K.env(g.gain, t, .02, .025, .35); s.connect(g); g.connect(o); s.start(t); s.stop(t + .45); },
-  whoosh: (ac, K, o, t, k) => { K.noiseHit(t - .25, .45, o, {gain: .09, f: 400, f1: 3500, q: 1.2, a: .25, seed: k}); K.bell(mtof(79), t + .45, o, .03, 1); K.bell(mtof(84), t + .5, o, .025, 1.1); },
-  sweep: (ac, K, o, t, k) => K.noiseHit(t, .3, o, {gain: .03, f: 2600, f1: 700, q: .9, a: .1, seed: k}),
-  sting: (ac, K, o, t, k) => { K.noiseHit(t - .02, .6, o, {gain: .08, type: 'lowpass', f: 900, f1: 200, q: .3, seed: k}); K.thump(t, o, .28, 110, 50, .6);
-    [72, 76, 79, 84].forEach((m, i) => K.bell(mtof(m), t + .03 + i*.07, o, .024, 1.8)); K.bell(mtof(96), t + .35, o, .01, 2); },
-  gate: (ac, K, o, t, k) => { K.noiseHit(t, .05, o, {gain: .14, f: 1900, q: 3, seed: k}); K.tone('sine', mtof(79), t, .08, o, .04, .002); K.thump(t + .01, o, .12, 220, 90, .12); },
+  // a card lands: a woody note in key
+  tick: (ac, K, o, t, k) => K.marimba(mtof(pent(k*2, 0) + 12), t, o, .085),
+  pop: (ac, K, o, t, k) => { const f = mtof(pent(k, 1)), osc = ac.createOscillator(), g = ac.createGain(); osc.frequency.setValueAtTime(f*1.5, t); osc.frequency.exponentialRampToValueAtTime(f, t + .06);
+    K.env(g.gain, t, .006, .085, .16); osc.connect(g); g.connect(o); osc.start(t); osc.stop(t + .25); },
+  check: (ac, K, o, t) => { K.bell(mtof(76), t, o, .056, .7); K.bell(mtof(79), t + .08, o, .056, .9); },
+  // the stamp: a felt thump and a wooden knock, no rattle
+  thud: (ac, K, o, t, k) => { K.thump(t, o, .09, 170, 65, .26); K.marimba(mtof(55), t, o, .05, .22); K.marimba(mtof(67), t + .01, o, .025, .18); K.tone('sine', mtof(43), t + .005, .4, o, .03, .006); },
+  count: (ac, K, o, t) => { [60, 62, 64, 67, 69, 72, 74].forEach((m, i) => K.marimba(mtof(m + 12), t + i*.1, o, .031 + i*.004, .2)); },
+  ding: (ac, K, o, t) => { K.bell(mtof(72), t, o, .063, 1.1); K.bell(mtof(79), t + .05, o, .035, 1.3); K.bell(mtof(76), t + .1, o, .025, 1.4); },
+  down: (ac, K, o, t) => { [69, 67, 64].forEach((m, i) => K.marimba(mtof(m + 12), t + i*.11, o, .056, .25));
+    const g = ac.createGain(), s = ac.createOscillator(); s.frequency.setValueAtTime(mtof(72), t); s.frequency.exponentialRampToValueAtTime(mtof(64), t + .35); K.env(g.gain, t, .02, .02, .35); s.connect(g); g.connect(o); s.start(t); s.stop(t + .45); },
+  whoosh: (ac, K, o, t) => { K.strum([60, 64, 67, 72, 76, 79], t - .25, o, .03, .05, .7); K.bell(mtof(72), t + .45, o, .03, 1); K.bell(mtof(76), t + .5, o, .022, 1.1); },
+  // a new scene: a quiet three-note harp strum
+  sweep: (ac, K, o, t, k) => K.strum([pent(k, 0), pent(k + 2, 0), pent(k + 4, 0) + 12].sort((a, b) => a - b), t, o, .025, .045, .5),
+  sting: (ac, K, o, t) => { K.thump(t, o, .09, 100, 50, .5); K.strum([48, 55, 60, 64, 67, 72], t - .02, o, .03, .03, 1.2);
+    [72, 76, 79].forEach((m, i) => K.bell(mtof(m), t + .08 + i*.08, o, .022, 1.8)); },
+  gate: (ac, K, o, t) => { K.marimba(mtof(67), t, o, .07, .15); K.thump(t + .01, o, .08, 220, 90, .12); },
 };
 
 // ---------------------------------------------------------------- mix
 // events: [{t, kind}]; introEnd: end of the cover; outroStart: the closing card.
-function score({total, introEnd, outroStart, events}) {
+function score({total, introEnd, outroStart, events, breaks = []}) {
   return (ac, t0, dest) => {
     const K = kit(ac);
-    const comp = ac.createDynamicsCompressor(); comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 2.5; comp.attack.value = .006; comp.release.value = .25;
+    const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 2; comp.attack.value = .006; comp.release.value = .25;
     const master = K.gain(.9, dest), hp = K.filter('highpass', 45, .6, master); comp.connect(hp);   // nothing below what speakers can play
     const solo = window.__pfSolo;                                                                    // 'music' | 'fx': for level checks
-    const room = K.reverb(1.9, 3.2, 21); room.connect(K.gain(.9, comp));
-    const musicBus = K.gain(.4, comp), fxBus = K.gain(1.5, comp);   // the music stays under the effects
+    const room = K.reverb(1.9, 3.2, 21); room.connect(K.filter('lowpass', 3500, .5, K.gain(.9, comp)));   // a warm room, no bright tail
+    const musicBus = K.gain(.2, comp), fxBus = K.gain(1.5, comp);   // the music stays well under the effects
     musicBus.connect(K.gain(.12, room)); fxBus.connect(K.gain(.28, room));
-    if (solo !== 'fx') music(ac, K, musicBus, t0, total, introEnd, outroStart);
-    if (solo !== 'music') events.forEach((e, k) => FX[e.kind](ac, K, fxBus, t0 + e.t, k));
+    if (solo !== 'fx') music(ac, K, musicBus, t0, total, introEnd, outroStart, breaks);
+    const end = ac.length ? ac.length/ac.sampleRate + 1 : Infinity;
+    if (solo !== 'music') events.forEach((e, k) => { if ((t0 >= 0 || t0 + e.t > .5) && t0 + e.t < end) FX[e.kind](ac, K, fxBus, t0 + e.t, k); });
   };
 }
 return {score, BPM};

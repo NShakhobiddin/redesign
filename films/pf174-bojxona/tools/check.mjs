@@ -10,7 +10,7 @@ let total = 0;
 for (const n of parts) {
   const page = await browser.newPage(), logs = [];
   page.on('console', m => logs.push(`${m.type()}: ${m.text()}`)); page.on('pageerror', e => logs.push(`pageerror: ${e.message}`));
-  const url = pathToFileURL(path.join(dir, `qism-${n}.html`)); url.searchParams.set('bare', '1');
+  const url = pathToFileURL(path.join(dir, String(n).endsWith('.html') ? n : `qism-${n}.html`)); url.searchParams.set('bare', '1');
   await page.goto(url.href, {waitUntil: 'load'});
   await page.waitForFunction('window.__ready === true || window.__error', {timeout: 60000});
   await page.evaluate(() => window.__frame(Math.floor(window.__NDRAW/2)));
