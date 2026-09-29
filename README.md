@@ -39,6 +39,8 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
   ~14 daqiqa) va hammasi ulangan bitta uzun video: maqsadlar va strategiya,
   tadbirkorlarga yengilliklar, bojxona qiymati va hujjatlar, fuqarolar va
   to'lovlar, inson omilisiz bojxona, raqamli markaz va ijro nazorati.
+  Burchakda **shopo** logotipi, sintez qilingan fon musiqasi va effektlar,
+  diktor uchun vaqtga moslangan matn.
 - [`films/kitob-reklama/`](films/kitob-reklama/) — **"Ishonmang, lekin
   bajarib ko‘ring!"** kitobi reklamasi (Dilshod Mannopov). 36 soniyalik
   vertikal video: kitobdagi limon tajribasi tomoshabin bilan birga o'tkaziladi,

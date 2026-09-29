@@ -37,13 +37,46 @@ Har bir sahnaning oxirgi holati: `out/qism-N-scenes.jpg` (masalan,
 - **Raqamlar** sanab chiqiladi (60%, 4,4%, 76,2 …). Bekor qilingan talablarga
   qizil **BEKOR** muhri bosiladi, avtomatik rasmiylashtiruv shartlari birma-bir
   belgilanadi, eksport yig'imlari chiziqlari 100 dan 70 ga qisqaradi.
-- **Tepada** seriya va qism raqami (N/6) hamda qism ichidagi jarayon chizig'i,
-  **pastda** manba: lex.uz · PF-174, 27.08.2026.
-- **Ovoz:** sokin fon ohangi, karta chiqishi, muhr, belgi va raqam uchun yumshoq
-  tovushlar. Diktor ovozi yo'q, videoni ovozsiz ham tushunsa bo'ladi.
+- **Tepada**, chap burchakda **shopo** logotipi, yonida "PF-174 · Bojxona
+  islohoti", o'ngda qism raqami (N/6) va qism ichidagi jarayon chizig'i.
+  **Pastda:** "Manba: Prezident Farmoni PF-174, 27.08.2026".
 - **Vaqt matnga qarab hisoblanadi:** har bir karta taxminan har so'z uchun
   0,32 soniya, qo'shimcha animatsiya vaqti bilan ekranda turadi. Shuning uchun
   matn o'qib ulguradigan tezlikda almashadi.
+
+## Logotip
+
+![shopo](brand/shopo-logo.png)
+
+Minimal yozuvli belgi: kichik harflar bilan **shopo**, oxirgi "o" firuza
+rangda, yonida sariq nuqta. Shrift Onest ExtraBold. Videoda har bir kadrning
+chap yuqori burchagida turadi. Alohida fayllar (shaffof fon, 1306×540):
+[`brand/shopo-logo.png`](brand/shopo-logo.png) (och fon uchun) va
+[`brand/shopo-logo-light.png`](brand/shopo-logo-light.png) (to'q fon uchun).
+Kodi `series.js` dagi `logo()` funksiyasi, fayllarni
+`node tools/logo.mjs` yaratadi.
+
+## Ovoz
+
+Hamma tovush [`sound.js`](sound.js) da Web Audio yordamida sintez qilingan.
+Tayyor namunalar yoki litsenziyali musiqa ishlatilmagan, shuning uchun
+mualliflik huquqi masalasi yo'q.
+
+- **Fon musiqasi** past ovozda. Tonallik C-major, daqiqasiga 100 zarb,
+  akkordlar Cadd9 – G/B – Am7 – Fmaj7. Yumshoq pad, bas, aks-sadoli
+  "pluck" arpedjio, har ikki taktda qo'ng'iroqcha, yengil zarb (kick, barmoq
+  chertishi, hi-hat). Muqovada faqat pad va arpedjio chalinadi. Asosiy
+  qismda zarb qo'shiladi. Yakuniy kartada zarb to'xtaydi va oxirgi akkord
+  so'nib boradi.
+- **Effektlar** musiqa bilan bir tonallikda: karta chiqqanda yog'och
+  "marimba" notasi; belgi qo'yilganda ikki notali qo'ng'iroq; raqam sanalganda
+  ko'tariluvchi arpedjio va jiringlash; muhr bosilganda past "gup"; sahna
+  almashganda yengil shamol; muqovada kirish akkordi.
+- Effektlar musiqadan balandroq, musiqa fonda qoladi. Har bir qism
+  −18 LUFS gacha tenglashtirilgan, eng baland nuqta −1,5 dB dan oshmaydi.
+- `node tools/score.mjs 1 out/sinov.wav` faqat ovozni render qiladi
+  (kadrlarsiz). `music` yoki `fx` qo'shilsa, faqat musiqa yoki faqat
+  effektlar chiqadi.
 
 ## Mazmunga oid eslatmalar
 
@@ -78,10 +111,11 @@ Matnning o'zi [`diktor-vo.mjs`](diktor-vo.mjs) faylida. Uni o'zgartirgach,
 
 ## Fayllar
 
-- [`series.js`](series.js) — dvigatel: ranglar, qo'lda chizilgan ikonkalar,
-  karta turlari (`text`, `item`, `stat`, `check`, `step`, `tl`, `bars`,
-  `lanes`, `formula`, `example`, `compare`, `clocks`, `years`, `pins`,
-  `merge`, `progress` …), matnni joylash, vaqt va ovoz
+- [`series.js`](series.js) — dvigatel: ranglar, logotip, qo'lda chizilgan
+  ikonkalar, karta turlari (`text`, `item`, `stat`, `check`, `step`, `tl`,
+  `bars`, `lanes`, `formula`, `example`, `compare`, `clocks`, `years`,
+  `pins`, `merge`, `progress` …), matnni joylash va vaqt
+- [`sound.js`](sound.js) — fon musiqasi va effektlar (sintez)
 - [`parts.js`](parts.js) — 6 qismning ssenariysi (faqat ma'lumot). Matnni
   shu yerda o'zgartirsangiz, joylashuv, vaqt va ovoz o'zi moslashadi
 - [`qism-1.html`](qism-1.html) … [`qism-6.html`](qism-6.html) — har bir
@@ -92,6 +126,8 @@ Matnning o'zi [`diktor-vo.mjs`](diktor-vo.mjs) faylida. Uni o'zgartirgach,
   joylashuvi (xavfsiz hududdan chiqib ketgan karta bo'lsa, ogohlantiradi)
 - [`tools/shots.mjs`](tools/shots.mjs) — tanlangan lahzalar yoki har bir
   sahna oxiridan ko'rik varag'i
+- [`tools/score.mjs`](tools/score.mjs) — faqat ovozni render qilish;
+  [`tools/logo.mjs`](tools/logo.mjs) — logotip PNG fayllari
 - [`diktor-vo.mjs`](diktor-vo.mjs), [`tools/diktor.mjs`](tools/diktor.mjs) —
   diktor matni va undan [`diktor-matni.md`](diktor-matni.md) ni yig'uvchi
   skript
@@ -104,16 +140,18 @@ node tools/shots.mjs 2 out scenes          # 2-qism sahnalari varag'i
 node render.mjs qism-2.html --out out      # 2-qism: MP4 + ovoz
 ```
 
-Render qilingach ovoz 10 dB balandlatildi (cheklagich −3 dBFS da) va 6 qism
-bitta videoga ulandi:
+Render qilingach har bir qismning ovozi −18 LUFS ga keltirildi (eng baland
+nuqta −1,5 dB da ushlanadi) va 6 qism bitta videoga ulandi:
 
 ```bash
 cd out
 for n in 1 2 3 4 5 6; do
   d=$(python3 -c "import json;print(json.load(open('qism-$n-render.json'))['duration'])")
+  I=$(ffmpeg -i qism-$n-score.wav -af ebur128 -f null - 2>&1 | sed -n '/Summary/,$p' | grep -m1 " I:" | awk '{print $2}')
+  g=$(python3 -c "print(round(-18 - ($I), 2))")
   ffmpeg -y -i qism-$n.mp4 -i qism-$n-score.wav -map 0:v:0 -map 1:a:0 \
-    -af "volume=10dB,alimiter=limit=0.708:level=disabled,apad" -t $d \
-    -c:v copy -c:a aac -b:a 192k qism-$n-final.mp4
+    -af "volume=${g}dB,alimiter=limit=0.84:attack=3:release=60:level=disabled,apad" \
+    -t $d -c:v copy -c:a aac -b:a 192k qism-$n-final.mp4
 done
 printf "file 'qism-%s-final.mp4'\n" 1 2 3 4 5 6 > list.txt
 ffmpeg -f concat -safe 0 -i list.txt -c copy pf174-toliq-final.mp4
@@ -124,7 +162,9 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy pf174-toliq-final.mp4
 - 7 ta MP4 ham xatosiz dekodlanadi (1080×1920, 24 fps, H.264 + AAC).
   Kadrlar: 3881, 3363, 3016, 2694, 3372, 3691. Uzun video 20 017 kadr,
   13:54; ovoz ham 13:54, qismlar chegarasida siljish yo'q.
-- Ovoz: o'rtacha −32 dB, eng baland nuqta −1,9 dB.
+- Ovoz: har bir qism −18,2 … −18,9 LUFS, eng baland nuqta (true peak)
+  −0,7 dBFS dan oshmaydi, ovoz kesilib qolmaydi. Musiqa effektlardan taxminan
+  5 dB past turadi (400 ms oynalar bo'yicha o'lchangan).
 - `tools/check.mjs`: hech bir sahna xavfsiz hududdan chiqmadi, hech birini
   kichraytirishga to'g'ri kelmadi.
 - Har bir qismning oxirgi kadrlari piksel darajasida solishtirildi: faqat

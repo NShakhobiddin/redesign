@@ -552,43 +552,35 @@ function outroScene(P) {
 }
 
 // ---------------------------------------------------------------- frame
+// The "shopo" wordmark: lowercase, tight, the last o in teal and a yellow dot.
+function logo(c, x, y, size = 44, ink = INK) {
+  c.save(); font(c, 800, size, 'Onest', (-.05*size).toFixed(1) + 'px'); c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  const w1 = c.measureText('shop').width, w2 = c.measureText('o').width;
+  c.fillStyle = ink; c.fillText('shop', x, y); c.fillStyle = TEAL; c.fillText('o', x + w1, y);
+  c.fillStyle = YEL; c.beginPath(); c.arc(x + w1 + w2 + size*.15, y - size*.09, size*.11, 0, TAU); c.fill();
+  c.restore(); return w1 + w2 + size*.26;
+}
 function header(c, P, t, dur) {
-  const a = 1;
-  pill(c, X0, 92, 150, 52, INK, a); label(c, 'PF-174', X0 + 75, 128, {size: 28, w: 800, color: PAPER, align: 'center', alpha: a});
-  label(c, 'Bojxona islohoti', X0 + 172, 128, {size: 30, w: 700, color: INK, alpha: a});
-  label(c, `${P.n}/${PARTS.length}`, X0 + CW, 128, {size: 30, w: 800, color: INK2, align: 'right', alpha: a});
-  for (let k = 0; k < PARTS.length; k++) { const x = X0 + CW - 90 - (PARTS.length - 1 - k)*28, n = k + 1; c.save(); c.beginPath(); c.arc(x, 118, n === P.n ? 10 : 7, 0, TAU);
+  const lw = logo(c, X0, 134, 46);
+  c.save(); c.fillStyle = LINE; c.fillRect(X0 + lw + 20, 100, 3, 40); c.restore();
+  label(c, 'PF-174 · Bojxona islohoti', X0 + lw + 42, 130, {size: 28, w: 700, color: INK2});
+  label(c, `${P.n}/${PARTS.length}`, X0 + CW, 130, {size: 30, w: 800, color: INK2, align: 'right'});
+  for (let k = 0; k < PARTS.length; k++) { const x = X0 + CW - 90 - (PARTS.length - 1 - k)*28, n = k + 1; c.save(); c.beginPath(); c.arc(x, 120, n === P.n ? 10 : 7, 0, TAU);
     if (n <= P.n) { c.fillStyle = n === P.n ? YEL : TEAL; c.fill(); } c.strokeStyle = n <= P.n ? INK : LINE; c.lineWidth = 2.4; c.stroke(); c.restore(); }
   c.save(); c.fillStyle = LINE; c.fillRect(X0, 172, CW, 5); c.fillStyle = TEAL; c.fillRect(X0, 172, CW*clamp(t/dur, 0, 1), 5); c.restore();
 }
-function footer(c) { label(c, 'Manba: lex.uz · Prezident Farmoni PF-174, 27.08.2026', XC, 1808, {size: 26, w: 500, color: MUTED, align: 'center'}); }
+function footer(c) { label(c, 'Manba: Prezident Farmoni PF-174, 27.08.2026', XC, 1808, {size: 26, w: 500, color: MUTED, align: 'center'}); }
 
 // ---------------------------------------------------------------- sound
-const SFX = {
-  tick: (ac, m, t0, t, k) => { note(ac, m, pentHz(2, k % 5, 262), t0, t, .16, 'sine', .028); noiseBurst(ac, m, t0, t, .03, .025, 100 + k); },
-  pop: (ac, m, t0, t, k) => note(ac, m, pentHz(2, (k*2) % 5, 262), t0, t, .12, 'triangle', .035),
-  check: (ac, m, t0, t, k) => { note(ac, m, pentHz(2, 4, 262), t0, t, .18, 'sine', .05); note(ac, m, pentHz(3, 0, 262), t0, t + .07, .25, 'sine', .04); },
-  thud: (ac, m, t0, t, k) => { note(ac, m, pentHz(-1, 0, 262), t0, t, .32, 'triangle', .22); noiseBurst(ac, m, t0, t, .07, .2, 200 + k); },
-  count: (ac, m, t0, t, k) => { for (let i = 0; i < 7; i++) note(ac, m, pentHz(1, i % 5, 262), t0, t + i*.11, .08, 'sine', .018); },
-  ding: (ac, m, t0, t, k) => { note(ac, m, pentHz(2, 0, 262), t0, t, .9, 'sine', .045); note(ac, m, pentHz(2, 2, 262), t0, t + .04, .9, 'sine', .03); },
-  down: (ac, m, t0, t, k) => { [4, 3, 2].forEach((s, i) => note(ac, m, pentHz(1, s, 262), t0, t + i*.1, .14, 'triangle', .03)); },
-  whoosh: (ac, m, t0, t, k) => noiseBurst(ac, m, t0, t, .35, .05, 300 + k),
-};
-function makeScore(P, scenes, total) {
-  return (ac, t0, dest) => {
-    const m = ac.createGain(); m.gain.value = .9; m.connect(dest); let k = 0;
-    const n = (o, s, t, d, g, type = 'sine') => note(ac, m, pentHz(o, s, 262), t0, t, d, type, g);
-    const bass = [0, 0, 3, 2, 0, 4, 3, 1];
-    for (let t = .5, i = 0; t < total - 1.5; t += 2, i++) n(-1, bass[(i + P.n) % bass.length], t, 1.7, .03, 'triangle');
-    for (const sc of scenes) {
-      const s0 = sc.start;
-      if (sc.cover) { [[1, 0], [1, 2], [1, 4], [2, 0], [2, 2]].forEach(([o, q], i) => n(o, q, s0 + .3 + i*.11, 1.6, .045)); n(-1, 0, s0 + .3, 1.2, .12, 'triangle');
-        if (P.icon === 'gate') noiseBurst(ac, m, t0, s0 + 2.55, .05, .12, 77); continue; }
-      [[0, 0], [0, 2], [1, 0]].forEach(([o, q], i) => n(o, (q + sc.idx) % 5, s0 + .15 + i*.03, 2.6, .022));
-      if (sc.outro) [[0, 0], [0, 4], [1, 2], [2, 0]].forEach(([o, q], i) => n(o, q, s0 + .4 + i*.14, 2.4, .04));
-      for (const it of sc.L.items) for (const [dt, kind] of it.sfx ?? [[0, 'tick']]) SFX[kind](ac, m, t0, s0 + it.t0 + dt, k++);
-    }
-  };
+// Every sound cue comes from the same timings as the pictures (sound.js).
+function soundEvents(P, scenes) {
+  const ev = [];
+  for (const sc of scenes) {
+    if (sc.cover) { ev.push({t: sc.start + .25, kind: 'sting'}); if (P.icon === 'gate') ev.push({t: sc.start + 2.55, kind: 'gate'}); continue; }
+    ev.push({t: sc.start + .05, kind: 'sweep'});
+    for (const it of sc.L.items) for (const [dt, kind] of it.sfx ?? [[0, 'tick']]) ev.push({t: sc.start + it.t0 + dt, kind});
+  }
+  return ev;
 }
 
 // ---------------------------------------------------------------- film
@@ -608,9 +600,10 @@ function film(n) {
     header(c, P, t, total); footer(c);
   }
   // Layouts need the fonts; the score needs the layouts. Both wait for the fonts.
-  const score = (ac, t0, dest) => { scenes.forEach(sc => { if (!sc.cover) sc.L ??= layoutScene(sc); }); return makeScore(P, scenes, total)(ac, t0, dest); };
+  const score = (ac, t0, dest) => { scenes.forEach(sc => { if (!sc.cover) sc.L ??= layoutScene(sc); });
+    return PF_SOUND.score({total, introEnd: scenes[0].dur, outroStart: last.start, events: soundEvents(P, scenes)})(ac, t0, dest); };
   defineFilm({palette: {...PALETTES.pencilMinimal, paper: PAPER}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: `pf174-${n}`, dur: total, fn: shot}], score});
   Promise.all(_photoLoads).then(() => document.fonts.ready).then(() => scenes.forEach(sc => { if (!sc.cover) sc.L ??= layoutScene(sc); }));
 }
-return {film, uz, C: {PAPER, INK, INK2, MUTED, TEAL, TEAL2, YEL, RED, GRN, GRN2, CARD, LINE, SKY}};
+return {film, uz, logo, C: {PAPER, INK, INK2, MUTED, TEAL, TEAL2, YEL, RED, GRN, GRN2, CARD, LINE, SKY}};
 })();
