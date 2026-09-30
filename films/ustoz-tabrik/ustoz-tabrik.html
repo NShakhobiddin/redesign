@@ -12,13 +12,12 @@
 'use strict';
 /* Film brief
 Occasion: Ustoz va murabbiylar kuni (Teachers' and Mentors' Day, 1 October).
-  A greeting from a student to their teacher, Dilshod Bahodirovich Mannopov,
-  author of "Ishonmang, lekin bajarib ko'ring!".
+  A greeting from a student to their teacher, Dilshod Bahodirovich Mannopov.
 Story "Bir chiroqdan — ming chiroq": night, a desk, an unlit clay lamp
   (moychiroq) and a notebook of crossed-out attempts; question marks hang in
   the dark. A larger lamp arrives, its light turns the questions into sparks,
   and it lights the small lamp from its own flame. In the notebook the
-  teacher's words appear: "Ishonmang, lekin bajarib ko'ring!"; the student
+  teacher's words appear: "Qalbingga quloq sol!"; the student
   ticks it off. The small lamp lights another, and another, until the dark is
   a field of lamps. A light rises from each flame and together they draw an
   open book in the sky. The greeting follows.
@@ -98,7 +97,7 @@ const T = {
   fade: [0, 1.4], cap1: [1.2, 5.2],
   arrive: [5.0, 7.8], cap2: [6.0, 9.6], sparks: [6.4, 9.2],
   reach: [9.8, 11.5], touch: 11.6, back: [12.5, 14.2], cap3: [10.2, 15.4],
-  push: [15.4, 17.0], write: [[17.2, 18.1], [18.2, 19.3], [19.4, 20.2]], tick: 22.0, cap4: [20.6, 25.0],
+  push: [15.4, 17.0], write: [[17.2, 18.5], [18.6, 19.9]], tick: 22.0, cap4: [20.6, 25.0],
   pull: [25.0, 27.0], chain0: 26.6, chain1: 34.0, cap5: [27.3, 31.0], cap6: [31.2, 35.0],
   rise: [35.0, 38.6], travel: 2.3, bookGlow: 40.2, finale: [35.0, 41.5],
   card: 41.6, end: 58.0,
@@ -159,7 +158,7 @@ const scribbleCel = () => cel('scribble', () => {
   return out;
 });
 const tickCel = () => cel('tick', () => [{id: 'tick', pts: line([[352, 1508], [372, 1528], [418, 1470]], .7, 81, 6), w: 7}]);
-const HAND = [["Ishonmang,", 612, 1440], ["lekin bajarib", 628, 1478], ["ko'ring!", 700, 1516]];
+const HAND = [["Qalbingga", 662, 1458], ["quloq sol!", 684, 1503]];
 
 // the lamps that follow: the student's light passed on and on
 const FIELD = (() => {
@@ -275,10 +274,11 @@ function world(c, t, C) {
     chalk(c, scribbleCel(), scA, GRAPH);
     // the teacher's words, written in
     HAND.forEach(([s, x, y], k) => { const [a, b] = T.write[k], u = span(t, a, b, easeInOutSine); if (u <= 0) return;
-      c.save(); c.font = 'italic 400 31px Literata'; const w = c.measureText(uz(s)).width; c.beginPath(); c.rect(x - 4, y - 36, (w + 8)*u, 50); c.clip();
+      c.save(); c.font = 'italic 400 36px Literata'; const w = c.measureText(uz(s)).width; c.beginPath(); c.rect(x - 4, y - 42, (w + 8)*u, 58); c.clip();
       c.globalAlpha = deskA*Math.max(.25, nl); c.fillStyle = SEPIA; c.fillText(uz(s), x, y); c.restore(); });
-    if (t > T.write[2][1]) { c.save(); c.globalAlpha = deskA*nl; c.strokeStyle = SEPIA; c.lineWidth = 2.2; c.lineCap = 'round'; const u = span(t, T.write[2][1], T.write[2][1] + .5, easeOut);
-      c.beginPath(); c.moveTo(620, 1530); c.quadraticCurveTo(740, 1522 - 8*u, 620 + 220*u, 1528); c.stroke(); c.restore(); }
+    const wEnd = T.write[T.write.length - 1][1];
+    if (t > wEnd) { c.save(); c.globalAlpha = deskA*nl; c.strokeStyle = SEPIA; c.lineWidth = 2.4; c.lineCap = 'round'; const u = span(t, wEnd, wEnd + .5, easeOut);
+      c.beginPath(); c.moveTo(652, 1523); c.quadraticCurveTo(745, 1515 - 8*u, 652 + 190*u, 1520); c.stroke(); c.restore(); }
     if (t > T.tick) { c.save(); c.globalAlpha = deskA*nl; pencilPart(c, tickCel(), span(t, T.tick, T.tick + .45, easeOut), GRAPH); c.restore(); }
   }
   // the field of lamps, each lit from a neighbour
@@ -323,7 +323,7 @@ function risers(c, t) {
     for (const pl of BOOK.lines) { c.beginPath(); pl.forEach((q, i) => i ? c.lineTo(...q) : c.moveTo(...q)); c.stroke(); } c.restore(); }
 }
 const CAPS = [[T.cap1, "Bir paytlar menda faqat savollar bor edi…"], [T.cap2, "Keyin Siz keldingiz."], [T.cap3, "Va o'z chirog'ingizdan mening chirog'imni yoqdingiz."],
-  [T.cap4, "Siz shunday degan edingiz. Men bajarib ko'rdim."], [T.cap5, "Chiroqdan chiroq yoqilsa, nuri kamaymaydi…"], [T.cap6, "…aksincha, olam yorishadi."]];
+  [T.cap4, "Siz shunday degan edingiz. Men qalbimga quloq soldim."], [T.cap5, "Chiroqdan chiroq yoqilsa, nuri kamaymaydi…"], [T.cap6, "…aksincha, olam yorishadi."]];
 function captions(c, t) {
   resetT(c);
   const back = Math.max(...CAPS.map(([[a, b]]) => win(t, a, b, .7, .6)));        // a soft shade so the words stay readable over the lights
@@ -403,7 +403,7 @@ function score(ac, t0, dest) {
   // the flame is passed
   bell(86, t0 + T.touch, .05, 2.2); bell(90, t0 + T.touch + .09, .03, 2.4); box(93, t0 + T.touch + .18, .02);
   // the words, the tick
-  T.write.forEach(([a], k) => box([81, 83, 86][k], t0 + a + .05, .03)); bell(81, t0 + T.tick + .3, .035, 1.4);
+  T.write.forEach(([a], k) => box([81, 86][k], t0 + a + .05, .03)); bell(81, t0 + T.tick + .3, .035, 1.4);
   // lamps multiply: pings for the first ones, climbing the scale
   const PENT = [62, 64, 66, 69, 71];
   FIELD.slice(0, 26).forEach((p, i) => box(PENT[i % 5] + 12*(1 + Math.floor(i/5) % 2), t0 + p.lit, .022 - i*.0004));

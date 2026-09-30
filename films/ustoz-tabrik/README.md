@@ -14,8 +14,8 @@ Telegram, Instagram va WhatsApp uchun.
 Kechasi, stol ustida o'chiq kichik moychiroq va chizib tashlangan urinishlarga
 to'la daftar turibdi. Qorong'ida savol belgilari suzib yuribdi. Keyin katta
 chiroq keladi. Uning nuri savollarni uchqunga aylantiradi va u o'z olovidan
-kichik chiroqni yoqadi. Daftarga ustozning so'zlari yoziladi: *«Ishonmang,
-lekin bajarib ko'ring!»*, shogird esa yoniga belgi qo'yadi. Kichik chiroq
+kichik chiroqni yoqadi. Daftarga ustozning so'zlari yoziladi: *«Qalbingga
+quloq sol!»*, shogird esa yoniga belgi qo'yadi. Kichik chiroq
 boshqasini yoqadi, u yana boshqasini, va qorong'ilik chiroqlar maydoniga
 aylanadi. Har bir olovdan bittadan nur ko'tariladi va osmonda ochiq kitobni
 chizadi. Shundan so'ng tabrik chiqadi.
@@ -25,13 +25,10 @@ chizadi. Shundan so'ng tabrik chiqadi.
 | 0–5 s | Qorong'i stol, o'chiq chiroq, savol belgilari | *Bir paytlar menda faqat savollar bor edi…* |
 | 5–10 s | Ustoz chirog'i keladi, savollar uchqunga aylanadi | *Keyin Siz keldingiz.* |
 | 10–15 s | Olovlar bir-biriga tegadi, kichik chiroq yonadi | *Va o'z chirog'ingizdan mening chirog'imni yoqdingiz.* |
-| 15–25 s | Daftarga «Ishonmang, lekin bajarib ko'ring!» yoziladi, shogird belgi qo'yadi | *Siz shunday degan edingiz. Men bajarib ko'rdim.* |
+| 15–25 s | Daftarga «Qalbingga quloq sol!» yoziladi, tagiga chiziladi, shogird belgi qo'yadi | *Siz shunday degan edingiz. Men qalbimga quloq soldim.* |
 | 25–35 s | Chiroq chiroqdan yonadi, kamera uzoqlashadi: yuzlab chiroq | *Chiroqdan chiroq yoqilsa, nuri kamaymaydi… …aksincha, olam yorishadi.* |
 | 35–41 s | Nurlar ko'tarilib, osmonda ochiq kitobni chizadi | — |
 | 41,6–58 s | Tabrik | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! … Minnatdor shogirdingiz |
-
-«Ishonmang, lekin bajarib ko'ring!» — ustozning kitobi nomi (shu
-repozitoriyda uning reklamasi ham bor: [`../kitob-reklama/`](../kitob-reklama/)).
 
 ## Ko'rinish va ovoz
 
