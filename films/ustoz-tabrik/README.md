@@ -28,7 +28,7 @@ chizadi. Shundan so'ng tabrik chiqadi.
 | 15–25 s | Daftarga «Qalbingga quloq sol!» yoziladi, tagiga chiziladi, shogird belgi qo'yadi | *Siz shunday degan edingiz. Men qalbimga quloq soldim.* |
 | 25–35 s | Chiroq chiroqdan yonadi, kamera uzoqlashadi: yuzlab chiroq | *Chiroqdan chiroq yoqilsa, nuri kamaymaydi… …aksincha, olam yorishadi.* |
 | 35–41 s | Nurlar ko'tarilib, osmonda ochiq kitobni chizadi | — |
-| 41,6–58 s | Tabrik | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! … Minnatdor shogirdingiz |
+| 41,6–58 s | Tabrik | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! … Minnatdor shogirdingiz, Shaxobiddin |
 
 ## Ko'rinish va ovoz
 
@@ -57,9 +57,8 @@ chizadi. Shundan so'ng tabrik chiqadi.
   render uchun ichiga joylangan
 - [`tools/score.mjs`](tools/score.mjs) — faqat ovozni render qilish
 
-Tabrik matnini o'zgartirish (masalan, oxiriga ismingizni qo'shish) uchun
-`ustoz-tabrik.html` dagi `card()` funksiyasida "Minnatdor shogirdingiz"
-qatorini tahrirlang.
+Tabrik matni `ustoz-tabrik.html` dagi `card()` funksiyasida. Imzo ikki qatorda:
+"Minnatdor shogirdingiz," va "Shaxobiddin".
 
 ```bash
 cd films/ustoz-tabrik

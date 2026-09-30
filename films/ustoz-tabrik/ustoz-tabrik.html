@@ -336,13 +336,14 @@ const WISH = "Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga siha
 function card(c, t) {
   if (t < T.card) return; resetT(c);
   const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut), rise = k => 18*(1 - a(k));
-  text(c, 'Aziz Ustozim,', W/2, 720 + rise(0), {size: 60, alpha: a(0), glow: 14});
-  text(c, 'Dilshod Bahodirovich', W/2, 822 + rise(.8), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(.8), glow: 22});
-  text(c, 'Mannopov!', W/2, 910 + rise(1.2), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(1.2), glow: 22});
-  text(c, 'Ustoz va murabbiylar kuni', W/2, 1022 + rise(2.6), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(2.6), glow: 12});
-  text(c, "muborak bo'lsin!", W/2, 1090 + rise(3), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(3), glow: 12});
-  wrap(c, WISH, 40, 860).forEach((l, i) => text(c, l, W/2, 1182 + i*54 + rise(4.6), {size: 40, alpha: .92*a(4.6), glow: 8}));
-  text(c, 'Minnatdor shogirdingiz', W/2, 1400 + rise(7), {size: 44, color: GOLD, alpha: a(7), glow: 14});
+  text(c, 'Aziz Ustozim,', W/2, 686 + rise(0), {size: 60, alpha: a(0), glow: 14});
+  text(c, 'Dilshod Bahodirovich', W/2, 786 + rise(.8), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(.8), glow: 22});
+  text(c, 'Mannopov!', W/2, 872 + rise(1.2), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(1.2), glow: 22});
+  text(c, 'Ustoz va murabbiylar kuni', W/2, 980 + rise(2.6), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(2.6), glow: 12});
+  text(c, "muborak bo'lsin!", W/2, 1046 + rise(3), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(3), glow: 12});
+  wrap(c, WISH, 40, 860).forEach((l, i) => text(c, l, W/2, 1134 + i*52 + rise(4.6), {size: 40, alpha: .92*a(4.6), glow: 8}));
+  text(c, 'Minnatdor shogirdingiz,', W/2, 1316 + rise(7), {size: 42, color: GOLD, alpha: a(7), glow: 14});
+  text(c, 'Shaxobiddin', W/2, 1386 + rise(7.7), {size: 58, color: GOLD, alpha: a(7.7), glow: 18});
 }
 
 // ------------------------------------------------------------------ the frame
