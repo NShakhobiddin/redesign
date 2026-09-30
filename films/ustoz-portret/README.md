@@ -100,7 +100,7 @@ cd ../ustoz-portret
 node render.mjs ustoz-portret.html --out out
 cd out && ffmpeg -y -i birlashma/ustoz-tabrik.mp4 -i ustoz-portret.mp4 \
   -i birlashma/ustoz-tabrik-score.wav -i ustoz-portret-score.wav -filter_complex \
-  "[0:v][1:v]concat=n=2:v=1:a=0[v];[2:a][3:a]concat=n=2:v=0:a=1,volume=GAINdB,alimiter=limit=0.891:attack=5:release=80:level=disabled[a]" \
+  "[0:v][1:v]concat=n=2:v=1:a=0[v];[2:a][3:a]concat=n=2:v=0:a=1,volume=7.5dB,alimiter=limit=0.891:attack=5:release=80:level=disabled[a]" \
   -map "[v]" -map "[a]" -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 192k ustoz-tabrik-birlashgan.mp4
 ```
 
@@ -109,5 +109,9 @@ cd out && ffmpeg -y -i birlashma/ustoz-tabrik.mp4 -i ustoz-portret.mp4 \
 - MP4 xatosiz dekodlanadi: 1392 kadr, 58,0 s, 1080×1920, ovoz AAC 48 kHz.
 - Grid va to'liq o'lchamdagi kadrlar ko'zdan kechirildi. Yordamchi chiziqlar
   yuz chizilgach to'liq o'chadi. Qalam izohlarni to'smaydi.
+- Birlashgan video xatosiz dekodlanadi: 2448 kadr (1056 + 1392), 1:42,0,
+  1080×1920; ovoz −17,4 LUFS, eng baland nuqta −1,5 dBFS. Ulanish joyi
+  (43–45 s) kadrma-kadr tekshirildi: birinchi film iliq qorong'ilikka so'nadi,
+  "Qalam" aynan shu rangdan ochiladi, sakrash yo'q.
 - Bu muhitda videoni odatiy tezlikda ko'rish va ovozni eshitish imkoni
   bo'lmadi.
