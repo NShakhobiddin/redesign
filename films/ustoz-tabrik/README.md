@@ -28,7 +28,7 @@ chizadi. Shundan so'ng tabrik chiqadi.
 | 15–25 s | Daftarga «Qalbingga quloq sol!» yoziladi, tagiga chiziladi, shogird belgi qo'yadi | *Siz shunday degan edingiz. Men qalbimga quloq soldim.* |
 | 25–35 s | Chiroq chiroqdan yonadi, kamera uzoqlashadi: yuzlab chiroq | *Chiroqdan chiroq yoqilsa, nuri kamaymaydi… …aksincha, olam yorishadi.* |
 | 35–41 s | Nurlar ko'tarilib, osmonda ochiq kitobni chizadi | — |
-| 41,6–58 s | Tabrik | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! … Minnatdor shogirdingiz, Shaxobiddin |
+| 41,6–58 s | Tabrik | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! … Minnatdor shogirdingiz |
 
 ## Ko'rinish va ovoz
 
@@ -57,8 +57,8 @@ chizadi. Shundan so'ng tabrik chiqadi.
   render uchun ichiga joylangan
 - [`tools/score.mjs`](tools/score.mjs) — faqat ovozni render qilish
 
-Tabrik matni `ustoz-tabrik.html` dagi `card()` funksiyasida. Imzo ikki qatorda:
-"Minnatdor shogirdingiz," va "Shaxobiddin".
+Tabrik matni `ustoz-tabrik.html` dagi `card()` funksiyasida. Imzo bir qator:
+"Minnatdor shogirdingiz".
 
 ```bash
 cd films/ustoz-tabrik
@@ -70,6 +70,22 @@ cd out && ffmpeg -y -i ustoz-tabrik.mp4 -i ustoz-tabrik-score.wav -map 0:v:0 -ma
   -af "volume=7.5dB,alimiter=limit=0.891:attack=5:release=80:level=disabled,apad" -t 58 \
   -c:v copy -c:a aac -b:a 192k ustoz-tabrik-final.mp4
 ```
+
+## Birlashgan video
+
+Bu film "Qalam" ([`../ustoz-portret/`](../ustoz-portret/)) bilan bitta
+videoga ulanadi: avval chiroqlar hikoyasi, keyin portret, oxirida bitta
+umumiy tabrik. Buning uchun film `--look merge` bilan render qilinadi:
+
+- film 44 soniyada tugaydi: nurlar kitobni chizgach, kadr "Qalam"ning iliq
+  qorong'i rangiga (`#1a1714`) o'tadi, "Qalam" esa aynan shu rangdan ochiladi;
+- tabrik kartasi chiqmaydi, u "Qalam"ning oxirida bir marta keladi;
+- musiqa G–D akkordlari bilan yumshoq yakunlanadi va kadr bilan birga so'nadi,
+  keyin "Qalam"ning G-majordagi kuyi boshlanadi.
+
+Birlashgan videoning ikkinchi yarmi ustozning suratidan chizilgani uchun u
+repozitoriyga qo'yilmagan. Ulash buyruqlari:
+[`../ustoz-portret/README.md`](../ustoz-portret/README.md#birlashgan-video).
 
 ## Tekshiruv va cheklovlar
 

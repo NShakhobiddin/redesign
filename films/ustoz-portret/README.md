@@ -1,7 +1,9 @@
 # Qalam
 
-**Ustoz va murabbiylar kuni** uchun ikkinchi tabrik: Shaxobiddindan ustozi
+**Ustoz va murabbiylar kuni** uchun ikkinchi tabrik: shogirddan ustozi
 **Dilshod Bahodirovich Mannopov**ga. 58 soniyalik vertikal (9:16) film.
+Birinchi tabrik ("Bir chiroqdan — ming chiroq") bilan bitta videoga ham
+ulanadi, pastda [Birlashgan video](#birlashgan-video) ga qarang.
 Shogird ustozining portretini qalamda chizadi, har bir chizgi bilan bir xotira
 aytiladi.
 
@@ -22,8 +24,8 @@ aytiladi.
 | 26–31 s | Ko'ylak, stol; qalam ketadi | *Chizib bo'lgach, bir narsani angladim:* |
 | 31–36 s | Qo'llar orasida kichik nur yonadi | *qo'llaringizda doim bir yorug'lik bo'lgan ekan.* |
 | 36–41 s | Nurdan uchqunlar uchib, atrofda rasmlarga aylanadi: chiroq, kitob, yulduz, yurak, qog'oz samolyot, moychiroq | *Siz uni hammamizga ulashdingiz.* |
-| 41–45 s | Tagida «Qalbingga quloq sol!», shogird imzosi "Shaxobiddin, 2026" | — |
-| 45–58 s | Portret yuqoriga ko'tariladi, tabrik chiqadi | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! Siz chizib bergan yo'ldan yurib, bugun o'zim ham chizishni o'rgandim. Rahmat, Ustoz! Minnatdor shogirdingiz, Shaxobiddin |
+| 41–45 s | Tagida «Qalbingga quloq sol!» yoziladi | — |
+| 45–58 s | Portret yuqoriga ko'tariladi, tabrik chiqadi | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga sihat-salomatlik, baraka va shogirdlaringiz quvonchini tilayman. Minnatdor shogirdingiz |
 
 ## Surat qanday qalam rasmiga aylanadi
 
@@ -72,6 +74,34 @@ node render.mjs ustoz-portret.html --out out
 cd out && ffmpeg -y -i ustoz-portret.mp4 -i ustoz-portret-score.wav -map 0:v:0 -map 1:a:0 \
   -af "volume=7.5dB,alimiter=limit=0.891:attack=5:release=80:level=disabled,apad" -t 58 \
   -c:v copy -c:a aac -b:a 192k ustoz-portret-final.mp4
+```
+
+## Birlashgan video
+
+Ikkala tabrik bitta videoda (1:42): avval "Bir chiroqdan — ming chiroq"
+([`../ustoz-tabrik/`](../ustoz-tabrik/)) chiroqlar hikoyasi, keyin "Qalam",
+oxirida bitta umumiy tabrik.
+
+| Vaqt | Qism |
+| --- | --- |
+| 0–44 s | "Bir chiroqdan — ming chiroq": savollar, ustoz chirog'i, «Qalbingga quloq sol!», chiroq chiroqdan yonadi, nurlar kitobni chizadi. Kadr iliq qorong'ilikka so'nadi. |
+| 44–102 s | "Qalam": portret chiziladi, qo'llar orasida nur yonadi, rasmlar uchib chiqadi, tabrik. |
+
+Birinchi film `--look merge` rejimida render qilinadi: tabrik kartasisiz,
+44 soniyada "Qalam" ochiladigan rangga so'nadi, musiqasi G–D bilan
+yakunlanadi. Ikkala ovoz yo'lagi ulangach, bitta umumiy kuchaytirish
+beriladi, shuning uchun qismlarning nisbiy balandligi o'zgarmaydi. Video
+surat asosida bo'lgani uchun `out/` da qoladi, repozitoriyga qo'yilmaydi.
+
+```bash
+cd films/ustoz-tabrik
+node render.mjs ustoz-tabrik.html --look merge --out ../ustoz-portret/out/birlashma
+cd ../ustoz-portret
+node render.mjs ustoz-portret.html --out out
+cd out && ffmpeg -y -i birlashma/ustoz-tabrik.mp4 -i ustoz-portret.mp4 \
+  -i birlashma/ustoz-tabrik-score.wav -i ustoz-portret-score.wav -filter_complex \
+  "[0:v][1:v]concat=n=2:v=1:a=0[v];[2:a][3:a]concat=n=2:v=0:a=1,volume=GAINdB,alimiter=limit=0.891:attack=5:release=80:level=disabled[a]" \
+  -map "[v]" -map "[a]" -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -b:a 192k ustoz-tabrik-birlashgan.mp4
 ```
 
 ## Tekshiruv va cheklovlar

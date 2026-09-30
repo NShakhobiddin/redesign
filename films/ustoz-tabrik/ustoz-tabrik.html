@@ -93,6 +93,9 @@ function wrap(c, str, size, maxW, font = 'italic 400', fam = 'Literata') {
 }
 
 // ------------------------------------------------------------------ timing (seconds)
+// ?look=merge (render.mjs --look merge): the film as the first half of the joint video. It stops after the
+// book of lights and fades into "Qalam"'s warm dark (#1a1714) and chord; the greeting card comes at the end of "Qalam".
+const MERGE = new URLSearchParams(location.search).get('look') === 'merge';
 const T = {
   fade: [0, 1.4], cap1: [1.2, 5.2],
   arrive: [5.0, 7.8], cap2: [6.0, 9.6], sparks: [6.4, 9.2],
@@ -100,7 +103,7 @@ const T = {
   push: [15.4, 17.0], write: [[17.2, 18.5], [18.6, 19.9]], tick: 22.0, cap4: [20.6, 25.0],
   pull: [25.0, 27.0], chain0: 26.6, chain1: 34.0, cap5: [27.3, 31.0], cap6: [31.2, 35.0],
   rise: [35.0, 38.6], travel: 2.3, bookGlow: 40.2, finale: [35.0, 41.5],
-  card: 41.6, end: 58.0,
+  card: 41.6, end: MERGE ? 44.0 : 58.0, out: [42.2, 43.6],
 };
 
 // ------------------------------------------------------------------ the world (camera zoom 1 = screen)
@@ -334,7 +337,7 @@ function captions(c, t) {
 }
 const WISH = "Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga sihat-salomatlik, baraka va shogirdlaringiz quvonchini tilayman.";
 function card(c, t) {
-  if (t < T.card) return; resetT(c);
+  if (MERGE || t < T.card) return; resetT(c);
   const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut), rise = k => 18*(1 - a(k));
   text(c, 'Aziz Ustozim,', W/2, 686 + rise(0), {size: 60, alpha: a(0), glow: 14});
   text(c, 'Dilshod Bahodirovich', W/2, 786 + rise(.8), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(.8), glow: 22});
@@ -342,8 +345,7 @@ function card(c, t) {
   text(c, 'Ustoz va murabbiylar kuni', W/2, 980 + rise(2.6), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(2.6), glow: 12});
   text(c, "muborak bo'lsin!", W/2, 1046 + rise(3), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(3), glow: 12});
   wrap(c, WISH, 40, 860).forEach((l, i) => text(c, l, W/2, 1134 + i*52 + rise(4.6), {size: 40, alpha: .92*a(4.6), glow: 8}));
-  text(c, 'Minnatdor shogirdingiz,', W/2, 1316 + rise(7), {size: 42, color: GOLD, alpha: a(7), glow: 14});
-  text(c, 'Shaxobiddin', W/2, 1386 + rise(7.7), {size: 58, color: GOLD, alpha: a(7.7), glow: 18});
+  text(c, 'Minnatdor shogirdingiz', W/2, 1336 + rise(7), {size: 50, color: GOLD, alpha: a(7), glow: 16});
 }
 
 // ------------------------------------------------------------------ the frame
@@ -355,6 +357,7 @@ function shot(c, tau) {
   const f = 1 - span(t, T.fade[0], T.fade[1]); if (f > 0) { c.save(); c.globalAlpha = f; c.fillStyle = '#05060c'; c.fillRect(0, 0, W, H); c.restore(); }
   // a soft vignette keeps the eye in the middle
   const v = c.createRadialGradient(W/2, H/2, H*.3, W/2, H/2, H*.75); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.45)'); c.fillStyle = v; c.fillRect(0, 0, W, H);
+  const o = MERGE ? span(t, T.out[0], T.out[1], easeInOutSine) : 0; if (o > 0) { c.save(); c.globalAlpha = o; c.fillStyle = '#1a1714'; c.fillRect(0, 0, W, H); c.restore(); }
 }
 
 // ------------------------------------------------------------------ score (D major, 76 BPM; synthesized, pitched sounds only)
@@ -370,6 +373,7 @@ function score(ac, t0, dest) {
   const G = (v, d) => { const g = ac.createGain(); g.gain.value = v; if (d) g.connect(d); return g; };
   const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 2; comp.knee.value = 10; comp.attack.value = .01; comp.release.value = .3;
   const master = G(.9, dest); comp.connect(master);
+  if (MERGE) { master.gain.setValueAtTime(.9, t0 + T.out[0]); master.gain.linearRampToValueAtTime(0, t0 + T.end - .2); }   // fade out with the picture
   const len = Math.ceil(ac.sampleRate*2.6), ir = ac.createBuffer(2, len, ac.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(ch + 17); for (let i = 0; i < len; i++) d[i] = (r()*2 - 1)*Math.pow(1 - i/len, 3.4); }
   const room = ac.createConvolver(); room.buffer = ir; const rlp = ac.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3200; room.connect(rlp); rlp.connect(G(1, comp));
@@ -386,10 +390,10 @@ function score(ac, t0, dest) {
   const padBus = G(1); const plp = ac.createBiquadFilter(); plp.type = 'lowpass'; plp.frequency.value = 950; padBus.connect(plp); plp.connect(bus);
   const pad = (ch, t, d, v) => ch.slice(1).forEach(m => [-6, 6].forEach(det => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + 1.1); g.gain.setValueAtTime(v, t + d); g.gain.linearRampToValueAtTime(0, t + d + 1.6); o.connect(g); g.connect(padBus); o.start(t); o.stop(t + d + 1.7); }));
-  const total = T.end;
-  CHORDS.forEach((ch, b) => {
+  const total = T.end, CH = MERGE ? [...CHORDS.slice(0, 13), CHORDS[14]] : CHORDS;       // merged: G then D, a soft close before "Qalam" (G major)
+  CH.forEach((ch, b) => {
     const tb = t0 + b*BAR; if (b*BAR > total - .5) return;
-    const last = b === CHORDS.length - 1, hold = last ? total - b*BAR - 1.6 : BAR;
+    const last = b === CH.length - 1, hold = last ? total - b*BAR - 1.6 : BAR;
     pad(ch, tb, hold, b < 2 ? .007 : b < 4 ? .009 : b >= 12 && b < 14 ? .012 : .008);
     if (b < 2) { piano(ch[0], tb, .09, 3.2); piano(ch[1], tb + BEAT*2, .05, 2.6); return; }                           // the dark: low, sparse
     if (b < 4) { ch.forEach((m, i) => piano(m, tb + i*.09, .06 - i*.006)); piano(ch[0] + 12, tb + BEAT*2, .04); return; }   // the lamp arrives: a rolled chord

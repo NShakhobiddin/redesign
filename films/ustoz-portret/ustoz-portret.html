@@ -12,7 +12,7 @@
 <script>
 'use strict';
 /* Film brief
-Occasion: Ustoz va murabbiylar kuni. A second greeting from Shaxobiddin to his
+Occasion: Ustoz va murabbiylar kuni. A second greeting from a student to his
   teacher Dilshod Bahodirovich Mannopov, built on the teacher's photo (supplied
   by the student; kept out of the public repository).
 Story "Qalam": the student draws his teacher in pencil. Guide lines first, then
@@ -21,7 +21,7 @@ Story "Qalam": the student draws his teacher in pencil. Guide lines first, then
   shirt. When the drawing is done a small light kindles between the hands; its
   sparks fly out and become doodles around the portrait (bulb, book, star,
   heart, paper plane, clay lamp). The teacher's words "Qalbingga quloq sol!"
-  are written under it and the student signs. The greeting follows.
+  are written under it. The greeting follows.
 Look: graphite on warm paper. The photo becomes a drawing in the page: a line
   layer (each pixel against its neighbourhood, dodge-style) and a hatched shade
   layer, graphite-coloured, with paper grain. The background of the photo is
@@ -96,7 +96,7 @@ function wrap(c, str, size, maxW, font = 'italic 400', fam = 'Literata') {
 const T = {
   fade: [0, 1.2], pencilIn: [1.0, 3.0], guide: [3.2, 8.2], lead: 1.0, reveal1: 30.0, pencilOut: [30.2, 31.4],
   light: [31.6, 33.4], sparks0: 35.4, sparkGap: .75, fly: .6, draw: .8,
-  quote: [41.6, 45.2], sign: 43.0, move: [45.0, 47.0], card: 46.6, end: 58.0,
+  quote: [41.6, 45.2], move: [45.0, 47.0], card: 46.6, end: 58.0,
 };
 const CAPS = [[[0.8, 4.6], "Sizni qalamda chizmoqchi bo'ldim…"], [[5.0, 8.6], "Qayerdan boshlashni bilmadim."],
   [[9.0, 14.4], "Ko'zlaringizdan boshladim — ular menga birinchi bo'lib ishongan edi."], [[14.8, 19.6], "Har bir chizgi — bir xotira, bir saboq."],
@@ -282,11 +282,10 @@ function captions(c, t) {
     const lines = wrap(c, s, 50, 930), y0 = 272 - (lines.length - 1)*33 + 12*(1 - span(t, a, a + .9, easeOut));
     lines.forEach((l, i) => text(c, l, W/2, y0 + i*66, {size: 50, alpha: al})); }
 }
+const WISH = "Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga sihat-salomatlik, baraka va shogirdlaringiz quvonchini tilayman.";
 function card(c, t) {
   const q = win(t, T.quote[0], 99, .8), P = place(t), qy = P.y + PH*P.s + (t < T.move[0] ? 80 : 58);
   text(c, "«Qalbingga quloq sol!»", W/2, qy, {size: t < T.move[0] ? 48 : 38, color: SEPIA, alpha: q});
-  if (t < T.move[0] + .6) { const sa = span(t, T.sign, T.sign + .8)*(1 - span(t, T.move[0], T.move[0] + .6));
-    text(c, "Shaxobiddin, 2026", P.x + PW*P.s - 24, qy + 64, {size: 32, color: GRAPHITE, align: 'right', alpha: sa}); }
   if (t < T.card) return;
   const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut), up = k => 16*(1 - a(k));
   text(c, 'Aziz Ustozim,', W/2, 1010 + up(0), {size: 54, alpha: a(0)});
@@ -294,9 +293,8 @@ function card(c, t) {
   text(c, 'Mannopov!', W/2, 1174 + up(1.2), {size: 66, font: '600', fam: 'Fraunces', color: AMBER, alpha: a(1.2)});
   text(c, 'Ustoz va murabbiylar kuni', W/2, 1274 + up(2.6), {size: 50, font: '600', fam: 'Fraunces', color: GRAPHITE, alpha: a(2.6)});
   text(c, "muborak bo'lsin!", W/2, 1334 + up(3), {size: 50, font: '600', fam: 'Fraunces', color: GRAPHITE, alpha: a(3)});
-  wrap(c, "Siz chizib bergan yo'ldan yurib, bugun o'zim ham chizishni o'rgandim. Rahmat, Ustoz!", 38, 880).forEach((l, i) => text(c, l, W/2, 1420 + i*50 + up(4.6), {size: 38, color: '#4a3f36', alpha: a(4.6)}));
-  text(c, 'Minnatdor shogirdingiz,', W/2, 1590 + up(6.6), {size: 40, color: AMBER, alpha: a(6.6)});
-  text(c, 'Shaxobiddin', W/2, 1654 + up(7.2), {size: 54, color: AMBER, alpha: a(7.2)});
+  wrap(c, WISH, 38, 880).forEach((l, i) => text(c, l, W/2, 1420 + i*50 + up(4.6), {size: 38, color: '#4a3f36', alpha: a(4.6)}));
+  text(c, 'Minnatdor shogirdingiz', W/2, 1620 + up(6.6), {size: 48, color: AMBER, alpha: a(6.6)});
 }
 
 // ------------------------------------------------------------------ the frame
@@ -377,7 +375,7 @@ function score(ac, t0, dest) {
   [[7.8, 83], [9.8, 79], [13.0, 81], [19.0, 86], [23.8, 83]].forEach(([t, m]) => box(m, t0 + t, .03));
   bell(83, t0 + T.light[0], .05, 2.4); bell(86, t0 + T.light[0] + .1, .03, 2.4);                      // the light
   DOODLES.forEach((d, k) => box([79, 81, 83, 86, 88, 91][k], t0 + sparkT(k) + T.fly, .03));           // each doodle lands
-  bell(79, t0 + T.quote[0], .03, 2.2); box(86, t0 + T.sign + .2, .02);
+  bell(79, t0 + T.quote[0], .03, 2.2);
 }
 
 defineFilm({palette: {...PALETTES.pencilMinimal, paper: PAPER}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: 'portret', dur: T.end, fn: shot}], score});
