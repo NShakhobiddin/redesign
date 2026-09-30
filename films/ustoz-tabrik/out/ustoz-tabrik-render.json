@@ -1,0 +1,17 @@
+{
+  "file": "/home/user/redesign/films/ustoz-tabrik/ustoz-tabrik.html",
+  "fps": 24,
+  "frames": 1392,
+  "outputFps": 24,
+  "outputFrames": 1392,
+  "duration": 58,
+  "size": {
+    "w": 1080,
+    "h": 1920,
+    "W": 1080,
+    "H": 1920,
+    "S": 1
+  },
+  "look": null,
+  "audio": true
+}

@@ -33,6 +33,11 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/ustoz-tabrik/`](films/ustoz-tabrik/) — **"Bir chiroqdan — ming
+  chiroq"**. Ustoz va murabbiylar kuni munosabati bilan ustoz Dilshod
+  Bahodirovich Mannopovga tabrik: 58 soniyalik vertikal film. Ustozning chirog'i
+  shogirdnikini yoqadi, chiroq chiroqdan yonib, nurlar osmonda ochiq kitobni
+  chizadi.
 - [`films/pf174-bojxona/`](films/pf174-bojxona/) — **"Bojxona islohoti:
   PF-174 sodda tilda"**. Prezidentning 2026-yil 27-avgustdagi PF-174-son
   bojxona farmoni bo'yicha 6 qismli vertikal tushuntirish seriyasi va

@@ -1,0 +1,417 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Bir chiroqdan — ming chiroq</title>
+<style>body{margin:0;background:#0d1020;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="studio.js"></script>
+<script src="cels.js"></script>
+<script src="materials.js"></script>
+<script src="fonts.js"></script>
+<script>
+'use strict';
+/* Film brief
+Occasion: Ustoz va murabbiylar kuni (Teachers' and Mentors' Day, 1 October).
+  A greeting from a student to their teacher, Dilshod Bahodirovich Mannopov,
+  author of "Ishonmang, lekin bajarib ko'ring!".
+Story "Bir chiroqdan — ming chiroq": night, a desk, an unlit clay lamp
+  (moychiroq) and a notebook of crossed-out attempts; question marks hang in
+  the dark. A larger lamp arrives, its light turns the questions into sparks,
+  and it lights the small lamp from its own flame. In the notebook the
+  teacher's words appear: "Ishonmang, lekin bajarib ko'ring!"; the student
+  ticks it off. The small lamp lights another, and another, until the dark is
+  a field of lamps. A light rises from each flame and together they draw an
+  open book in the sky. The greeting follows.
+Narration: first-person captions, the student speaking to the teacher ("Siz").
+Look: chalk-and-pencil lines on night paper (drawCel pencil in a pale chalk
+  colour); flame and glow are the only saturated colour, and what they light
+  takes on its colour (clay, paper, gold ink). The flame carries the story
+  across every change of scale.
+Motion: objects, not characters: the teacher's lamp glides in, dips to touch
+  flames, settles; flames flicker on purpose; everything else holds its marks.
+Format: 9:16, 1080x1920, 24 fps, 58 s. Captions in the upper third, clear of
+  phone UI; the closing card holds 10 s.
+Sound: all synthesized here (no samples, no licensed music): piano and music
+  box in D major, 76 BPM (Bm–G–D–A intro, then D–A/C#–Bm–G–D/F#–G–A–D with a
+  melody), a bell when a flame is passed, pings as the lamps multiply, a harp
+  glissando as the lights rise. Only pitched sounds, no noise.
+Engine: hand-drawn-canvas-animation skill (MIT, Alexey Fateev).
+*/
+{
+// ------------------------------------------------------------------ look
+const NIGHT = '#141a2e', NIGHT2 = '#231f38', DUSK = '#2a1f33', DUSK2 = '#4b2f3a', CHALK = '#e7dfcc', CREAM = '#f6ecd8';
+const GOLD = '#f2b45a', CLAY = '#b8693a', CLAY2 = '#7a3f22', PAGE = '#f1e5cc', GRAPH = '#3b342c', SEPIA = '#94561b';
+const uz = s => String(s).replace(/([oOgG])'/g, '$1ʻ').replace(/'/g, 'ʼ');
+for (const f of FILM_FONTS) { const ff = new FontFace(f.family, `url(${f.src})`, {weight: f.weight, style: f.style, unicodeRange: f.range}); document.fonts.add(ff); _photoLoads.push(ff.load()); }
+_photoLoads.push(document.fonts.load('italic 400 40px Literata', uz("o'g'")), document.fonts.load('600 40px Fraunces', uz("O'zbek")));
+
+const FPS = 24, DEG = Math.PI/180;
+const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
+const win = (t, a, b, fi = .5, fo = .5) => Math.min(span(t, a, a + fi, easeOut), 1 - span(t, b - fo, b, easeIn));
+const lp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+const mix = (a, b, t) => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], t))).join(',')})`; };
+const PRESS = [[0, .15], [.15, .85], [.5, 1], [.85, .8], [1, .1]];
+const CELS = {};
+const cel = (id, make) => CELS[id] ??= compileCel({strokes: make().map((s, k) => ({id: s.id ?? `s${k}`, points: s.pts, width: s.w ?? 5, opacity: s.o ?? 1, pressure: PRESS}))}, {id});
+const chalk = (c, cl, a = 1, color = CHALK) => { if (a <= 0) return; c.save(); c.globalAlpha *= a; drawCel(c, cl, {material: 'pencil', color}); c.restore(); };
+const pathOf = (pts, close = true) => { const p = new Path2D(); pts.forEach((q, i) => i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])); if (close) p.closePath(); return p; };
+const ring = (c, rx, ry, a0, sweep, n) => Array.from({length: n}, (_, k) => { const a = a0 + sweep*k/(n - 1); return [c[0] + rx*Math.cos(a), c[1] + ry*Math.sin(a)]; });
+function densify(pts, step, close) { const out = [], P = close ? [...pts, pts[0]] : pts;
+  for (let i = 0; i < P.length - 1; i++) { const a = P[i], b = P[i + 1], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1])/step)); for (let k = 0; k < n; k++) out.push(lp2(a, b, k/n)); }
+  if (!close) out.push(P[P.length - 1]); return out; }
+const jit = (pts, amp, seed) => pts.map((p, k) => [p[0] + amp*noise1(k*.45, seed), p[1] + amp*noise1(k*.45 + 31, seed)]);
+const loop = (pts, amp = 1, seed = 1, step = 12) => { const d = jit(densify(pts, step, true), amp, seed); return [...d, ...d.slice(0, 3)]; };
+const line = (pts, amp = .8, seed = 1, step = 10) => jit(densify(pts, step, false), amp, seed);
+// A hand-written reveal of a fixed pencil cel: the same marks as drawCel, cut at u.
+function pencilPart(c, compiled, u, color) {
+  c.save(); c.lineCap = 'butt'; c.strokeStyle = color;
+  const all = compiled.strokes.reduce((a, s) => a + s.samples.length - 1, 0); let budget = u*all;
+  for (const s of compiled.strokes) {
+    const last = Math.min(s.samples.length - 1, Math.floor(budget)); budget -= s.samples.length - 1; if (last < 1) break;
+    for (let pass = 0; pass < 3; pass++) {
+      const spread = (pass - 1)*s.width*.30;
+      const pt = a => { const d = (noise1(a.u*5 + pass*11, s.seed)*.20 + spread)*Math.sin(Math.PI*a.u); return [a.p[0] - a.tangent[1]*d, a.p[1] + a.tangent[0]*d]; };
+      for (let i = 1; i <= last; i++) {
+        const a = s.samples[i - 1], b = s.samples[i], tooth = hash(i*3 + pass, s.seed);
+        if (tooth < .08 + .10*(1 - Math.min(1, b.w/s.width))) continue;
+        c.lineWidth = Math.max(.18, Math.max(.04, (a.w + b.w)/2)*.40); c.globalAlpha = (s.opacity ?? 1)*(.34 + tooth*.30);
+        c.beginPath(); c.moveTo(...pt(a)); c.lineTo(...pt(b)); c.stroke();
+      }
+    }
+  }
+  c.restore();
+}
+function text(c, str, x, y, {size = 54, font = 'italic 400', fam = 'Literata', color = CREAM, align = 'center', alpha = 1, glow = 0} = {}) {
+  if (alpha <= 0) return;
+  c.save(); c.font = `${font} ${size}px ${fam}`; c.textAlign = align; c.textBaseline = 'alphabetic'; c.globalAlpha *= alpha; c.letterSpacing = fam === 'Fraunces' ? (-.01*size).toFixed(1) + 'px' : '0px';
+  if (glow) { c.shadowColor = 'rgba(255,190,110,.55)'; c.shadowBlur = glow; }
+  c.fillStyle = color; c.fillText(uz(str), x, y); c.restore();
+}
+function wrap(c, str, size, maxW, font = 'italic 400', fam = 'Literata') {
+  c.save(); c.font = `${font} ${size}px ${fam}`; const out = []; let cur = '';
+  for (const w of uz(str).split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && c.measureText(t).width > maxW) { out.push(cur); cur = w; } else cur = t; }
+  if (cur) out.push(cur); c.restore(); return out;
+}
+
+// ------------------------------------------------------------------ timing (seconds)
+const T = {
+  fade: [0, 1.4], cap1: [1.2, 5.2],
+  arrive: [5.0, 7.8], cap2: [6.0, 9.6], sparks: [6.4, 9.2],
+  reach: [9.8, 11.5], touch: 11.6, back: [12.5, 14.2], cap3: [10.2, 15.4],
+  push: [15.4, 17.0], write: [[17.2, 18.1], [18.2, 19.3], [19.4, 20.2]], tick: 22.0, cap4: [20.6, 25.0],
+  pull: [25.0, 27.0], chain0: 26.6, chain1: 34.0, cap5: [27.3, 31.0], cap6: [31.2, 35.0],
+  rise: [35.0, 38.6], travel: 2.3, bookGlow: 40.2, finale: [35.0, 41.5],
+  card: 41.6, end: 58.0,
+};
+
+// ------------------------------------------------------------------ the world (camera zoom 1 = screen)
+const DESK = {back: 1300, front: 1600};
+const SMALL = {x: 230, base: 1340, s: 1, flip: 1};
+const BIG = {s: 1.3, flip: -1, rest: [850, 1340 - 52]};
+const NOTE = {L: [[300, 1402], [585, 1410], [585, 1545], [292, 1538]], R: [[595, 1410], [880, 1402], [888, 1538], [595, 1545]]};
+// the clay lamp (moychiroq), body-centred local coordinates; the wick is at the spout tip
+const LAMP = [[-44, -22], [-26, -28], [0, -30], [26, -28], [44, -22], [58, -16], [74, -12], [92, -16], [104, -22], [108, -18], [104, -12], [90, -6], [72, 0], [58, 8],
+  [52, 20], [36, 32], [14, 38], [-14, 38], [-36, 32], [-54, 18], [-60, 0], [-54, -14]];
+const WICK = [106, -21], HANDLE = [[-54, -12], [-70, -24], [-88, -18], [-90, 0], [-76, 14], [-56, 10]];
+const LAMP_PATH = pathOf(LAMP);
+const lampCel = () => cel('lamp', () => [
+  {id: 'body', pts: loop(LAMP, .9, 3, 9), w: 5},
+  {id: 'handle', pts: line(HANDLE, .6, 5, 8), w: 5}, {id: 'handle2', pts: line([[-56, -4], [-68, -12], [-80, -8], [-80, 2], [-70, 8], [-58, 4]], .5, 6, 8), w: 3.5},
+  {id: 'hole', pts: loop(ring([0, -28], 15, 4, 0, TAU, 13).slice(0, -1), .3, 7, 6), w: 3.5},
+  {id: 'foot', pts: line(ring([0, 38], 24, 5, 0, Math.PI, 9), .4, 8, 6), w: 4},
+  {id: 'wave', pts: line(Array.from({length: 13}, (_, k) => [-44 + k*7.5, -4 + 4*Math.sin(k*1.4)]), .3, 9, 5), w: 3},
+  {id: 'wick', pts: line([[102, -17], [106, -22]], .1, 10, 2), w: 4},
+]);
+const xf = (P, pt) => { const [x, y] = pt, c = Math.cos(P.rot ?? 0), s = Math.sin(P.rot ?? 0), X = x*P.s*P.flip, Y = y*P.s; return [P.x + X*c - Y*s, P.y + X*s + Y*c]; };
+
+// the teacher's lamp over time
+const TOUCH_ROT = 13*DEG;                                      // mirrored lamp: a positive turn dips its spout
+function bigPose(t) {
+  const P = {s: BIG.s, flip: BIG.flip, rot: 0};
+  const sw = xf({x: SMALL.x, y: SMALL.base - 40, s: 1, flip: 1}, WICK);            // the small lamp's wick
+  const hover = [720, 1070];
+  const tw = [sw[0] + 30, sw[1] - 44];                                               // where the big wick goes to kiss the small one
+  const off = xf({x: 0, y: 0, s: BIG.s, flip: BIG.flip, rot: TOUCH_ROT}, WICK), touch = [tw[0] - off[0], tw[1] - off[1]];
+  const bob = Math.sin(t*1.7)*6;
+  if (t < T.arrive[1]) { const u = span(t, T.arrive[0], T.arrive[1], easeOutQuint); P.x = lerp(1320, hover[0], u); P.y = lerp(760, hover[1], u) + bob; P.rot = lerp(-10, 0, u)*DEG; }
+  else if (t < T.reach[0]) { P.x = hover[0]; P.y = hover[1] + bob; }
+  else if (t < T.back[0]) { const u = span(t, T.reach[0], T.reach[1], easeInOutSine), b = bob*(1 - u);
+    P.x = lerp(hover[0], touch[0], u); P.y = lerp(hover[1], touch[1], u) + b; P.rot = lerp(0, TOUCH_ROT, u); }
+  else { const u = span(t, T.back[0], T.back[1], easeInOutSine), bobIn = bob*(1 - span(t, T.back[0], T.back[0] + .8));
+    P.x = lerp(touch[0], BIG.rest[0], u); P.y = lerp(touch[1], BIG.rest[1], u) + bobIn*(1 - u); P.rot = lerp(TOUCH_ROT, 0, easeOutBack(u)); }
+  return P;
+}
+const smallPose = () => ({x: SMALL.x, y: SMALL.base - 40, s: SMALL.s, flip: 1, rot: 0});
+
+// question marks hanging in the dark
+const QS = [[250, 690, 1.0, -8], [530, 560, 1.25, 6], [810, 700, .95, 10], [390, 930, .8, -4], [700, 950, 1.05, -10], [150, 1060, .75, 12], [930, 900, .8, -6], [560, 1140, .7, 4]];
+const qCel = k => cel('q' + k, () => [{id: 'hook', pts: line([[-18, -22], [-14, -36], [0, -44], [16, -38], [20, -24], [10, -12], [2, -2], [0, 10]], .8, 20 + k, 5), w: 6},
+  {id: 'dot', pts: line([[0, 24], [1, 28], [-1, 29], [0, 25]], .2, 40 + k, 2), w: 7}]);
+const qSpark = k => { const [x, y] = QS[k], d = Math.hypot(x - 720, y - 1070); return T.sparks[0] + d/900*1.8; };
+
+// the notebook: pages, scribbled attempts, the teacher's words, the student's tick
+const noteCel = () => cel('note', () => [{id: 'L', pts: loop(NOTE.L, .7, 51, 14), w: 4.5}, {id: 'R', pts: loop(NOTE.R, .7, 52, 14), w: 4.5}, {id: 'spine', pts: line([[590, 1406], [590, 1546]], .4, 53), w: 3}]);
+const scribbleCel = () => cel('scribble', () => {
+  const r = rng(77), out = [];
+  for (let k = 0; k < 4; k++) { const y = 1432 + k*26, pts = []; for (let x = 318; x < 560 - r()*60; x += 7) pts.push([x, y + 4*Math.sin(x*.19 + k) + (r() - .5)*3]); out.push({id: 'w' + k, pts: line(pts, .6, 60 + k, 6), w: 3}); }
+  out.push({id: 'x1', pts: line([[330, 1428], [470, 1490]], .8, 70), w: 4}, {id: 'x2', pts: line([[470, 1424], [336, 1494]], .8, 71), w: 4});
+  out.push({id: 'o', pts: line(Array.from({length: 26}, (_, k) => [500 + 30*Math.cos(k*.52) + k*.6, 1500 + 17*Math.sin(k*.52)]), .8, 72, 6), w: 3.5});
+  return out;
+});
+const tickCel = () => cel('tick', () => [{id: 'tick', pts: line([[352, 1508], [372, 1528], [418, 1470]], .7, 81, 6), w: 7}]);
+const HAND = [["Ishonmang,", 612, 1440], ["lekin bajarib", 628, 1478], ["ko'ring!", 700, 1516]];
+
+// the lamps that follow: the student's light passed on and on
+const FIELD = (() => {
+  const r = rng(2026), out = [], cx = 540, cy = 1560, n = 340;
+  for (let k = 0; out.length < 320 && k < n*3; k++) {
+    const a = k*2.39996323, rr = Math.sqrt((k + 4)/(n + 4));
+    const x = cx + Math.cos(a)*rr*2700 + (r() - .5)*140, y = cy + Math.sin(a)*rr*1100 + (r() - .5)*120;   // a wide field, a horizon of lamps
+    if (((x - 560)/480)**2 + ((y - 1420)/170)**2 < 1) continue;                 // keep the notebook and the two lamps clear
+    out.push({x, y, s: .42 + r()*.22, flip: r() < .5 ? -1 : 1, seed: k + 3});
+  }
+  const src = xf(smallPose(), WICK), dmax = Math.max(...out.map(p => Math.hypot(p.x - src[0], p.y - src[1])));
+  out.forEach(p => { p.d = Math.hypot(p.x - src[0], p.y - src[1]); });
+  out.sort((a, b) => a.d - b.d);
+  out.forEach((p, i) => {
+    p.wick = xf({...p, rot: 0}, WICK);
+    p.lit = T.chain0 + (T.chain1 - T.chain0)*Math.pow(p.d/dmax, .85);
+    // lit from the nearest lamp already burning (the first ones from the student's own lamp)
+    let best = null, bd = 1e9; for (let j = 0; j < i; j++) { const q = out[j]; if (q.lit > p.lit - .35) continue; const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; best = q; } }
+    p.from = best ? best.wick : src; if (!best) p.lit = Math.max(p.lit, T.chain0 + i*.12);
+  });
+  return out;
+})();
+
+// the open book the risen lights draw, in screen space
+const BOOK = (() => {
+  const cx = 540, top = 290, bot = 560, w = 380, pts = [];
+  const page = side => {
+    const e = [[cx, top + 36], [cx + side*w*.45, top - 10], [cx + side*w, top + 6], [cx + side*w, bot - 4], [cx + side*w*.5, bot - 18], [cx, bot + 22]];
+    const curve = (a, b, c, n) => Array.from({length: n}, (_, k) => { const u = k/(n - 1); return [(1 - u)**2*a[0] + 2*u*(1 - u)*b[0] + u*u*c[0], (1 - u)**2*a[1] + 2*u*(1 - u)*b[1] + u*u*c[1]]; });
+    return [curve(e[0], e[1], e[2], 40), [e[2], e[3]], curve(e[3], e[4], e[5], 40), ...[0, 1, 2, 3].map(k => { const y = top + 74 + k*48, x0 = cx + side*48, x1 = cx + side*(w - 44 - (k === 3 ? 90 : 0));
+      return curve([x0, y + 14], [(x0 + x1)/2, y - 8], [x1, y], 16); })];
+  };
+  const lines = [...page(-1), ...page(1), [[cx, top + 36], [cx, bot + 22]]];
+  const sample = (pl, step) => { const out = []; for (let i = 0; i < pl.length - 1; i++) { const a = pl[i], b = pl[i + 1], n = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1])/step)); for (let k = 0; k < n; k++) out.push(lp2(a, b, k/n)); } out.push(pl[pl.length - 1]); return out; };
+  for (const pl of lines) pts.push(...sample(pl, 21));
+  return {lines, pts};
+})();
+
+// ------------------------------------------------------------------ camera
+function camAt(t) {
+  const K = [[0, 540, 1000, 1], [T.push[0], 555, 1020, 1.05], [T.push[1], 590, 1440, 1.72], [T.pull[0], 590, 1440, 1.74], [T.pull[1], 540, 1250, 1],
+    [T.chain1, 540, 1540, .31], [T.finale[0], 540, 1540, .31], [T.finale[1], 540, -2050, .2]];
+  let i = 0; while (i < K.length - 2 && t >= K[i + 1][0]) i++;
+  const a = K[i], b = K[i + 1], u = span(t, a[0], b[0], easeInOutSine);
+  const z = Math.exp(lerp(Math.log(a[3]), Math.log(b[3]), u));
+  return {x: lerp(a[1], b[1], u), y: lerp(a[2], b[2], u), z};
+}
+const toScreen = (C, p) => [W/2 + (p[0] - C.x)*C.z, H/2 + (p[1] - C.y)*C.z];
+
+// ------------------------------------------------------------------ light and fire
+function glow(c, x, y, r, a, warm = 1) {
+  if (a <= 0 || r <= 0) return;
+  const g = c.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(255,${Math.round(178 + 20*warm)},${Math.round(96 + 30*warm)},${.5*a})`); g.addColorStop(.35, `rgba(255,150,70,${.16*a})`); g.addColorStop(1, 'rgba(255,120,50,0)');
+  c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.restore();
+}
+function flame(c, x, y, h, t, seed, a = 1, rot = 0) {
+  if (a <= 0) return;
+  const f = 1 + .08*noise1(t*6.3, seed) + .05*noise1(t*14.1, seed + 3), H = h*f*a, Wd = h*.44*Math.sqrt(a), sw = h*.14*noise1(t*2.4, seed + 7);
+  c.save(); c.translate(x, y); c.rotate(rot*.35);
+  const body = (s, col, al) => { c.globalAlpha = al; c.fillStyle = col; c.beginPath(); c.moveTo(0, Wd*.18*s);
+    c.bezierCurveTo(-Wd*.78*s, -H*.08*s, -Wd*.36*s + sw*.3, -H*.62*s, sw, -H*s); c.bezierCurveTo(Wd*.36*s + sw*.3, -H*.62*s, Wd*.78*s, -H*.08*s, 0, Wd*.18*s); c.fill(); };
+  body(1, '#ff9a3c', .92); body(.72, '#ffc766', .95); body(.42, '#fff5d2', 1);
+  c.globalAlpha = .35; c.fillStyle = '#7fa7ff'; c.beginPath(); c.ellipse(0, 0, Wd*.22, Wd*.14, 0, 0, TAU); c.fill();
+  c.restore();
+}
+// how lit a point is by the two main flames (for the colour the light gives objects)
+function litAt(t, p) {
+  let v = 0; const bp = xf(bigPose(t), WICK), sp = xf(smallPose(), WICK);
+  const a1 = span(t, T.arrive[0] + .6, T.arrive[1]), a2 = span(t, T.touch, T.touch + .6);
+  v += a1*Math.exp(-Math.pow(Math.hypot(p[0] - bp[0], p[1] - bp[1])/620, 2)) + a2*.85*Math.exp(-Math.pow(Math.hypot(p[0] - sp[0], p[1] - sp[1])/520, 2));
+  return clamp(v*1.25, 0, 1);
+}
+function drawLamp(c, P, t, lit, {detail = true, fire = 0, seed = 1, fh = 34} = {}) {
+  c.save(); c.translate(P.x, P.y); c.rotate(P.rot ?? 0); c.scale(P.s*P.flip, P.s);
+  const g = c.createLinearGradient(0, -30, 0, 40); g.addColorStop(0, mix(CLAY2, CLAY, .4 + .6*lit)); g.addColorStop(1, mix('#1d1420', CLAY2, lit));
+  c.save(); c.globalAlpha = .25 + .75*lit; c.fillStyle = g; c.fill(LAMP_PATH);
+  c.strokeStyle = mix('#241a24', CLAY2, lit); c.lineWidth = 9; c.lineCap = 'round'; c.beginPath(); HANDLE.forEach((q, i) => i ? c.lineTo(...q) : c.moveTo(...q)); c.stroke(); c.restore();
+  if (detail) chalk(c, lampCel(), .55 + .45*(1 - lit*.5));
+  else { c.save(); c.globalAlpha = .35; c.strokeStyle = CHALK; c.lineWidth = 3; c.stroke(LAMP_PATH); c.restore(); }
+  c.restore();
+  if (fire > 0) { const w = xf(P, WICK); flame(c, w[0], w[1] - 2, fh*P.s, t, seed, fire, P.rot ?? 0); }
+}
+
+// ------------------------------------------------------------------ scene
+function background(c, t) {
+  const warm = span(t, T.finale[0], T.finale[1] + 1, easeInOutSine);
+  paper(c, mix(NIGHT, DUSK, warm), null, 5);
+  resetT(c); const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, `rgba(0,0,0,${.35 - .2*warm})`); g.addColorStop(1, mix(NIGHT2, DUSK2, warm));
+  c.save(); c.globalAlpha = .75; c.fillStyle = g; c.fillRect(0, 0, W, H); c.restore();
+}
+function world(c, t, C) {
+  const big = bigPose(t), small = smallPose(), fireBig = span(t, T.arrive[0], T.arrive[0] + .4), fireSmall = span(t, T.touch, T.touch + .45, easeOutBack);
+  const deskA = 1 - span(t, T.chain0 + .6, T.chain0 + 3.5);
+  // light first: it lives in the air around the flames
+  const bw = xf(big, WICK), sw = xf(small, WICK);
+  glow(c, bw[0], bw[1] - 20, 900, .8*fireBig); glow(c, bw[0], bw[1] - 20, 260, .9*fireBig);
+  glow(c, sw[0], sw[1] - 16, 700, .75*fireSmall); glow(c, sw[0], sw[1] - 16, 200, .85*fireSmall);
+  // desk
+  if (deskA > 0) {
+    const lit = litAt(t, [560, 1420]);
+    c.save(); c.globalAlpha = deskA*(.2 + .5*lit); c.fillStyle = mix('#241c26', '#6a4430', lit); c.fillRect(-900, DESK.back, 2900, DESK.front - DESK.back); c.restore();
+    chalk(c, cel('desk', () => [{id: 'back', pts: line([[-900, DESK.back], [1980, DESK.back + 4]], 1.2, 90, 40), w: 5}, {id: 'front', pts: line([[-900, DESK.front], [1980, DESK.front - 6]], 1.2, 91, 40), w: 6},
+      {id: 'apron', pts: line([[-900, DESK.front + 42], [1980, DESK.front + 36]], 1.2, 92, 40), w: 4}]), deskA*.8);
+    // notebook
+    const nl = litAt(t, [590, 1470]);
+    c.save(); c.globalAlpha = deskA*(.1 + .9*nl); c.fillStyle = PAGE; c.fill(pathOf(NOTE.L)); c.fill(pathOf(NOTE.R));
+    c.globalAlpha = deskA*.35*nl; c.strokeStyle = '#8fa6c4'; c.lineWidth = 1.4;
+    for (let k = 0; k < 4; k++) { const y = 1440 + k*27; c.beginPath(); c.moveTo(308, y); c.lineTo(578, y + 2); c.moveTo(602, y + 2); c.lineTo(874, y); c.stroke(); }
+    c.restore();
+    chalk(c, noteCel(), deskA*.8);
+    const scA = deskA*nl*(1 - .55*span(t, T.tick, T.tick + .6));
+    chalk(c, scribbleCel(), scA, GRAPH);
+    // the teacher's words, written in
+    HAND.forEach(([s, x, y], k) => { const [a, b] = T.write[k], u = span(t, a, b, easeInOutSine); if (u <= 0) return;
+      c.save(); c.font = 'italic 400 31px Literata'; const w = c.measureText(uz(s)).width; c.beginPath(); c.rect(x - 4, y - 36, (w + 8)*u, 50); c.clip();
+      c.globalAlpha = deskA*Math.max(.25, nl); c.fillStyle = SEPIA; c.fillText(uz(s), x, y); c.restore(); });
+    if (t > T.write[2][1]) { c.save(); c.globalAlpha = deskA*nl; c.strokeStyle = SEPIA; c.lineWidth = 2.2; c.lineCap = 'round'; const u = span(t, T.write[2][1], T.write[2][1] + .5, easeOut);
+      c.beginPath(); c.moveTo(620, 1530); c.quadraticCurveTo(740, 1522 - 8*u, 620 + 220*u, 1528); c.stroke(); c.restore(); }
+    if (t > T.tick) { c.save(); c.globalAlpha = deskA*nl; pencilPart(c, tickCel(), span(t, T.tick, T.tick + .45, easeOut), GRAPH); c.restore(); }
+  }
+  // the field of lamps, each lit from a neighbour
+  if (t > T.chain0 - .5) for (const p of FIELD) {
+    const ig = span(t, p.lit, p.lit + .35, easeOutBack), appear = span(t, p.lit - .9, p.lit - .3);
+    if (appear <= 0) continue;
+    const sc = toScreen(C, [p.x, p.y]); if (sc[0] < -80 || sc[0] > W + 80 || sc[1] < -80 || sc[1] > H + 80) continue;
+    const dim = 1 - .4*span(t, T.card, T.card + 2.5);                                         // the field steps back behind the greeting
+    if (ig > 0) glow(c, p.wick[0], p.wick[1] - 10, 190*ig, .3*ig*dim);
+    c.save(); c.globalAlpha = appear*dim; drawLamp(c, {...p, rot: 0}, t, .25 + .6*ig, {detail: C.z > .7, fire: ig, seed: p.seed, fh: 34}); c.restore();
+    if (ig > 0 && C.z < .6) glow(c, p.wick[0], p.wick[1] - 8, 7/C.z, .9*ig*dim);             // far away, each flame stays a point of its own
+    const u = span(t, p.lit - .4, p.lit);                                                     // the spark on its way
+    if (u > 0 && u < 1) for (let k = 0; k < 4; k++) { const v = Math.max(0, u - k*.06), a = p.from, b = p.wick, mid = [(a[0] + b[0])/2, Math.min(a[1], b[1]) - 60 - .15*Math.hypot(b[0] - a[0], b[1] - a[1])];
+      const q = [(1 - v)**2*a[0] + 2*v*(1 - v)*mid[0] + v*v*b[0], (1 - v)**2*a[1] + 2*v*(1 - v)*mid[1] + v*v*b[1]]; glow(c, q[0], q[1], 34 - k*6, 1 - k*.22); }
+  }
+  // the two lamps of the story
+  drawLamp(c, small, t, Math.max(litAt(t, [small.x, small.y]), .1), {fire: fireSmall, seed: 12, fh: 34});
+  drawLamp(c, big, t, Math.max(litAt(t, [big.x, big.y]), .15), {fire: fireBig, seed: 31, fh: 38});
+  // the flame passing from wick to wick
+  if (t > T.touch - .25 && t < T.touch + .5) { const u = span(t, T.touch - .25, T.touch + .5); glow(c, sw[0], sw[1] - 8, 120*(1 - u) + 40, 1.4*(1 - u)); }
+  // questions in the dark, then sparks
+  QS.forEach(([x, y, s, r], k) => {
+    const ts = qSpark(k), qa = 1 - span(t, ts, ts + .9), bob = Math.sin(t*.9 + k*1.7)*9;
+    if (qa > 0) { c.save(); c.translate(x, y + bob); c.rotate(r*DEG); c.scale(s*1.5, s*1.5); chalk(c, qCel(k), qa*span(t, .3 + k*.12, 1.3 + k*.12)); c.restore(); }
+    const sa = span(t, ts + .2, ts + .8)*(1 - span(t, ts + 2.4, ts + 4.2)); if (sa > 0) { const up = span(t, ts, ts + 4.2, easeOut)*140; glow(c, x, y + bob + 40*s - up, 70, sa); glow(c, x, y + bob + 40*s - up, 18, sa*1.3); }
+  });
+}
+// the lights rise out of the field and draw the book
+function risers(c, t) {
+  if (t < T.rise[0]) return;
+  const n = BOOK.pts.length, srcs = FIELD.slice(0, n), order = srcs.map((p, i) => i).sort((a, b) => srcs[a].x - srcs[b].x);
+  const targets = BOOK.pts.map((p, i) => i).sort((a, b) => BOOK.pts[a][0] - BOOK.pts[b][0]);
+  order.forEach((si, k) => {
+    const p = srcs[si], tg = BOOK.pts[targets[k]], t0 = T.rise[0] + (T.rise[1] - T.rise[0])*hash(si, 5), u = span(t, t0, t0 + T.travel, easeInOutSine); if (u <= 0) return;
+    const C0 = camAt(t0), a = toScreen(C0, [p.wick[0], p.wick[1] - 12]), c1 = [a[0], a[1] - 420], c2 = [tg[0], tg[1] + 260];
+    const q = [0, 1].map(i => (1 - u)**3*a[i] + 3*u*(1 - u)**2*c1[i] + 3*u*u*(1 - u)*c2[i] + u**3*tg[i]);
+    const tw = 1 + .25*Math.sin(t*5 + si), end = span(t, T.bookGlow, T.bookGlow + 1.5);
+    glow(c, q[0], q[1], (30 + 10*(1 - u))*tw*(1 - .3*end), .8); glow(c, q[0], q[1], 7, 1.2);
+  });
+  const ga = span(t, T.bookGlow - .4, T.bookGlow + 1.2);
+  if (ga > 0) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(255,200,120,${.55*ga})`; c.lineWidth = 3; c.lineCap = 'round'; c.lineJoin = 'round'; c.shadowColor = 'rgba(255,170,80,.9)'; c.shadowBlur = 16;
+    for (const pl of BOOK.lines) { c.beginPath(); pl.forEach((q, i) => i ? c.lineTo(...q) : c.moveTo(...q)); c.stroke(); } c.restore(); }
+}
+const CAPS = [[T.cap1, "Bir paytlar menda faqat savollar bor edi…"], [T.cap2, "Keyin Siz keldingiz."], [T.cap3, "Va o'z chirog'ingizdan mening chirog'imni yoqdingiz."],
+  [T.cap4, "Siz shunday degan edingiz. Men bajarib ko'rdim."], [T.cap5, "Chiroqdan chiroq yoqilsa, nuri kamaymaydi…"], [T.cap6, "…aksincha, olam yorishadi."]];
+function captions(c, t) {
+  resetT(c);
+  const back = Math.max(...CAPS.map(([[a, b]]) => win(t, a, b, .7, .6)));        // a soft shade so the words stay readable over the lights
+  if (back > 0) { const g = c.createLinearGradient(0, 180, 0, 640); g.addColorStop(0, `rgba(8,10,22,${.55*back})`); g.addColorStop(.55, `rgba(8,10,22,${.4*back})`); g.addColorStop(1, 'rgba(8,10,22,0)'); c.fillStyle = g; c.fillRect(0, 0, W, 640); }
+  for (const [[a, b], s] of CAPS) { const al = win(t, a, b, .7, .6); if (al <= 0) continue;
+    const lines = wrap(c, s, 58, 900), y0 = 360 - (lines.length - 1)*38 + 14*(1 - span(t, a, a + .9, easeOut));
+    lines.forEach((l, i) => text(c, l, W/2, y0 + i*76, {size: 58, alpha: al, glow: 18})); }
+}
+const WISH = "Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga sihat-salomatlik, baraka va shogirdlaringiz quvonchini tilayman.";
+function card(c, t) {
+  if (t < T.card) return; resetT(c);
+  const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut), rise = k => 18*(1 - a(k));
+  text(c, 'Aziz Ustozim,', W/2, 720 + rise(0), {size: 60, alpha: a(0), glow: 14});
+  text(c, 'Dilshod Bahodirovich', W/2, 822 + rise(.8), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(.8), glow: 22});
+  text(c, 'Mannopov!', W/2, 910 + rise(1.2), {size: 76, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(1.2), glow: 22});
+  text(c, 'Ustoz va murabbiylar kuni', W/2, 1022 + rise(2.6), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(2.6), glow: 12});
+  text(c, "muborak bo'lsin!", W/2, 1090 + rise(3), {size: 56, font: '600', fam: 'Fraunces', color: CREAM, alpha: a(3), glow: 12});
+  wrap(c, WISH, 40, 860).forEach((l, i) => text(c, l, W/2, 1182 + i*54 + rise(4.6), {size: 40, alpha: .92*a(4.6), glow: 8}));
+  text(c, 'Minnatdor shogirdingiz', W/2, 1400 + rise(7), {size: 44, color: GOLD, alpha: a(7), glow: 14});
+}
+
+// ------------------------------------------------------------------ the frame
+function shot(c, tau) {
+  const t = Math.round(tau*FPS)/FPS, C = camAt(t);
+  background(c, t);
+  cam(c, C.x, C.y, C.z); world(c, t, C);
+  resetT(c); risers(c, t); captions(c, t); card(c, t);
+  const f = 1 - span(t, T.fade[0], T.fade[1]); if (f > 0) { c.save(); c.globalAlpha = f; c.fillStyle = '#05060c'; c.fillRect(0, 0, W, H); c.restore(); }
+  // a soft vignette keeps the eye in the middle
+  const v = c.createRadialGradient(W/2, H/2, H*.3, W/2, H/2, H*.75); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.45)'); c.fillStyle = v; c.fillRect(0, 0, W, H);
+}
+
+// ------------------------------------------------------------------ score (D major, 76 BPM; synthesized, pitched sounds only)
+const BPM = 76, BEAT = 60/BPM, BAR = 4*BEAT, mtof = m => 440*Math.pow(2, (m - 69)/12);
+const CHORDS = [[47, 54, 59, 62, 66], [43, 50, 55, 59, 62], [38, 50, 57, 62, 66], [45, 52, 57, 61, 64],               // Bm G D A (intro)
+  [38, 50, 57, 62, 66], [49, 57, 61, 64, 69], [47, 54, 59, 62, 66], [43, 50, 55, 59, 62],                               // D A/C# Bm G
+  [42, 50, 57, 62, 66], [43, 50, 55, 59, 62], [45, 52, 57, 61, 64], [38, 50, 57, 62, 66],                               // D/F# G A D
+  [43, 50, 55, 59, 62], [45, 52, 57, 61, 64], [38, 50, 57, 62, 66], [43, 50, 55, 59, 62], [45, 52, 57, 61, 64], [38, 50, 57, 62, 66]];   // G A | D G A D
+const MELODY = [[4, 0, 78, 3], [4, 3, 76, 1], [5, 0, 76, 2], [5, 2, 73, 2], [6, 0, 74, 2], [6, 2, 78, 2], [7, 0, 71, 3], [7, 3, 74, 1],
+  [8, 0, 81, 2], [8, 2, 78, 2], [9, 0, 79, 2], [9, 2, 76, 2], [10, 0, 76, 2], [10, 2, 73, 1], [10, 3, 76, 1], [11, 0, 74, 4],
+  [14, 0, 81, 2], [14, 2, 78, 2], [15, 0, 83, 2], [15, 2, 79, 2], [16, 0, 81, 2], [16, 2, 76, 1], [16, 3, 73, 1], [17, 0, 74, 4]];   // [bar, beat, midi, beats]
+function score(ac, t0, dest) {
+  const G = (v, d) => { const g = ac.createGain(); g.gain.value = v; if (d) g.connect(d); return g; };
+  const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 2; comp.knee.value = 10; comp.attack.value = .01; comp.release.value = .3;
+  const master = G(.9, dest); comp.connect(master);
+  const len = Math.ceil(ac.sampleRate*2.6), ir = ac.createBuffer(2, len, ac.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(ch + 17); for (let i = 0; i < len; i++) d[i] = (r()*2 - 1)*Math.pow(1 - i/len, 3.4); }
+  const room = ac.createConvolver(); room.buffer = ir; const rlp = ac.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3200; room.connect(rlp); rlp.connect(G(1, comp));
+  const bus = G(1, comp); bus.connect(G(.32, room));
+  const env = (p, t, a, peak, d) => { p.setValueAtTime(0, t); p.linearRampToValueAtTime(peak, t + a); p.exponentialRampToValueAtTime(.0001, t + a + d); p.setValueAtTime(0, t + a + d + .01); };
+  const osc = (f, t, a, peak, d, dst, type = 'sine') => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; env(g.gain, t, a, peak, d); o.connect(g); g.connect(dst); o.start(t); o.stop(t + a + d + .05); };
+  // piano: a few harmonics, the upper ones fading first; lower notes ring longer
+  const piano = (m, t, v, d = null) => { const f = mtof(m), dur = d ?? clamp(3.4 - (m - 40)*.045, 1.2, 3.4);
+    [[1, 1], [2, .42], [3, .18], [4, .08]].forEach(([h, a]) => osc(f*h*(1 + (h - 1)*.0007), t, .005, v*a, dur/Math.pow(h, .7), bus)); };
+  const box = (m, t, v) => { const f = mtof(m); osc(f, t, .003, v, 1.3, bus); osc(f*3.01, t, .002, v*.18, .35, bus); };        // music box
+  const bell = (m, t, v, d = 1.8) => { const f = mtof(m), c = ac.createOscillator(), mo = ac.createOscillator(), mg = ac.createGain(), g = ac.createGain();
+    c.frequency.value = f; mo.frequency.value = f*2; mg.gain.setValueAtTime(f*.8, t); mg.gain.exponentialRampToValueAtTime(f*.02, t + d*.7); mo.connect(mg); mg.connect(c.frequency);
+    env(g.gain, t, .004, v, d); c.connect(g); g.connect(bus); c.start(t); mo.start(t); c.stop(t + d + .1); mo.stop(t + d + .1); };
+  const padBus = G(1); const plp = ac.createBiquadFilter(); plp.type = 'lowpass'; plp.frequency.value = 950; padBus.connect(plp); plp.connect(bus);
+  const pad = (ch, t, d, v) => ch.slice(1).forEach(m => [-6, 6].forEach(det => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + 1.1); g.gain.setValueAtTime(v, t + d); g.gain.linearRampToValueAtTime(0, t + d + 1.6); o.connect(g); g.connect(padBus); o.start(t); o.stop(t + d + 1.7); }));
+  const total = T.end;
+  CHORDS.forEach((ch, b) => {
+    const tb = t0 + b*BAR; if (b*BAR > total - .5) return;
+    const last = b === CHORDS.length - 1, hold = last ? total - b*BAR - 1.6 : BAR;
+    pad(ch, tb, hold, b < 2 ? .007 : b < 4 ? .009 : b >= 12 && b < 14 ? .012 : .008);
+    if (b < 2) { piano(ch[0], tb, .09, 3.2); piano(ch[1], tb + BEAT*2, .05, 2.6); return; }                           // the dark: low, sparse
+    if (b < 4) { ch.forEach((m, i) => piano(m, tb + i*.09, .06 - i*.006)); piano(ch[0] + 12, tb + BEAT*2, .04); return; }   // the lamp arrives: a rolled chord
+    if (last) { ch.forEach((m, i) => piano(m, tb + i*.11, .08 - i*.007, 4.4)); piano(ch[4] + 12, tb + .6, .04, 4); return; }
+    const calm = b >= 14, pat = [0, 1, 2, 3, 4, 3, 2, 1];
+    piano(ch[0], tb, .085);
+    for (let i = 1; i < 8; i++) { if (calm && i % 2) continue; piano(ch[1 + (pat[i] % 4)], tb + i*BEAT/2, .038*(i % 2 ? .8 : 1)); }
+  });
+  MELODY.forEach(([b, beat, m, len]) => { const t = t0 + b*BAR + beat*BEAT; piano(m, t, .1, Math.max(1.6, len*BEAT*1.3)); box(m + 12, t, .012); });
+  // the questions: a little unanswered figure
+  [[1.6, 74], [2.1, 76], [2.6, 78], [3.3, 76]].forEach(([t, m]) => box(m, t0 + t, .03));
+  // the flame is passed
+  bell(86, t0 + T.touch, .05, 2.2); bell(90, t0 + T.touch + .09, .03, 2.4); box(93, t0 + T.touch + .18, .02);
+  // the words, the tick
+  T.write.forEach(([a], k) => box([81, 83, 86][k], t0 + a + .05, .03)); bell(81, t0 + T.tick + .3, .035, 1.4);
+  // lamps multiply: pings for the first ones, climbing the scale
+  const PENT = [62, 64, 66, 69, 71];
+  FIELD.slice(0, 26).forEach((p, i) => box(PENT[i % 5] + 12*(1 + Math.floor(i/5) % 2), t0 + p.lit, .022 - i*.0004));
+  // the lights rise: a harp run over two octaves, then the book lights up
+  for (let i = 0; i < 16; i++) { const m = [62, 64, 66, 67, 69, 71, 73][i % 7] + 12*Math.floor(i/7); osc(mtof(m), t0 + T.rise[0] + .2 + i*.075, .006, .03, 1.6, bus, 'triangle'); }
+  [74, 78, 81, 86].forEach((m, i) => bell(m, t0 + T.bookGlow + i*.12, .03, 2.6));
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: NIGHT}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: 'ustoz', dur: T.end, fn: shot}], score});
+}
+</script>
