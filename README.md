@@ -33,6 +33,10 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/ustoz-portret/`](films/ustoz-portret/) — **"Qalam"**. Ustoz va
+  murabbiylar kuni uchun ikkinchi tabrik: shogird ustozining portretini qalamda
+  chizadi, qo'llari orasida nur yonadi. Surat asosida ishlangani uchun surat
+  va video ochiq repozitoriyga qo'yilmagan, bu yerda faqat kod bor.
 - [`films/ustoz-tabrik/`](films/ustoz-tabrik/) — **"Bir chiroqdan — ming
   chiroq"**. Ustoz va murabbiylar kuni munosabati bilan ustoz Dilshod
   Bahodirovich Mannopovga tabrik: 58 soniyalik vertikal film. Ustozning chirog'i
