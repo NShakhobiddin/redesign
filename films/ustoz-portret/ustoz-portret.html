@@ -20,15 +20,23 @@ Story "Qalam": the student draws his teacher in pencil. Guide lines first, then
   steepled hands ("you taught me not what to think, but how to think"), the
   shirt. When the drawing is done a small light kindles between the hands; its
   sparks fly out and become doodles around the portrait (bulb, book, star,
-  heart, paper plane, clay lamp). The teacher's words "Qalbingga quloq sol!"
-  are written under it. The greeting follows.
-Look: graphite on warm paper. The photo becomes a drawing in the page: a line
-  layer (each pixel against its neighbourhood, dodge-style) and a hatched shade
-  layer, graphite-coloured, with paper grain. The background of the photo is
-  dropped (flood fill from the border) so only the teacher is drawn. The
-  drawing is revealed by pencil-width strokes in the order a person would draw
-  it; lines lead, shading follows a second later; a drawn pencil works where
-  the lines are appearing. Colour arrives only with the light and the doodles.
+  heart, paper plane, clay lamp) and a watercolour wash spreads from it. The
+  teacher's words "Qalbingga quloq sol!" are written in under it and
+  underlined. The greeting follows.
+Look: a graphite portrait on warm paper, made the way a person draws one. The
+  photo's background is dropped (flood fill from the border). Tone becomes
+  three sheets of real hatching strokes on a right hand's slant, added as the
+  tone deepens, plus soft blended graphite on the face; light skin stays paper.
+  A line layer (each pixel against its neighbourhood, dodge-style) holds the
+  features. Everything catches on the paper's tooth. The shirt is loose
+  contour strokes (traced from the figure's outline) and a few hatched folds,
+  and the drawing thins out into the paper below the shoulders: a vignette
+  sketch, not a cut-out. It is revealed by narrow strokes along the hatching
+  slant in the order a person draws; contours and lines lead, shading follows.
+  A dark green 2B pencil with a cast shadow works where the lines appear and
+  lifts between passes. The camera starts close on the eyes and pulls back as
+  the drawing grows. Colour arrives only with the light: the wash and the
+  doodles (ink over watercolour).
 Format: 9:16, 1080x1920, 24 fps, 58 s. Captions in the upper band; the closing
   card holds 10 s.
 Sound: synthesized here, pitched sounds only (the student asked for no hiss):
@@ -94,7 +102,7 @@ function wrap(c, str, size, maxW, font = 'italic 400', fam = 'Literata') {
 
 // ------------------------------------------------------------------ timing (seconds)
 const T = {
-  fade: [0, 1.2], pencilIn: [1.0, 3.0], guide: [3.2, 8.2], lead: 1.0, reveal1: 30.0, pencilOut: [30.2, 31.4],
+  fade: [0, 1.2], pencilIn: [1.0, 3.0], guide: [3.2, 7.3], travel: 7.8, lead: 1.0, reveal1: 30.0, pencilOut: [30.2, 31.4],
   light: [31.6, 33.4], sparks0: 35.4, sparkGap: .75, fly: .6, draw: .8,
   quote: [41.6, 45.2], move: [45.0, 47.0], card: 46.6, end: 58.0,
 };
@@ -104,23 +112,33 @@ const CAPS = [[[0.8, 4.6], "Sizni qalamda chizmoqchi bo'ldim…"], [[5.0, 8.6], 
   [[26.8, 31.0], "Chizib bo'lgach, bir narsani angladim:"], [[31.4, 36.0], "qo'llaringizda doim bir yorug'lik bo'lgan ekan."],
   [[36.4, 41.2], "Siz uni hammamizga ulashdingiz."]];
 
-// ------------------------------------------------------------------ the portrait (photo → pencil)
+// ------------------------------------------------------------------ the portrait (photo → pencil drawing)
 const PX = {sx: 190, sy: 30, sw: 900, sh: 994}, PS = 1020/900, PW = 1020, PH = Math.round(994*PS);
 const toP = ([x, y]) => [(x - PX.sx)*PS, (y - PX.sy)*PS];                          // photo px → portrait-local
 const toPh = ([x, y]) => [PX.sx + x/PS, PX.sy + y/PS];
 const EYES = [[590, 293], [690, 290]], TIPS = [680, 435], LIGHT = [680, 575];
 const HANDS = [[680, 425], [620, 450], [540, 540], [450, 650], [440, 725], [520, 735], [610, 650], [680, 600], [750, 650], [840, 735], [905, 705], [860, 600], [790, 510], [720, 440]];
+const HATCH = -52*DEG;                                                              // a right hand's natural hatching slant
+const ss = (a, b, x) => { const u = clamp((x - a)/(b - a), 0, 1); return u*u*(3 - 2*u); };
+function vnoise(x, y, seed = 1) { const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx*fx*(3 - 2*fx), v = fy*fy*(3 - 2*fy);
+  const h = (a, b) => hash(Math.imul(a, 73856093) ^ Math.imul(b, 19349663), seed); return lerp(lerp(h(xi, yi), h(xi + 1, yi), u), lerp(h(xi, yi + 1), h(xi + 1, yi + 1), u), v); }
 function inPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi)*(p[1] - yi)/(yj - yi) + xi) c = !c; } return c; }
 // when each part of the drawing arrives: eyes, face, hair, neck, hands, body
 function appearAt(ph, h) {
   const [x, y] = ph, dEye = Math.min(...EYES.map(e => Math.hypot(x - e[0], y - e[1])));
   let t;
-  if (((x - 640)/165)**2 + ((y - 320)/205)**2 < 1 && y > 200) t = 8.8 + Math.min(1, dEye/200)*5.2;
+  if (((x - 640)/165)**2 + ((y - 320)/205)**2 < 1 && y > 186 + 44*vnoise(x/34, 0, 9)) t = 9.2 + Math.min(1, dEye/200)*5.2;
   else if (y < 260 && x > 460 && x < 820) t = 14.0 + (260 - y)/200*2.6 + Math.abs(x - 640)/180*1.4;
   else if (inPoly(ph, HANDS)) t = 20.0 + Math.min(1, Math.hypot(x - TIPS[0], y - TIPS[1])/330)*4.6;
   else if (y < 500 && x > 470 && x < 820) t = 17.6 + (y - 380)/120*1.6;
   else t = 24.8 + Math.min(1, Math.hypot(x - 680, (y - 620)*1.2)/560)*4.4;
   return t + (h - .5)*.7;
+}
+// how finished each place is: the face and hands fully, the shirt looser, and the drawing thins out into
+// the paper below the shoulders (a vignette sketch rather than a cut-out)
+function finishAt(ph) {
+  const [x, y] = ph, dx = (x - 650)/560, dy = Math.max(0, y - 380)/540;
+  return Math.hypot(dx, dy) + .11*(vnoise(x/64, y/64, 4) - .5);
 }
 const PORT = {ready: false};
 function boxBlur(src, w, h, r, passes = 3) {
@@ -132,6 +150,36 @@ function boxBlur(src, w, h, r, passes = 3) {
       for (let y = 0; y < h; y++) { a[y*w + x] = s/(2*r + 1); s += b[Math.min(h - 1, y + r + 1)*w + x] - b[Math.max(0, y - r)*w + x]; } }
   }
   return a;
+}
+// a sheet of real pencil hatching: rows of short, slightly bowed strokes of varying length and pressure
+function hatchField(ang, gap, seed, len = [24, 78], wd = [1.1, 1.9]) {
+  const cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; const g = cv.getContext('2d'), r = rng(seed);
+  const ca = Math.cos(ang), sa = Math.sin(ang), R = Math.hypot(PW, PH)/2 + 20, cx = PW/2, cy = PH/2;
+  g.strokeStyle = '#000'; g.lineCap = 'butt';
+  for (let v = -R; v < R; v += gap*(.75 + .5*r())) for (let u = -R + r()*40; u < R;) {
+    const L = len[0] + r()*(len[1] - len[0]), bow = (r() - .5)*3.2, vv = v + (r() - .5)*1.8, w = wd[0] + r()*(wd[1] - wd[0]), al = .45 + .5*r();
+    const P = k => { const s = u + L*k, o = vv + bow*Math.sin(Math.PI*k); return [cx + ca*s - sa*o, cy + sa*s + ca*o]; };
+    for (let k = 0; k < 5; k++) { const a = P(k/5), b = P((k + 1)/5); g.globalAlpha = al*[.35, .85, 1, .9, .45][k]; g.lineWidth = w*[.7, 1, 1, .95, .7][k]; g.beginPath(); g.moveTo(...a); g.lineTo(...b); g.stroke(); }
+    u += L + 2 + r()*16;
+  }
+  const d = g.getImageData(0, 0, PW, PH).data, out = new Float32Array(PW*PH); for (let i = 0; i < out.length; i++) out[i] = d[4*i + 3]/255; return out;
+}
+// the figure's outline as polylines (marching squares on the mask), for loose contour strokes
+function outlines(mask, cell, thr) {
+  const gw = Math.floor((PW - 1)/cell), gh = Math.floor((PH - 1)/cell), v = (gx, gy) => mask[Math.min(PH - 1, gy*cell)*PW + Math.min(PW - 1, gx*cell)] > thr ? 1 : 0;
+  const adj = new Map(), key = (x, y) => `${Math.round(x*2)},${Math.round(y*2)}`, link = (a, b) => { const ka = key(...a), kb = key(...b);
+    (adj.get(ka) ?? adj.set(ka, {p: a, n: []}).get(ka)).n.push(kb); (adj.get(kb) ?? adj.set(kb, {p: b, n: []}).get(kb)).n.push(ka); };
+  for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
+    const id = v(x, y)*8 + v(x + 1, y)*4 + v(x + 1, y + 1)*2 + v(x, y + 1), Tp = [x + .5, y], Rt = [x + 1, y + .5], Bt = [x + .5, y + 1], Lf = [x, y + .5];
+    const segs = {1: [[Lf, Bt]], 2: [[Bt, Rt]], 3: [[Lf, Rt]], 4: [[Tp, Rt]], 5: [[Lf, Tp], [Bt, Rt]], 6: [[Tp, Bt]], 7: [[Lf, Tp]], 8: [[Lf, Tp]], 9: [[Tp, Bt]],
+      10: [[Tp, Rt], [Lf, Bt]], 11: [[Tp, Rt]], 12: [[Lf, Rt]], 13: [[Bt, Rt]], 14: [[Lf, Bt]]}[id];
+    if (segs) segs.forEach(([a, b]) => link(a, b));
+  }
+  const seen = new Set(), chains = [];
+  const walk = k0 => { const ch = []; let k = k0, prev = null; while (k && !seen.has(k)) { seen.add(k); const e = adj.get(k); ch.push([e.p[0]*cell, e.p[1]*cell]); const nx = e.n.find(q => q !== prev && !seen.has(q)); prev = k; k = nx; } return ch; };
+  for (const [k, e] of adj) if (!seen.has(k) && e.n.length === 1) chains.push(walk(k));
+  for (const [k] of adj) if (!seen.has(k)) chains.push(walk(k));
+  return chains.filter(ch => ch.length*cell > 160).map(ch => { let p = ch; for (let it = 0; it < 4; it++) p = p.map((q, i) => { const a = p[Math.max(0, i - 1)], b = p[Math.min(p.length - 1, i + 1)]; return [(a[0] + 2*q[0] + b[0])/4, (a[1] + 2*q[1] + b[1])/4]; }); return p; });
 }
 function buildPortrait(img) {
   const cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; const g = cv.getContext('2d', {willReadFrequently: true});
@@ -145,33 +193,62 @@ function buildPortrait(img) {
   while (st.length) { const i = st.pop(), x = i % PW, y = (i/PW) | 0; if (x > 0) push(i - 1); if (x < PW - 1) push(i + 1); if (y > 0) push(i - PW); if (y < PH - 1) push(i + PW); }
   const fg = new Float32Array(N); for (let i = 0; i < N; i++) fg[i] = bg[i] ? 0 : 1;
   boxBlur(fg, PW, PH, 3, 2);
-  const blurL = boxBlur(Float32Array.from(L), PW, PH, 9, 3);
-  const lines = new ImageData(PW, PH), shade = new ImageData(PW, PH), gr = [0x2c, 0x27, 0x24];
+  // detail: full on the face, hair and hands, low on the shirt (its fine stripes are smoothed away)
+  const D = new Float32Array(N), fin = new Float32Array(N);
+  for (let i = 0; i < N; i++) { const ph = toPh([i % PW, (i/PW) | 0]), [x, y] = ph;
+    D[i] = ((x - 640)/180)**2 + ((y - 310)/225)**2 < 1 || (y < 262 && x > 470 && x < 810) ? 1 : inPoly(ph, HANDS) ? .9 : y < 500 && x > 480 && x < 800 ? .75 : .2;
+    fin[i] = finishAt(ph); }
+  boxBlur(D, PW, PH, 18, 2);
+  const nblur = (v, r) => { const a = boxBlur(v.map((x, i) => x*fg[i]), PW, PH, r, 3), w = boxBlur(Float32Array.from(fg), PW, PH, r, 3); return a.map((x, i) => w[i] > .02 ? x/w[i] : 1); };
+  const Ls = nblur(L, 3); for (let i = 0; i < N; i++) Ls[i] = lerp(Ls[i], L[i], D[i]);
+  const blurL = nblur(Ls, 8);
+  const tooth = new Float32Array(N); for (let i = 0; i < N; i++) tooth[i] = hash(i, 7); boxBlur(tooth, PW, PH, 1, 1);
+  for (let i = 0; i < N; i++) tooth[i] = clamp(.5 + (tooth[i] - .5)*3.2, 0, 1);    // the paper's tooth: graphite catches on the ridges
+  const H1 = hatchField(HATCH, 5.2, 41), H2 = hatchField(HATCH + 78*DEG, 6.0, 42, [18, 56]), H3 = hatchField(HATCH - 30*DEG, 7.5, 43, [14, 40], [1, 1.5]);
+  const lines = new ImageData(PW, PH), shade = new ImageData(PW, PH), gr = [0x2e, 0x2a, 0x28];
   for (let i = 0; i < N; i++) {
-    const x = i % PW, y = (i/PW) | 0, m = fg[i]; if (m <= .01) continue;
-    const grain = .72 + .28*hash(i, 7), ln = clamp((1 - L[i]/(blurL[i]*.985 + .012))*2.4, 0, 1);
-    const hatch = .55 + .45*(.5 + .5*Math.sin((x + y)*.86)), sh = Math.pow(1 - L[i], 1.35)*.62*hatch;
+    const m = fg[i]; if (m <= .01) continue;
+    const F = 1 - ss(.72, 1.0, fin[i]), Fl = 1 - ss(.8, 1.08, fin[i]); if (Fl <= 0) continue;
+    const T0 = clamp((1 - Ls[i] - .26)/.68, 0, 1), dt = D[i], tt = tooth[i];            // light skin stays paper; planes and shadows take the tone
+    const smooth = T0*(.45 + .55*tt), hatch = Math.min(1, H1[i]*ss(.14, .5, T0) + H2[i]*ss(.42, .76, T0) + H3[i]*ss(.66, .92, T0));
+    const sh = F*m*((.3 + .5*dt)*smooth + (1 - .6*dt)*.85*hatch*(.7 + .3*tt));
+    const dodge = 1 - Ls[i]/(blurL[i]*.985 + .012), ln = clamp((dodge - .03)*2.7, 0, 1)*(.4 + .6*dt);
     for (let k = 0; k < 3; k++) { lines.data[4*i + k] = gr[k]; shade.data[4*i + k] = gr[k]; }
-    lines.data[4*i + 3] = 255*clamp(ln*m*grain, 0, .95); shade.data[4*i + 3] = 255*clamp(sh*m*grain, 0, .85);
+    lines.data[4*i + 3] = 255*clamp(ln*m*Fl*(.55 + .45*tt), 0, .92); shade.data[4*i + 3] = 255*clamp(sh, 0, .88);
   }
   const mk = im => { const c2 = document.createElement('canvas'); c2.width = PW; c2.height = PH; c2.getContext('2d').putImageData(im, 0, 0); return c2; };
   PORT.lines = mk(lines); PORT.shade = mk(shade);
-  // the drawing strokes that reveal it, on a 14 px grid over the figure
+  // the reveal: pencil-width strokes along the hatching slant, in the order a person would draw
   const S = [], r = rng(31);
-  for (let y = 7; y < PH; y += 14) for (let x = 7; x < PW; x += 14) {
-    const jx = x + (r() - .5)*10, jy = y + (r() - .5)*10, i = (clamp(jy | 0, 0, PH - 1))*PW + clamp(jx | 0, 0, PW - 1); if (fg[i] < .4) continue;
+  for (let y = 5; y < PH; y += 10) for (let x = 5; x < PW; x += 10) {
+    const jx = x + (r() - .5)*8, jy = y + (r() - .5)*8, i = (clamp(jy | 0, 0, PH - 1))*PW + clamp(jx | 0, 0, PW - 1); if (fg[i] < .4 || fin[i] > 1.1) continue;
     const ph = toPh([jx, jy]), h = r();
-    S.push({x: jx, y: jy, a: -.78 + (r() - .5)*.6, len: 46 + r()*50, w: 22 + r()*12, t: appearAt(ph, h)});
+    S.push({x: jx, y: jy, a: HATCH + (r() - .5)*.3, len: 50 + r()*44, w: 13 + r()*7, t: appearAt(ph, h)});
   }
   S.sort((a, b) => a.t - b.t); PORT.strokes = S;
   PORT.mask = document.createElement('canvas'); PORT.mask.width = PW; PORT.mask.height = PH;
   PORT.tmp = document.createElement('canvas'); PORT.tmp.width = PW; PORT.tmp.height = PH;
+  // loose contour strokes around the figure: each a pencil line of its own, drawn when its part is drawn
+  const O = [], ro = rng(57);
+  for (const ch of outlines(fg, 4, .5)) {
+    const len = [0]; for (let i = 1; i < ch.length; i++) len.push(len[i - 1] + Math.hypot(ch[i][0] - ch[i - 1][0], ch[i][1] - ch[i - 1][1]));
+    for (let s0 = 0; s0 < len[len.length - 1] - 40;) {
+      const s1 = Math.min(len[len.length - 1], s0 + 120 + ro()*150), pts = ch.filter((_, i) => len[i] >= s0 && len[i] <= s1);
+      if (pts.length > 3) { const mid = pts[pts.length >> 1], ph = toPh(mid), f = 1 - ss(.78, 1.04, finishAt(ph));
+        if (f > .12) { const k = O.length, off = (ro() - .5)*3;
+          O.push({t: appearAt(ph, ro()) - .6, dur: .35 + (s1 - s0)/900, o: .75*f, cel: cel('out' + k, () => [{pts: jit(pts.map(([x, y]) => [x + off, y + off*.6]), 1.1, 200 + k), w: 3.2}])});
+          if (ro() < .35) O.push({t: O[k].t + .25, dur: O[k].dur, o: .35*f, cel: cel('out' + k + 'b', () => [{pts: jit(pts.map(([x, y]) => [x - off*1.6 + 1.5, y + 1.2]), 1.6, 300 + k), w: 2.4}])}); } }
+      s0 = s1 - 8 - ro()*14;
+    }
+  }
+  PORT.outline = O;
   // where the pencil works: the middle of the lines appearing now, smoothed
   const path = [], step = 1/FPS;
-  for (let t = T.guide[1]; t <= T.reveal1 + .5; t += step) {
+  for (let t = T.travel; t <= T.reveal1 + .5; t += step) {
     let sx = 0, sy = 0, n = 0; for (const s of S) { const tl = s.t - T.lead; if (tl > t - .35 && tl <= t + .05) { sx += s.x; sy += s.y; n++; } }
-    path.push(n ? [sx/n, sy/n] : path[path.length - 1] ?? [PW*.55, PH*.3]);
+    path.push(n ? [sx/n, sy/n] : path[path.length - 1] ?? null);
   }
+  const first = path.find(p => p); for (let i = 0; i < path.length && !path[i]; i++) path[i] = first;     // before the first line: wait where it will start
   const sm = path.map((p, i) => { let x = 0, y = 0, n = 0; for (let k = -7; k <= 7; k++) { const q = path[clamp(i + k, 0, path.length - 1)]; x += q[0]; y += q[1]; n++; } return [x/n, y/n]; });
   PORT.path = sm; PORT.ready = true;
 }
@@ -179,52 +256,63 @@ function buildPortrait(img) {
 const LAST = () => PORT.strokes[PORT.strokes.length - 1].t;
 function portraitLayer(c, layer, t) {
   if (t >= LAST() + .3) { c.drawImage(layer, 0, 0); return; }
-  const m = PORT.mask.getContext('2d'); m.clearRect(0, 0, PW, PH); m.strokeStyle = '#fff'; m.lineCap = 'round';
+  const m = PORT.mask.getContext('2d'); m.clearRect(0, 0, PW, PH); m.strokeStyle = '#fff'; m.lineCap = 'butt';
   for (const s of PORT.strokes) { if (s.t > t) break; const g = span(t, s.t, s.t + .28, easeOut), dx = Math.cos(s.a)*s.len/2, dy = Math.sin(s.a)*s.len/2;
-    m.lineWidth = s.w*(.4 + .6*g); m.beginPath(); m.moveTo(s.x - dx, s.y - dy); m.lineTo(s.x - dx + 2*dx*g, s.y - dy + 2*dy*g); m.stroke(); }
+    m.lineWidth = s.w*(.55 + .45*g); m.beginPath(); m.moveTo(s.x - dx, s.y - dy); m.lineTo(s.x - dx + 2*dx*g, s.y - dy + 2*dy*g); m.stroke(); }
   const tc = PORT.tmp.getContext('2d'); tc.globalCompositeOperation = 'copy'; tc.drawImage(layer, 0, 0); tc.globalCompositeOperation = 'destination-in'; tc.drawImage(PORT.mask, 0, 0); tc.globalCompositeOperation = 'source-over';
   c.drawImage(PORT.tmp, 0, 0);
+}
+function outlineLayer(c, t) {
+  for (const o of PORT.outline) { const u = span(t, o.t, o.t + o.dur, easeInOutSine); if (u <= 0) continue; c.save(); c.globalAlpha = o.o; reveal(c, o.cel, u, GRAPHITE); c.restore(); }
 }
 
 // guide lines the student blocks in first (portrait-local)
 const guideCel = () => cel('guide', () => {
   const P = p => toP(p), head = ring([640, 300], 158, 212, -Math.PI/2, TAU*1.02, 44).map(P);
   return [{id: 'head', pts: line(head, 1.2, 3, 12), w: 3.2}, {id: 'axis', pts: line([[640, 110], [648, 520]].map(P), .8, 4), w: 2.6},
-    {id: 'eyes', pts: line([[520, 292], [770, 288]].map(P), .8, 5), w: 2.6}, {id: 'shoulders', pts: line([[300, 470], [470, 405], [820, 405], [990, 470]].map(P), 1, 6, 12), w: 3},
-    {id: 'handL', pts: line([[680, 438], [460, 700]].map(P), 1, 7), w: 2.8}, {id: 'handR', pts: line([[682, 438], [880, 700]].map(P), 1, 8), w: 2.8},
-    {id: 'table', pts: line([[240, 960], [1060, 960]].map(P), 1, 9, 14), w: 2.6}];
+    {id: 'eyes', pts: line([[520, 292], [770, 288]].map(P), .8, 5), w: 2.6}, {id: 'nose', pts: line([[560, 372], [720, 370]].map(P), .8, 10), w: 2.2},
+    {id: 'shoulders', pts: line([[300, 470], [470, 405], [820, 405], [990, 470]].map(P), 1, 6, 12), w: 3},
+    {id: 'handL', pts: line([[680, 438], [460, 700]].map(P), 1, 7), w: 2.8}, {id: 'handR', pts: line([[682, 438], [880, 700]].map(P), 1, 8), w: 2.8}];
 });
 
-// ------------------------------------------------------------------ the pencil (drawn, held at a working angle)
-const pencilCel = () => cel('pencil', () => [
-  {id: 'body', pts: loop([[26, -250], [46, -238], [46, -40], [26, -22], [6, -40], [6, -238]], .6, 60, 12), w: 3.4},
-  {id: 'facet', pts: line([[26, -250], [26, -22]], .5, 61, 12), w: 2.2},
-  {id: 'wood', pts: line([[6, -40], [26, 18], [46, -40]], .4, 62, 6), w: 3},
-  {id: 'ferrule', pts: loop([[4, -262], [48, -262], [48, -240], [4, -240]], .3, 63, 8), w: 3},
-]);
-function pencilAt(t) {
-  const P0 = [1180, 1700];
-  if (t < T.pencilIn[0]) return null;
-  if (t < T.guide[0]) { const u = span(t, T.pencilIn[0], T.pencilIn[1], easeOutQuint), g = toScreenP(0, toP([500, 110])); return lp2(P0, g, u); }
-  if (t < T.guide[1]) return null;                                                   // the guide pass reports its own tip
-  if (t < T.pencilOut[0]) { const i = clamp(Math.round((t - T.guide[1])*FPS), 0, PORT.path.length - 1), p = PORT.path[i];
-    const wig = Math.sin(t*31)*14*span(t, T.guide[1], T.guide[1] + .4), a = -.78;                   // hatching back and forth
-    return toScreenP(t, [p[0] + Math.cos(a)*wig, p[1] + Math.sin(a)*wig]); }
-  const last = PORT.path[PORT.path.length - 1]; return lp2(toScreenP(t, last), P0, span(t, T.pencilOut[0], T.pencilOut[1], easeInOutSine));
-}
-function drawPencil(c, tip, t) {
+// ------------------------------------------------------------------ the pencil (a dark green drawing pencil, held low and to the right)
+const PEN = {len: 440, w: 30, cone: 58};
+function drawPencil(c, tip, t, lift = 0) {
   if (!tip) return;
-  c.save(); c.translate(tip[0], tip[1]); c.rotate(58*DEG); c.translate(-26, -18);           // held low, so it stays clear of the captions
-  c.save(); c.globalAlpha = .12; c.fillStyle = '#000'; c.translate(10, 14); c.fill(pathOf([[6, -238], [46, -238], [46, -40], [26, 18], [6, -40]])); c.restore();
-  c.fillStyle = '#e9b949'; c.fill(pathOf([[6, -238], [46, -238], [46, -40], [6, -40]]));
-  c.fillStyle = '#d99f2e'; c.fill(pathOf([[26, -238], [46, -238], [46, -40], [26, -40]]));
-  c.fillStyle = '#ecd0a4'; c.fill(pathOf([[6, -40], [46, -40], [26, 18]]));
-  c.fillStyle = GRAPHITE; c.fill(pathOf([[18, -4], [34, -4], [26, 18]]));
-  c.fillStyle = '#b9b3aa'; c.fill(pathOf([[4, -262], [48, -262], [48, -240], [4, -240]]));
-  c.fillStyle = '#e48a86'; c.fill(pathOf([[6, -290], [46, -290], [46, -262], [6, -262]]));
-  drawCel(c, pencilCel(), {material: 'pencil', color: GRAPHITE});
+  const a = 33*DEG + .03*Math.sin(t*1.7), h = 26*lift, {len, w, cone} = PEN;
+  c.save(); c.translate(tip[0], tip[1]);
+  // the shadow on the paper, falling down and right; it meets the tip only when the pencil touches
+  c.save(); c.translate(5 + h*.9, 5 + h*.9); c.rotate(a); c.globalAlpha = .16 - .06*lift; c.fillStyle = '#3b2f24'; c.filter = `blur(${5 + 6*lift}px)`;
+  c.fill(pathOf([[0, 0], [cone, -w/2], [len, -w/2], [len, w/2], [cone, w/2]])); c.filter = 'none'; c.restore();
+  c.translate(-h*.3, -h*.3); c.rotate(a);
+  // painted hexagonal body: three visible facets
+  const band = (y0, y1, col) => { c.fillStyle = col; c.fill(pathOf([[cone - 2, y0], [len, y0], [len, y1], [cone - 2, y1]])); };
+  band(-w/2, -w/6, '#3d6b52'); band(-w/6, w/6, '#2b5040'); band(w/6, w/2, '#1c362b');
+  c.globalAlpha = .35; band(-w/2 + 2, -w/2 + 5, '#9cc4ac'); c.globalAlpha = 1;
+  c.fillStyle = '#c9a44c'; c.font = '600 13px Fraunces'; c.textBaseline = 'middle'; c.fillText('2B', len - 92, 1);          // the grade, in gold
+  c.fillStyle = '#141414'; c.fill(pathOf([[len - 14, -w/2], [len, -w/2], [len, w/2], [len - 14, w/2]]));                     // the dipped end
+  // the sharpened wood cone, scalloped where the paint was cut, and the graphite point
+  const scal = Array.from({length: 7}, (_, k) => { const y = -w/2 + w*k/6; return [cone + 4 + 5*Math.cos(k*Math.PI/3), y]; });
+  c.fillStyle = '#e5c79c'; c.fill(pathOf([[12, -3.2], ...scal, [12, 3.2]]));
+  c.fillStyle = '#c9a57a'; c.globalAlpha = .7; c.fill(pathOf([[12, 0], [cone + 4, w/6], [cone + 4, w/2], [12, 3.2]])); c.globalAlpha = 1;
+  c.fillStyle = '#2a2a2c'; c.fill(pathOf([[0, 0], [14, -3.6], [16, 0], [14, 3.6]]));
+  c.fillStyle = '#8a8a90'; c.globalAlpha = .6; c.fill(pathOf([[1, -.4], [13, -3], [13, -1.4]])); c.globalAlpha = 1;
   c.restore();
 }
+const guideEnds = () => { const g = guideCel().strokes, s = g[g.length - 1]; return [g[0].samples[0].p, s.samples[s.samples.length - 1].p]; };
+function pencilAt(t, guideTip) {
+  const P0 = [1260, 1760], [g0, g1] = guideEnds();
+  if (t < T.pencilIn[0]) return null;
+  if (t < T.guide[0]) return lp2(P0, toScreenP(t, g0), span(t, T.pencilIn[0], T.pencilIn[1], easeOutQuint));
+  if (t < T.guide[1]) return toScreenP(t, guideTip ?? g0);                           // the guide pass reports its own tip
+  if (t < T.travel) return toScreenP(t, lp2(g1, PORT.path[0], span(t, T.guide[1], T.travel, easeInOutSine)));   // lifted, across to the eyes
+  if (t < T.pencilOut[0]) { const i = clamp(Math.round((t - T.travel)*FPS), 0, PORT.path.length - 1), p = PORT.path[i];
+    const wig = Math.sin(t*29)*11*span(t, T.travel, T.travel + .4);          // hatching back and forth, along the slant
+    return toScreenP(t, [p[0] + Math.cos(HATCH)*wig, p[1] + Math.sin(HATCH)*wig]); }
+  const last = PORT.path[PORT.path.length - 1]; return lp2(toScreenP(t, last), P0, span(t, T.pencilOut[0], T.pencilOut[1], easeInOutSine));
+}
+const pencilLift = t => t < T.guide[0] ? 1 - span(t, T.pencilIn[1] - .5, T.pencilIn[1]) : t > T.pencilOut[0] ? span(t, T.pencilOut[0], T.pencilOut[0] + .4)
+  : t > T.guide[1] && t < T.travel ? .15 + .75*Math.sin(Math.PI*span(t, T.guide[1], T.travel)) : .15 + .15*Math.max(0, Math.sin(t*3.1));
 
 // ------------------------------------------------------------------ light and doodles
 function glow(c, x, y, r, a, mode = 'lighter', col = [255, 214, 150]) {
@@ -267,10 +355,38 @@ const DOODLES = [
 ];
 const sparkT = k => T.sparks0 + k*T.sparkGap;
 
-// ------------------------------------------------------------------ layout over time
-const STORY = {x: 30, y: 380, s: 1}, FINAL = {x: (1080 - PW*.64)/2, y: 150, s: .64};
-function place(t) { const u = span(t, T.move[0], T.move[1], easeInOutSine); return {x: lerp(STORY.x, FINAL.x, u), y: lerp(STORY.y, FINAL.y, u), s: lerp(1, FINAL.s, u)}; }
-const toScreenP = (t, p) => { const P = place(t); return [P.x + p[0]*P.s, P.y + p[1]*P.s]; };
+// ------------------------------------------------------------------ camera and layout over time
+// keys: time, the portrait-local point in focus, zoom, where that point sits on screen
+const FULL = [[PW/2, PH/2], 1, [540, 380 + PH/2]], FINAL = [[PW/2, PH/2], .64, [540, 150 + PH*.64/2]];
+const CAMK = [[0, [510, 540], 1, [540, 930]], [7.6, [510, 540], 1, [540, 930]],
+  [9.4, [510, 300], 1.65, [540, 900]], [14.0, [512, 306], 1.76, [540, 900]],        // close on the eyes while the face comes
+  [16.2, [515, 330], 1.3, [540, 900]], [19.2, [520, 360], 1.24, [540, 920]],       // hair and neck
+  [21.2, [560, 560], 1.12, [540, 1000]], [24.4, [560, 580], 1.1, [540, 1000]],     // the hands
+  [27.4, ...FULL], [T.move[0], ...FULL], [T.move[1], ...FINAL]];
+function view(t) {
+  const k = CAMK.findIndex(q => q[0] > t), A = CAMK[k < 0 ? CAMK.length - 1 : Math.max(0, k - 1)], B = k < 0 ? A : CAMK[k];
+  const u = B === A ? 0 : easeInOutSine(span(t, A[0], B[0])), f = lp2(A[1], B[1], u), z = A[2]*Math.pow(B[2]/A[2], u), at = lp2(A[3], B[3], u);
+  return {x: at[0] - f[0]*z, y: at[1] - f[1]*z, s: z};
+}
+const toScreenP = (t, p) => { const P = view(t); return [P.x + p[0]*P.s, P.y + p[1]*P.s]; };
+
+// the watercolour wash that spreads from the light: warm ochre, pooling at its edges, settling in the tooth
+const WASH = {c: null, o: [-200, -160]};
+function buildWash() {
+  const cw = PW + 400, chh = PH + 320, cv = document.createElement('canvas'); cv.width = cw; cv.height = chh; const g = cv.getContext('2d');
+  const C = [520 + 200, 470 + 160], shape = (R, seed, n = 96) => Array.from({length: n}, (_, k) => { const a = k/n*TAU, r = R*(1 + .12*noise1(a*2.2, seed) + .05*noise1(a*7.3, seed + 1)); return [C[0] + r*Math.cos(a)*1.02, C[1] + r*Math.sin(a)*1.1]; });
+  const body = pathOf(shape(480, 51)); g.fillStyle = 'rgba(234,176,96,.17)'; g.fill(body);
+  g.save(); g.filter = 'blur(5px)'; g.strokeStyle = 'rgba(198,126,52,.12)'; g.lineWidth = 10; g.stroke(body); g.restore();
+  g.save(); g.filter = 'blur(60px)'; g.fillStyle = 'rgba(236,168,80,.16)'; g.fill(pathOf(shape(300, 53))); g.restore();
+  const d = g.getImageData(0, 0, cw, chh); for (let i = 0; i < cw*chh; i++) d.data[4*i + 3] *= .76 + .48*hash(i, 88); g.putImageData(d, 0, 0);
+  WASH.c = cv;
+}
+function washLayer(c, t) {
+  const u = span(t, T.light[0] + .3, T.light[0] + 3.4, easeOut); if (u <= 0) return; if (!WASH.c) buildWash();
+  const Lp = toP(LIGHT); c.save(); c.beginPath();
+  for (let k = 0; k <= 80; k++) { const a = k/80*TAU, r = u*1050*(1 + .14*noise1(a*3, 61)); k ? c.lineTo(Lp[0] + r*Math.cos(a), Lp[1] + r*Math.sin(a)) : c.moveTo(Lp[0] + r, Lp[1]); }
+  c.clip(); c.globalCompositeOperation = 'multiply'; c.drawImage(WASH.c, WASH.o[0], WASH.o[1]); c.restore();
+}
 
 function paperBg(c) {
   paper(c, PAPER, null, 11); resetT(c);
@@ -284,8 +400,11 @@ function captions(c, t) {
 }
 const WISH = "Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga sihat-salomatlik, baraka va shogirdlaringiz quvonchini tilayman.";
 function card(c, t) {
-  const q = win(t, T.quote[0], 99, .8), P = place(t), qy = P.y + PH*P.s + (t < T.move[0] ? 80 : 58);
-  text(c, "«Qalbingga quloq sol!»", W/2, qy, {size: t < T.move[0] ? 48 : 38, color: SEPIA, alpha: q});
+  const P = view(t), mv = span(t, T.move[0], T.move[1], easeInOutSine), qs = lerp(50, 40, mv), qy = P.y + PH*P.s + lerp(84, 60, mv);
+  const qw = (c.font = `italic 400 ${qs}px Literata`, c.measureText(uz("«Qalbingga quloq sol!»")).width), qu = span(t, T.quote[0], T.quote[0] + 2.2, easeInOutSine);
+  if (qu > 0) { c.save(); c.beginPath(); c.rect(W/2 - qw/2 - 10, qy - qs*1.2, (qw + 20)*qu, qs*1.8); c.clip(); text(c, "«Qalbingga quloq sol!»", W/2, qy, {size: qs, color: SEPIA}); c.restore();
+    const lu = span(t, T.quote[0] + 2.1, T.quote[0] + 2.8, easeInOutSine);
+    if (lu > 0) { c.save(); c.translate(W/2, qy + qs*.36); c.scale(qs/50, qs/50); reveal(c, cel('underline', () => [{pts: line([[-210, 6], [-60, 1], [90, 3], [200, -4]], .6, 120, 8), w: 3.4}]), lu, SEPIA, 'ink'); c.restore(); } }
   if (t < T.card) return;
   const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut), up = k => 16*(1 - a(k));
   text(c, 'Aziz Ustozim,', W/2, 1010 + up(0), {size: 54, alpha: a(0)});
@@ -299,33 +418,34 @@ function card(c, t) {
 
 // ------------------------------------------------------------------ the frame
 function shot(c, tau) {
-  const t = Math.round(tau*FPS)/FPS, P = place(t);
+  const t = Math.round(tau*FPS)/FPS, P = view(t);
   paperBg(c);
   c.save(); c.translate(P.x, P.y); c.scale(P.s, P.s);
-  // guide lines, then the drawing itself: lines lead, shading follows
-  const ga = Math.max(0, 1 - .8*span(t, 13, 19) - .2*span(t, 22, 27));   // clamp: canvas ignores a negative alpha                                  // the guides are rubbed out as the drawing takes over
-  let tip = null;
-  if (t > T.guide[0] && ga > .005) { c.save(); c.globalAlpha = ga; const gt = reveal(c, guideCel(), span(t, T.guide[0], T.guide[1], easeInOutSine), '#8b8176'); c.restore(); if (t < T.guide[1]) tip = gt; }
-  if (PORT.ready && t > 7.2) { portraitLayer(c, PORT.shade, t); portraitLayer(c, PORT.lines, t + T.lead); }
+  washLayer(c, t);
+  // guide lines, then the drawing itself: contours and lines lead, shading follows
+  const ga = Math.max(0, 1 - .8*span(t, 13, 19) - .2*span(t, 22, 27));   // clamp: canvas ignores a negative alpha; the guides are rubbed out as the drawing takes over
+  let gtip = null;
+  if (t > T.guide[0] && ga > .005) { c.save(); c.globalAlpha = ga; gtip = reveal(c, guideCel(), span(t, T.guide[0], T.guide[1], easeInOutSine), '#8b8176'); c.restore(); }
+  if (PORT.ready && t > 7.2) { portraitLayer(c, PORT.shade, t); portraitLayer(c, PORT.lines, t + T.lead); outlineLayer(c, t); }
   // the light between his hands
   const L = toP(LIGHT), la = span(t, T.light[0], T.light[1], easeOut);
-  if (la > 0) { glow(c, L[0], L[1] - 20, 460, .38*la, 'multiply', [255, 196, 120]); glow(c, L[0], L[1] - 20, 190, .55*la); flame(c, L[0], L[1] + 16, 52, t, 5, la); glow(c, L[0], L[1] - 6, 60, .8*la); }
-  // sparks become doodles
+  if (la > 0) { glow(c, L[0], L[1] - 20, 460, .3*la, 'multiply', [255, 200, 130]); glow(c, L[0], L[1] - 20, 200, .55*la); flame(c, L[0], L[1] + 16, 52, t, 5, la); glow(c, L[0], L[1] - 6, 64, .8*la); }
+  // sparks become doodles: ink lines over a watercolour touch
   DOODLES.forEach((d, k) => {
     const s0 = sparkT(k), u = span(t, s0, s0 + T.fly, easeInOutSine);
     if (u > 0 && u < 1) { const mid = [(L[0] + d.at[0])/2, Math.min(L[1], d.at[1]) - 160]; for (let j = 0; j < 4; j++) { const v = Math.max(0, u - j*.07);
       const p = [0, 1].map(i => (1 - v)**2*[L, mid, d.at][0][i] + 2*v*(1 - v)*mid[i] + v*v*d.at[i]); glow(c, p[0], p[1], 34 - j*6, 1 - j*.2); } }
     const dr = span(t, s0 + T.fly, s0 + T.fly + T.draw, easeInOutSine); if (dr <= 0) return;
     c.save(); c.translate(...d.at);
-    for (const [pts, col, al] of d.fill) { c.save(); c.globalAlpha = al*span(dr, .5, 1); c.fillStyle = col; c.translate(3, 4); c.fill(pathOf(pts)); c.restore(); }
+    for (const [pts, col, al] of d.fill) { const p = pathOf(jit(pts, 1.6, 7 + k)); c.save(); c.globalAlpha = al*span(dr, .45, 1); c.globalCompositeOperation = 'multiply'; c.translate(4, 5);
+      c.fillStyle = col; c.fill(p); c.globalAlpha *= .5; c.strokeStyle = col; c.lineWidth = 3; c.stroke(p); c.restore(); }
     reveal(c, cel('doodle-' + d.id, d.make), dr, SEPIA, 'ink');
     if (d.flame) { const fa = span(t, s0 + T.fly + T.draw*.8, s0 + T.fly + T.draw + .3); glow(c, d.flame[0], d.flame[1] - 8, 60, .8*fa); flame(c, d.flame[0], d.flame[1], 22, t, 9, fa); }
     c.restore();
   });
   c.restore();
   resetT(c);
-  if (!tip) tip = pencilAt(t); else tip = toScreenP(t, tip);
-  drawPencil(c, tip, t);
+  drawPencil(c, pencilAt(t, gtip), t, pencilLift(t));
   captions(c, t); card(c, t);
   const f = 1 - span(t, T.fade[0], T.fade[1]); if (f > 0) { c.save(); c.globalAlpha = f; c.fillStyle = '#1a1714'; c.fillRect(0, 0, W, H); c.restore(); }
 }

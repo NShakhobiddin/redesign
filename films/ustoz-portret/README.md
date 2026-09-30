@@ -17,37 +17,55 @@ aytiladi.
 
 | Vaqt | Ekranda | Izoh (shogird tilidan) |
 | --- | --- | --- |
-| 0–9 s | Bo'sh qog'oz, qalam keladi, yordamchi chiziqlar (bosh, ko'z chizig'i, yelka, qo'llar) | *Sizni qalamda chizmoqchi bo'ldim… Qayerdan boshlashni bilmadim.* |
-| 9–15 s | Ko'zlar, keyin yuz chiziladi | *Ko'zlaringizdan boshladim — ular menga birinchi bo'lib ishongan edi.* |
-| 15–20 s | Soch, bo'yin; yordamchi chiziqlar o'chiriladi | *Har bir chizgi — bir xotira, bir saboq.* |
-| 20–26 s | Birlashgan qo'llar | *Keyin qo'llaringiz… Siz menga nima o'ylashni emas, qanday o'ylashni o'rgatdingiz.* |
-| 26–31 s | Ko'ylak, stol; qalam ketadi | *Chizib bo'lgach, bir narsani angladim:* |
-| 31–36 s | Qo'llar orasida kichik nur yonadi | *qo'llaringizda doim bir yorug'lik bo'lgan ekan.* |
+| 0–9 s | Bo'sh qog'oz, qalam keladi, yordamchi chiziqlar (bosh, ko'z va burun chizig'i, yelka, qo'llar), keyin kamera ko'zlarga yaqinlashadi | *Sizni qalamda chizmoqchi bo'ldim… Qayerdan boshlashni bilmadim.* |
+| 9–15 s | Yaqin plan: ko'zlar, keyin yuz chiziladi | *Ko'zlaringizdan boshladim — ular menga birinchi bo'lib ishongan edi.* |
+| 15–20 s | Kamera biroz uzoqlashadi: soch, bo'yin; yordamchi chiziqlar o'chiriladi | *Har bir chizgi — bir xotira, bir saboq.* |
+| 20–26 s | Kamera qo'llarga tushadi: birlashgan qo'llar | *Keyin qo'llaringiz… Siz menga nima o'ylashni emas, qanday o'ylashni o'rgatdingiz.* |
+| 26–31 s | Butun rasm ko'rinadi: ko'ylak erkin chiziqlar bilan chiziladi va pastda qog'ozga singib ketadi; qalam ketadi | *Chizib bo'lgach, bir narsani angladim:* |
+| 31–36 s | Qo'llar orasida kichik nur yonadi, undan iliq akvarel yoyiladi | *qo'llaringizda doim bir yorug'lik bo'lgan ekan.* |
 | 36–41 s | Nurdan uchqunlar uchib, atrofda rasmlarga aylanadi: chiroq, kitob, yulduz, yurak, qog'oz samolyot, moychiroq | *Siz uni hammamizga ulashdingiz.* |
-| 41–45 s | Tagida «Qalbingga quloq sol!» yoziladi | — |
+| 41–45 s | Tagiga «Qalbingga quloq sol!» qo'lda yozilgandek chiqadi va tagi chiziladi | — |
 | 45–58 s | Portret yuqoriga ko'tariladi, tabrik chiqadi | Aziz Ustozim, Dilshod Bahodirovich Mannopov! Ustoz va murabbiylar kuni muborak bo'lsin! Bergan har bir saboqingiz — yo'limni yoritgan chiroq. Sizga sihat-salomatlik, baraka va shogirdlaringiz quvonchini tilayman. Minnatdor shogirdingiz |
 
 ## Surat qanday qalam rasmiga aylanadi
 
 `buildPortrait()` kadrlar render qilinishidan oldin, sahifaning o'zida bir
-marta ishlaydi:
+marta ishlaydi. Maqsad fotofiltr emas, odam chizgan portret:
 
 1. **Fonni olib tashlash.** Surat qirqiladi. Qora studiya foni chetdan
    boshlab qorong'i piksellar bo'ylab to'ldirish (flood fill) bilan olib
-   tashlanadi. Faqat ustozning o'zi qoladi, fon qog'ozga aylanadi.
-2. **Chiziq qatlami.** Har bir piksel atrofidagi o'rtacha yorug'lik bilan
-   solishtiriladi (dodge usuli). Qirralar va tuklar qalam chizig'iga aylanadi.
-3. **Soya qatlami.** To'q joylarga diagonal shtrix bilan grafit soyasi
-   beriladi. Ikkala qatlamda qog'oz donadorligi bor.
-4. **Chizilish tartibi.** Rasm qalam kengligidagi taxminan 3000 ta "chizgi"
-   bilan ochiladi. Ular odam chizadigan tartibda chiqadi: ko'zlar, yuz,
-   soch, bo'yin, qo'llar, ko'ylak. Chiziqlar bir soniya oldin chiqadi, soya
-   ulardan keyin keladi.
-5. **Qalam.** Rasmdagi qalam aynan shu payt chizgilar paydo bo'layotgan
-   joyda ishlaydi va shtrix chizgandek oldinga-orqaga yuradi.
+   tashlanadi. Keyingi barcha o'rtachalar faqat ustozning o'zidan olinadi,
+   shuning uchun bosh chetida qora halqa qolmaydi.
+2. **Tafsilot xaritasi.** Yuz, soch va qo'llar to'liq aniqlikda chiziladi.
+   Ko'ylakdagi mayda yo'l-yo'l chiziqlar silliqlanadi, ular rastrga
+   o'xshab qolmaydi.
+3. **Haqiqiy shtrixlar.** Soya uch qatlam qalam shtrixidan iborat. Har bir
+   qatlamda minglab qisqa, biroz egilgan chizgilar bor, ularning uzunligi va
+   bosimi har xil. Birinchi qatlam o'ng qo'l qiyaligida chiziladi, soya
+   quyuqlashgan sari keyingi qatlamlar ustiga kesishib tushadi. Yuzda
+   shtrix kam, u yumshoq, surtilgan grafit bilan beriladi. Yorug' teri qog'oz
+   rangida qoladi.
+4. **Chiziq qatlami.** Har bir piksel atrofidagi o'rtacha yorug'lik bilan
+   solishtiriladi (dodge usuli). Ko'z, qosh, lab va sochdagi tuklar shu
+   qatlamda chiqadi.
+5. **Qog'oz donadorligi.** Grafit qog'oz bo'rtiqlariga ilashadi: ikkala
+   qatlam ham qog'oz tishiga qarab notekis tushadi.
+6. **Erkin konturlar.** Qomat chegarasi marching squares usuli bilan
+   chiziqlarga aylantiriladi. Ular bo'laklarga bo'linib, har biri alohida
+   qalam chizig'i sifatida chiziladi, ba'zilari ikki marta.
+7. **Vinyetka.** Rasm yelkadan pastda asta siyraklashib, qog'ozga singib
+   ketadi. Tirsaklar va stol chizilmaydi, qirqib olingan qattiq chet yo'q.
+8. **Chizilish tartibi.** Rasm shtrix qiyaligidagi ingichka izlar bilan
+   ochiladi. Ular odam chizadigan tartibda chiqadi: ko'zlar, yuz, soch,
+   bo'yin, qo'llar, ko'ylak. Konturlar va chiziqlar oldin, soya bir soniya
+   keyin keladi.
+9. **Qalam va kamera.** To'q yashil 2B qalamning qog'ozga soyasi tushadi.
+   U chizgilar paydo bo'layotgan joyda shtrix chizgandek oldinga-orqaga
+   yuradi, o'tishlar orasida ko'tariladi. Kamera ko'zlardan boshlab asta
+   uzoqlashadi.
 
-Yakunda rang faqat qo'llar orasidagi nur va siyoh bilan chizilgan
-rasmlarda bo'ladi.
+Rang faqat nur bilan keladi: qo'llar orasidan yoyilgan akvarel va atrofdagi
+siyoh bilan chizilgan, akvarel bilan bo'yalgan rasmlar.
 
 ## Ovoz
 
