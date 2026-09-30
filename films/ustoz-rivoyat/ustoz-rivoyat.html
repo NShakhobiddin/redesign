@@ -1,0 +1,745 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Ustozning kavushi</title>
+<style>body{margin:0;background:#0e0806;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="studio.js"></script>
+<script src="cels.js"></script>
+<script src="materials.js"></script>
+<script src="fonts.js"></script>
+<script>
+'use strict';
+/* Film brief
+Occasion: Ustoz va murabbiylar kuni. A third greeting to the teacher Dilshod
+  Bahodirovich Mannopov, this time an old Eastern story about a teacher.
+Story "Ustozning kavushi" (al-Khatib al-Baghdadi, Tarikh Baghdad, in the life
+  of the grammarian al-Farra): the caliph al-Ma'mun gave his two sons to
+  al-Farra to be taught. One day, when the lesson ended and the teacher rose,
+  both princes ran to bring him his shoes; they quarrelled over who would, and
+  settled it by each bringing one. The news reached the caliph, who called
+  the teacher and asked: "Who is the most honoured of people?" - "I know none
+  more honoured than the Commander of the Faithful." - "No: it is the one whose
+  shoes, when he rises, the caliph's two heirs fight to bring." The teacher
+  said he had wanted to stop them but feared to keep them from an honour they
+  raced for. The caliph: "Had you stopped them, I would have reproached you.
+  It did not lower them; it raised them. However great a man is, he is not
+  too great to serve his ruler, his father and his teacher." The film closes
+  on Alisher Navoi's couplet "Haq yo'lida kim senga bir harf o'qitmish ranj
+  ila, / Aylamak bo'lmas ado oning haqin yuz ganj ila" and the greeting.
+Look: Eastern shadow theatre. A carved dark wooden proscenium frames a lit
+  cloth screen; the captions sit in the dark band above it. On the screen,
+  jointed puppets cut from dark leather, in profile, with cut-out eyes and
+  pierced ornament that lets the light through, held on thin rods. Sets are
+  cut silhouettes too; windows and lamps carry coloured glass. The light
+  behind the screen is warm lamplight indoors and a blue gel for the night
+  city. A close-up is the puppets brought nearer the screen (the camera
+  scales the stage inside the frame; the light stays with the screen).
+Acting reference: shadow puppetry. The figures move as jointed puppets do, on
+  purpose: limbs pivot, bodies turn by flipping, a walk is a swung stride with
+  a bob. Poses are designed per beat (kneel, rise, run, reach, tug, carry,
+  offer, bow, gesture); hands that hold a shoe are solved to the shoe.
+Format: 9:16, 1080x1920, 24 fps. Closing card holds 10 s.
+Sound: synthesized here, pitched sounds only: a plucked oud-like string
+  (Karplus-Strong from a smoothed pluck, so no noise burst), a drone, a
+  ney-like flute and pitched frame-drum thumps, in a Hijaz-coloured mode on D.
+Engine: hand-drawn-canvas-animation skill (MIT, Alexey Fateev).
+*/
+{
+// ------------------------------------------------------------------ look
+const INK = '#1a0f0a', WOOD = '#150b07', WOOD2 = '#2a160c', GOLD = '#e8b25c', GOLD2 = '#c98a3a', CREAM = '#f7e9cc';
+const uz = s => String(s).replace(/([oOgG])'/g, '$1ʻ').replace(/'/g, 'ʼ');
+for (const f of FILM_FONTS) { const ff = new FontFace(f.family, `url(${f.src})`, {weight: f.weight, style: f.style, unicodeRange: f.range}); document.fonts.add(ff); _photoLoads.push(ff.load()); }
+_photoLoads.push(document.fonts.load('italic 400 40px Literata', uz("o'g'")), document.fonts.load('600 40px Fraunces', uz("O'zbek")));
+
+const FPS = 24, DEG = Math.PI/180;
+const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
+const win = (t, a, b, fi = .6, fo = .6) => Math.min(span(t, a, a + fi, easeOut), 1 - span(t, b - fo, b, easeIn));
+const lp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]], mul = (a, k) => [a[0]*k, a[1]*k];
+const dirv = a => [Math.sin(a), Math.cos(a)];                    // limb direction: angle from straight down, positive = forward
+const rot = (p, th) => [p[0]*Math.cos(th) - p[1]*Math.sin(th), p[0]*Math.sin(th) + p[1]*Math.cos(th)];
+const ss = (a, b, x) => { const u = clamp((x - a)/(b - a), 0, 1); return u*u*(3 - 2*u); };
+// a smooth closed (or open) outline through points: Catmull-Rom as cubic Béziers
+function sp(pts, closed = true) {
+  const p = new Path2D(), n = pts.length, P = i => closed ? pts[(i + n) % n] : pts[clamp(i, 0, n - 1)];
+  p.moveTo(...P(0));
+  for (let i = 0; i < (closed ? n : n - 1); i++) { const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+    p.bezierCurveTo(p1[0] + (p2[0] - p0[0])/6, p1[1] + (p2[1] - p0[1])/6, p2[0] - (p3[0] - p1[0])/6, p2[1] - (p3[1] - p1[1])/6, p2[0], p2[1]); }
+  if (closed) p.closePath(); return p;
+}
+const poly = (pts, closed = true) => { const p = new Path2D(); pts.forEach((q, i) => i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])); if (closed) p.closePath(); return p; };
+function hull(points) {
+  const P = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cross = (o, a, b) => (a[0] - o[0])*(b[1] - o[1]) - (a[1] - o[1])*(b[0] - o[0]);
+  const lo = [], up = [];
+  for (const p of P) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (const p of P.reverse()) { while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  return lo.slice(0, -1).concat(up.slice(0, -1));
+}
+// a rounded hull around discs [x, y, r]: cloth over the joints it covers
+const drape = discs => sp(hull(discs.flatMap(([x, y, r]) => Array.from({length: 10}, (_, k) => [x + r*Math.cos(k*TAU/10), y + r*Math.sin(k*TAU/10)]))));
+function limbPath(a, b, w0, w1) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy/L, ny = dx/L, g = Math.atan2(dy, dx), p = new Path2D();
+  p.moveTo(a[0] + nx*w0/2, a[1] + ny*w0/2); p.lineTo(b[0] + nx*w1/2, b[1] + ny*w1/2); p.arc(b[0], b[1], w1/2, g + Math.PI/2, g - Math.PI/2, true);
+  p.lineTo(a[0] - nx*w0/2, a[1] - ny*w0/2); p.arc(a[0], a[1], w0/2, g - Math.PI/2, g + Math.PI/2, true); p.closePath(); return p;
+}
+function text(c, str, x, y, {size = 50, font = 'italic 400', fam = 'Literata', color = CREAM, align = 'center', alpha = 1, glow = 0, spacing = null} = {}) {
+  if (alpha <= 0) return;
+  c.save(); c.font = `${font} ${size}px ${fam}`; c.textAlign = align; c.textBaseline = 'alphabetic'; c.globalAlpha *= alpha;
+  c.letterSpacing = spacing ?? (fam === 'Fraunces' ? (-.01*size).toFixed(1) + 'px' : '0px');
+  if (glow) { c.shadowColor = 'rgba(255,190,110,.45)'; c.shadowBlur = glow; }
+  c.fillStyle = color; c.fillText(uz(str), x, y); c.restore();
+}
+function wrap(c, str, size, maxW, font = 'italic 400', fam = 'Literata') {
+  c.save(); c.font = `${font} ${size}px ${fam}`; const out = []; let cur = '';
+  for (const w of uz(str).split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && c.measureText(t).width > maxW) { out.push(cur); cur = w; } else cur = t; }
+  if (cur) out.push(cur); c.restore(); return out;
+}
+
+// ------------------------------------------------------------------ the theatre: proscenium and screen
+const SCR = {l: 40, r: 1040, top: 560, peak: 452, bot: 1596};
+const screenPath = (() => { const {l, r, top, peak, bot} = SCR, m = (l + r)/2, p = new Path2D();
+  p.moveTo(l, bot); p.lineTo(l, top); p.bezierCurveTo(l, top - 70, m - 250, peak + 6, m, peak); p.bezierCurveTo(m + 250, peak + 6, r, top - 70, r, top); p.lineTo(r, bot); p.closePath(); return p; })();
+const LAYER = document.createElement('canvas'); LAYER.width = 1080; LAYER.height = 1920; const LG = LAYER.getContext('2d');
+function proscenium(c, t) {
+  c.save(); c.fillStyle = WOOD; c.fillRect(0, 0, W, H);
+  // the carved frame: a gold inlay along the arch, a band of pierced rosettes, a skirting below
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1d0f09'); g.addColorStop(.25, '#120906'); g.addColorStop(.8, '#120906'); g.addColorStop(1, '#1d0f09'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.strokeStyle = 'rgba(232,178,92,.55)'; c.lineWidth = 3; c.save(); c.translate(0, -16); c.stroke(screenPath); c.restore();
+  c.strokeStyle = 'rgba(232,178,92,.22)'; c.lineWidth = 1.5; c.save(); c.translate(540, 1000); c.scale(1.035, 1.03); c.translate(-540, -1000); c.stroke(screenPath); c.restore();
+  for (let k = 0; k < 13; k++) { const x = 60 + k*80, y = 1700; rosette(c, x, y, 20, 'rgba(232,178,92,.18)'); }
+  c.fillStyle = 'rgba(232,178,92,.16)'; c.fillRect(40, 1648, 1000, 2); c.fillRect(40, 1752, 1000, 2);
+  c.restore();
+}
+function rosette(c, x, y, r, col) {
+  c.save(); c.translate(x, y); c.fillStyle = col;
+  for (let k = 0; k < 8; k++) { c.rotate(TAU/8); c.beginPath(); c.ellipse(r*.55, 0, r*.42, r*.16, 0, 0, TAU); c.fill(); }
+  c.beginPath(); c.arc(0, 0, r*.2, 0, TAU); c.fill(); c.restore();
+}
+// the light behind the cloth: warm lamplight or a blue gel, with a slow flicker and the cloth's weave
+function backlight(c, t, mood) {
+  c.save(); c.clip(screenPath);
+  const f = 1 + .025*noise1(t*1.7, 3) + .012*noise1(t*6.1, 4), [cx, cy] = [540 + 30*noise1(t*.4, 5), 1040];
+  const g = c.createRadialGradient(cx, cy, 60, cx, cy, 900);
+  const warm = [[0, `rgb(${255},${Math.round(226*f)},${Math.round(160*f)})`], [.45, `rgb(${Math.round(246*f)},${Math.round(178*f)},${Math.round(98*f)})`], [1, '#6e3514']];
+  const night = [[0, '#6f8fc4'], [.5, '#34497e'], [1, '#101a3a']];
+  const mix = (A, B, u) => A.map(([o, a], i) => [o, u <= 0 ? a : u >= 1 ? B[i][1] : a]);
+  (mood === 'night' ? night : warm).forEach(([o, col]) => g.addColorStop(o, col));
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.restore();
+}
+function cloth(c) {                                   // the weave and the soft falloff at the edges of the screen
+  c.save(); c.clip(screenPath); c.globalCompositeOperation = 'multiply';
+  const v = c.createRadialGradient(540, 1040, 380, 540, 1040, 820); v.addColorStop(0, 'rgba(255,255,255,0)'); v.addColorStop(1, 'rgba(120,70,40,.55)'); c.fillStyle = v; c.fillRect(0, 0, W, H);
+  c.globalAlpha = .06; c.fillStyle = '#6b4a30'; for (let y = SCR.peak; y < SCR.bot; y += 4) c.fillRect(SCR.l, y, SCR.r - SCR.l, 1);
+  c.restore();
+}
+
+// ------------------------------------------------------------------ puppets
+// Right-facing, pelvis at (0,0), y down. A pose gives the lean of the torso, the nod of the head, two legs
+// (hip angle a from straight down, knee k, foot angle f) and two arms (shoulder a, elbow e, or a target `to`
+// in stage coordinates that the arm is solved to). Index 0 is the near limb (towards us), 1 the far one.
+const PRINCE = {s: 1, thigh: 86, shin: 84, upper: 60, fore: 56, hip: [0, 2], shoulder: [2, -100], neck: [2, -118], legW: [26, 20, 18, 13], armW: [19, 15, 14, 11], headSc: 1.14,
+  torso: [[-20, 6], [-24, -36], [-24, -84], [-17, -108], [-6, -118], [8, -118], [20, -104], [25, -72], [22, -30], [19, 6]], skirt: 'kaftan', head: 'prince'};
+const PRINCE2 = {...PRINCE, s: .88, head: 'prince2'};
+const TEACHER = {s: 1.28, thigh: 92, shin: 90, upper: 60, fore: 56, hip: [0, 2], shoulder: [2, -108], neck: [2, -128], legW: [24, 19, 17, 12], armW: [24, 20, 17, 13], headSc: 1,
+  torso: [[-24, 8], [-28, -40], [-29, -88], [-24, -112], [-12, -126], [4, -132], [14, -128], [25, -110], [29, -76], [27, -36], [24, 8]], skirt: 'robe', head: 'teacher', sleeve: 1};
+const CALIPH = {...TEACHER, s: 1.3, head: 'caliph', torso: [[-26, 8], [-32, -40], [-33, -92], [-26, -118], [-12, -132], [4, -138], [16, -134], [28, -114], [32, -76], [30, -36], [26, 8]]};
+const knock = (g, path, w = 2.6) => { g.save(); g.globalCompositeOperation = 'destination-out'; g.lineWidth = w; g.stroke(path); g.restore(); };
+const hole = (g, path) => { g.save(); g.globalCompositeOperation = 'destination-out'; g.fill(path); g.restore(); };
+function joints(sp_, P) {
+  const R = p => rot(p, P.lean ?? 0), sh = R(sp_.shoulder), neck = R(sp_.neck), toLocal = q => [(q[0] - P.x)/((P.dir ?? 1)*sp_.s*(P.sc ?? 1)), (q[1] - P.y)/(sp_.s*(P.sc ?? 1))];
+  const legs = (P.legs ?? [{a: .06, k: -.05}, {a: -.06, k: -.05}]).map(L => { const knee = add(sp_.hip, mul(dirv(L.a), sp_.thigh)), ankle = add(knee, mul(dirv(L.a + L.k), sp_.shin)); return {hip: sp_.hip, knee, ankle, f: L.f ?? 0, foot: L.foot}; });
+  const arms = (P.arms ?? [{a: .1, e: .2}, {a: -.05, e: .25}]).map(A => {
+    if (A.to) { const s = solveLimb(sh, toLocal(A.to), sp_.upper, sp_.fore, A.bend ?? 1); return {sh, el: s.joint, wr: s.end, hand: A.hand ?? 0}; }
+    const el = add(sh, mul(dirv(A.a), sp_.upper)), wr = add(el, mul(dirv(A.a + A.e), sp_.fore)); return {sh, el, wr, hand: A.hand ?? 0}; });
+  return {sh, neck, legs, arms};
+}
+// a hand (a small mitten with a thumb) or a foot at the end of a limb
+function handPath(wr, from, open = 0) { const g = Math.atan2(wr[1] - from[1], wr[0] - from[0]), p = new Path2D();
+  p.ellipse(wr[0] + Math.cos(g)*9, wr[1] + Math.sin(g)*9, 13, 8.5, g, 0, TAU); p.ellipse(wr[0] + Math.cos(g - 1.1)*9, wr[1] + Math.sin(g - 1.1)*9, 7, 4.5, g - .6 - open, 0, TAU); return p; }
+// kavush: a slipper with a pointed, upturned toe (length ~ 64 at scale 1), heel at 0,0, sole on y = 0
+const KAVUSH = [[-4, -2], [-3, -18], [8, -21], [24, -14], [44, -14], [58, -10], [68, -12], [76, -22], [80, -19], [74, -4], [62, 1], [6, 2]];
+function footPath(an, f, kind, sc = 1) {
+  const p = new Path2D(), m = new DOMMatrix().translate(an[0], an[1]).rotate(f/DEG).scale(sc);
+  if (kind === 'kavush') p.addPath(sp(KAVUSH.map(([x, y]) => [x - 14, y + 12])), m);
+  else if (kind === 'boot') p.addPath(sp([[-12, -6], [-12, 8], [14, 12], [40, 13], [52, 9], [56, 2], [40, -2], [10, -8]]), m);
+  else p.addPath(sp([[-12, -4], [-11, 9], [10, 12], [34, 12], [44, 7], [36, 0], [12, -6]]), m);   // a stockinged foot
+  return p;
+}
+function headPath(kind) {
+  // origin at the neck joint; the profile faces right
+  const face = [[-24, -18], [-26, -44], [-16, -64], [2, -70], [20, -63], [29, -48], [31, -40], [38, -30], [31, -26], [32, -20], [29, -15], [27, -6], [14, 0], [8, 8], [-10, 8]];
+  const p = new Path2D(); p.addPath(sp(face));
+  const T = {
+    prince: [[-29, -40], [-33, -58], [-26, -76], [-8, -86], [14, -84], [30, -70], [34, -54], [30, -46], [12, -50], [-10, -50], [-24, -44]],
+    prince2: [[-27, -44], [-28, -60], [-22, -80], [0, -84], [22, -80], [29, -60], [30, -48], [2, -52]],
+    teacher: [[-32, -36], [-40, -58], [-38, -84], [-22, -102], [2, -110], [26, -104], [42, -86], [46, -62], [40, -46], [22, -50], [0, -52], [-22, -44]],
+    caliph: [[-34, -36], [-44, -60], [-42, -90], [-24, -112], [4, -120], [30, -114], [48, -94], [52, -64], [44, -46], [22, -50], [0, -52], [-24, -44]],
+  }[kind];
+  p.addPath(sp(T));
+  if (kind === 'teacher' || kind === 'caliph') {
+    p.addPath(sp([[30, -18], [34, -6], [34, 12], [26, 36], [16, 50], [10, 30], [2, 10], [-4, -2], [12, -6]]));            // a long scholar's beard
+    p.addPath(sp([[-34, -44], [-46, -26], [-50, 4], [-44, 26], [-34, 8], [-26, -26]]));                                  // the turban's tail
+  }
+  if (kind === 'prince') p.addPath(sp([[10, -82], [12, -104], [22, -124], [32, -132], [28, -112], [20, -86]]));             // a plume
+  if (kind === 'prince2') { p.moveTo(4, -84); p.arc(0, -86, 5, 0, TAU); }
+  if (kind === 'caliph') p.addPath(sp([[12, -116], [18, -142], [30, -164], [40, -170], [36, -146], [24, -114]]));
+  return p;
+}
+function headHoles(kind) {
+  const p = new Path2D(); p.ellipse(19, -41, 5.2, 2.6, -.08, 0, TAU);                                             // the cut-out eye
+  const slit = (x0, y0, x1, y1, bow, w) => { const m = [(x0 + x1)/2 + bow, (y0 + y1)/2 - bow*.3]; p.addPath(sp([[x0, y0], [m[0], m[1] - w], [x1, y1], [m[0], m[1] + w]])); };
+  if (kind === 'teacher' || kind === 'caliph') { slit(-30, -64, 20, -92, -6, 2.4); slit(-26, -50, 30, -76, -6, 2.2); slit(-20, -88, 12, -102, -4, 1.8); }   // the wraps of the turban
+  if (kind === 'prince') { slit(-24, -56, 22, -64, -3, 2); p.moveTo(18, -66); p.arc(14, -66, 4, 0, TAU); }
+  if (kind === 'prince2') for (let k = 0; k < 3; k++) { const x = -14 + k*14; p.addPath(sp([[x, -58], [x + 4, -66], [x + 2, -74], [x - 3, -66]])); }  // a skullcap with pepper motifs
+  if (kind === 'caliph') { p.moveTo(26, -76); p.arc(22, -76, 5, 0, TAU); }
+  return p;
+}
+// draws one puppet into the layer canvas (its own knock-outs and piercings never touch the set)
+function puppet(g, sp_, P) {
+  const J = joints(sp_, P), lean = P.lean ?? 0;
+  g.save(); g.translate(P.x, P.y); g.scale((P.dir ?? 1)*sp_.s*(P.sc ?? 1), sp_.s*(P.sc ?? 1)); g.fillStyle = INK; g.strokeStyle = INK;
+  const leg = (L, near) => { const [w0, w1, w2, w3] = sp_.legW, p = new Path2D();
+    p.addPath(limbPath(L.hip, L.knee, w0, w1)); p.addPath(limbPath(L.knee, L.ankle, w2, w3)); p.addPath(footPath(L.ankle, L.f, L.foot ?? P.foot ?? 'sock'));
+    if (near) knock(g, p, 5); g.fill(p); };
+  const arm = (A, near) => { const [w0, w1, w2, w3] = sp_.armW, p = new Path2D();
+    p.addPath(limbPath(A.sh, A.el, w0, w1)); p.addPath(limbPath(A.el, A.wr, w2, w3)); p.addPath(handPath(A.wr, A.el, A.hand));
+    if (sp_.sleeve) { const m = lp2(A.el, A.wr, .62); p.addPath(drape([[A.el[0], A.el[1], 13], [m[0], m[1] + 14, 16], [A.wr[0] - 2, A.wr[1] + 10, 15], [A.wr[0], A.wr[1] - 4, 11]])); }   // a wide sleeve that hangs
+    if (near) knock(g, p, 5); g.fill(p); };
+  arm(J.arms[1], false); leg(J.legs[1], false); leg(J.legs[0], true);
+  // cloth over the legs: a knee-length kaftan or a robe to the ankles
+  const Lg = J.legs, R = p => rot(p, lean);
+  let skirt;
+  if (sp_.skirt === 'robe') {                          // an A-line robe to the ankles, following the knees when he sits
+    const fl = Lg.map(L => clamp(Math.cos(Math.atan2(L.knee[0] - L.hip[0], L.knee[1] - L.hip[1])), 0, 1)), low = sp_.hip[1] + sp_.thigh + sp_.shin - 14;
+    const hem = Lg.map((L, i) => lp2([L.ankle[0], L.ankle[1] - 14], [L.ankle[0]*.6, low], .3*fl[i]));
+    const hx = hem.map(h => h[0]), hy = Math.max(...hem.map(h => h[1])), f = Math.min(...fl);
+    skirt = drape([[...R([-26, -40]), 16], [...R([22, -40]), 16], [...R([-28, -4]), 17], [...R([24, -4]), 17], ...Lg.map(L => [L.knee[0], L.knee[1], 20]), ...hem.map(h => [h[0], h[1], 20]),
+      [Math.min(...hx) - 56*f, hy - 2, 18], [Math.max(...hx) + 36*f, hy, 17]]);
+  } else {                                            // a kaftan: fitted at the waist, the skirt hangs to the knee
+    const hang = L => lp2(L.knee, add(L.hip, [0, sp_.thigh*.95]), .45);
+    skirt = drape([[...R([-22, -8]), 14], [...R([19, -8]), 14], ...Lg.map(L => { const q = hang(L); return [q[0], q[1], 17]; })]);
+  }
+  g.fill(skirt);
+  const torso = sp(sp_.torso.map(R)); g.fill(torso);
+  // the head
+  g.save(); g.translate(...J.neck); g.rotate((P.nod ?? 0) + lean*.5); g.scale(sp_.headSc ?? 1, sp_.headSc ?? 1); g.fill(headPath(sp_.head)); hole(g, headHoles(sp_.head)); g.restore();
+  // pierced ornament: a sash of small diamonds and a line of tiny holes down the front edge
+  const orn = new Path2D();
+  for (let k = 0; k < 4; k++) { const q = R([-14 + k*9, -4]); orn.moveTo(q[0], q[1] - 3.2); orn.lineTo(q[0] + 2.6, q[1]); orn.lineTo(q[0], q[1] + 3.2); orn.lineTo(q[0] - 2.6, q[1]); orn.closePath(); }
+  for (let k = 0; k < 5; k++) { const q = R([sp_.torso[8][0] - 7, -96 + k*18]); orn.moveTo(q[0] + 1.8, q[1]); orn.arc(q[0], q[1], 1.8, 0, TAU); }
+  hole(g, orn);
+  arm(J.arms[0], true);
+  g.restore();
+  return J;
+}
+// stage position of a puppet-local point (for props held in a hand)
+const stageOf = (sp_, P, q) => [P.x + q[0]*(P.dir ?? 1)*sp_.s*(P.sc ?? 1), P.y + q[1]*sp_.s*(P.sc ?? 1)];
+function kavush(g, x, y, ang = 0, sc = 1.25, flip = 1, knockout = false) {
+  const p = new Path2D(), m = new DOMMatrix().translate(x, y).rotate(ang/DEG).scale(sc*flip, sc);
+  p.addPath(sp(KAVUSH), m); if (knockout) knock(g, p, 5); g.fillStyle = INK; g.fill(p);
+  const h = new Path2D(); for (let k = 0; k < 4; k++) { const q = m.transformPoint(new DOMPoint(18 + k*11, -9)); h.moveTo(q.x + 2.2*sc, q.y); h.arc(q.x, q.y, 2.2*sc, 0, TAU); } hole(g, h);
+}
+
+// ------------------------------------------------------------------ sets: cut silhouettes; glass lets coloured light through
+const FLOOR = 1488;
+function archPath(cx, base, w, h, spring = .52) {
+  const p = new Path2D(), l = cx - w/2, r = cx + w/2, sy = base - h*spring, top = base - h;
+  p.moveTo(l, base); p.lineTo(l, sy); p.bezierCurveTo(l, sy - (sy - top)*.62, cx - w*.2, top + (sy - top)*.2, cx, top);
+  p.bezierCurveTo(cx + w*.2, top + (sy - top)*.2, r, sy - (sy - top)*.62, r, sy); p.lineTo(r, base); p.closePath(); return p;
+}
+const GLASS = ['rgba(52,150,150,.55)', 'rgba(233,160,52,.5)', 'rgba(176,58,52,.5)', 'rgba(60,96,176,.5)', 'rgba(240,200,90,.4)'];
+// a window of coloured glass behind a lattice of eight-pointed stars
+function glassWindow(g, cx, base, w, h, seed) {
+  const a = archPath(cx, base, w, h), s = 58;
+  g.save(); g.clip(a);
+  for (let y = base - h - s; y < base + s; y += s) for (let x = cx - w/2 - s; x < cx + w/2 + s; x += s) {
+    g.fillStyle = GLASS[Math.floor(hash(Math.round(x*7 + y*13), seed)*GLASS.length)]; g.fillRect(x - s/2, y - s/2, s, s); }
+  g.strokeStyle = INK; g.lineWidth = 7; g.lineJoin = 'round';
+  for (let y = base - h - s; y < base + s; y += s) for (let x = cx - w/2 - s; x < cx + w/2 + s; x += s) {
+    for (const r0 of [0, Math.PI/4]) { g.beginPath(); for (let k = 0; k < 4; k++) { const an = r0 + k*Math.PI/2 + Math.PI/4, q = [x + s*.34*Math.cos(an), y + s*.34*Math.sin(an)]; k ? g.lineTo(...q) : g.moveTo(...q); } g.closePath(); g.stroke(); }
+    g.beginPath(); g.moveTo(x + s*.34, y); g.lineTo(x + s*.66, y); g.moveTo(x, y + s*.34); g.lineTo(x, y + s*.66); g.stroke();
+  }
+  g.restore();
+  g.lineWidth = 18; g.strokeStyle = INK; g.stroke(a); g.fillStyle = INK; g.fillRect(cx - w/2 - 26, base, w + 52, 20);
+}
+// a mosque lamp of amber glass on three chains
+function qandil(g, x, y, t, top = SCR.peak - 40) {
+  g.save(); g.strokeStyle = INK; g.lineWidth = 3;
+  for (const dx of [-26, 0, 26]) { g.beginPath(); g.moveTo(x + dx*.2, y - 150); g.lineTo(x + dx, y - 44); g.stroke(); }
+  g.lineWidth = 4; g.beginPath(); g.moveTo(x, top); g.lineTo(x, y - 150); g.stroke();
+  const body = sp([[-40, -44], [-30, -30], [-46, 6], [-38, 34], [-14, 48], [-10, 62], [-22, 70], [22, 70], [10, 62], [14, 48], [38, 34], [46, 6], [30, -30], [40, -44]].map(([a, b]) => [x + a, y + b]));
+  const f = 1 + .06*noise1(t*5, 21);
+  const gl = g.createRadialGradient(x, y + 10, 4, x, y + 10, 60); gl.addColorStop(0, `rgba(255,236,170,${.95*f})`); gl.addColorStop(1, 'rgba(226,130,40,.85)');
+  g.fillStyle = gl; g.fill(body); g.lineWidth = 7; g.stroke(body);
+  g.fillStyle = INK; g.fillRect(x - 44, y - 50, 88, 9); g.fillRect(x - 46, y + 2, 92, 7);
+  for (let k = -2; k <= 2; k++) { g.beginPath(); g.arc(x + k*16, y + 22, 4.5, 0, TAU); g.fill(); }
+  g.restore();
+}
+function lampGlow(c, x, y, t, a = 1) {
+  const f = 1 + .08*noise1(t*5, 21), r = 260*f, gr = c.createRadialGradient(x, y, 0, x, y, r);
+  gr.addColorStop(0, `rgba(255,220,150,${.45*a})`); gr.addColorStop(.4, `rgba(255,170,80,${.14*a})`); gr.addColorStop(1, 'rgba(255,140,60,0)');
+  c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = gr; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.restore();
+}
+// the floor, a carpet with a pierced border and fringes, a cushion, a book stand and a wall niche
+function floorAndCarpet(g, x0 = 60, x1 = 860) {
+  g.fillStyle = INK; g.fillRect(-400, FLOOR + 16, 1900, 700);
+  const tiles = new Path2D(); for (let x = -380; x < 1500; x += 64) { tiles.moveTo(x, FLOOR + 40); tiles.lineTo(x + 32, FLOOR + 56); tiles.lineTo(x, FLOOR + 72); tiles.lineTo(x - 32, FLOOR + 56); tiles.closePath(); }
+  hole(g, tiles);
+  g.fillStyle = INK; g.fillRect(x0, FLOOR - 4, x1 - x0, 22);
+  for (let x = x0 - 18; x < x0; x += 5) g.fillRect(x, FLOOR + 2, 2.5, 12); for (let x = x1; x < x1 + 18; x += 5) g.fillRect(x, FLOOR + 2, 2.5, 12);
+  const d = new Path2D(); for (let x = x0 + 20; x < x1 - 10; x += 26) { d.moveTo(x, FLOOR + 1); d.lineTo(x + 7, FLOOR + 7); d.lineTo(x, FLOOR + 13); d.lineTo(x - 7, FLOOR + 7); d.closePath(); }
+  hole(g, d);
+}
+function cushion(g, x, w = 190) { g.fillStyle = INK; g.fill(sp([[x - w/2, FLOOR - 4], [x - w/2 - 6, FLOOR - 24], [x - w/2 + 10, FLOOR - 38], [x + w/2 - 10, FLOOR - 38], [x + w/2 + 6, FLOOR - 24], [x + w/2, FLOOR - 4]]));
+  for (const s of [-1, 1]) { g.beginPath(); g.arc(x + s*(w/2 + 10), FLOOR - 20, 7, 0, TAU); g.fill(); } }
+function rahla(g, x, open = 1) {                     // an X-shaped book stand with the book on it
+  g.save(); g.strokeStyle = INK; g.lineCap = 'round'; g.lineWidth = 11;
+  g.beginPath(); g.moveTo(x - 34, FLOOR - 4); g.lineTo(x + 30, FLOOR - 100); g.moveTo(x + 34, FLOOR - 4); g.lineTo(x - 30, FLOOR - 100); g.stroke();
+  g.fillStyle = INK;
+  if (open > .5) { g.fill(sp([[x - 64, FLOOR - 112], [x - 30, FLOOR - 124], [x, FLOOR - 104], [x + 30, FLOOR - 124], [x + 64, FLOOR - 112], [x + 58, FLOOR - 98], [x, FLOOR - 90], [x - 58, FLOOR - 98]])); }
+  else { g.fill(sp([[x - 44, FLOOR - 104], [x + 44, FLOOR - 104], [x + 46, FLOOR - 92], [x - 46, FLOOR - 92]])); g.fillRect(x - 40, FLOOR - 112, 80, 6); }
+  g.restore();
+}
+function niche(g, x, y) {                            // a wall niche with books and a jug
+  g.save(); g.strokeStyle = INK; g.lineWidth = 12; g.stroke(archPath(x, y, 150, 230)); g.fillStyle = INK; g.fillRect(x - 90, y, 180, 16);
+  [[-56, 58, 16], [-38, 70, 14], [-22, 50, 18]].forEach(([dx, h, w]) => g.fillRect(x + dx, y - h, w, h));
+  g.fill(sp([[x + 24, y], [x + 14, y - 30], [x + 22, y - 60], [x + 30, y - 76], [x + 42, y - 76], [x + 52, y - 60], [x + 58, y - 30], [x + 50, y]]));
+  g.lineWidth = 6; g.beginPath(); g.arc(x + 62, y - 42, 12, -Math.PI/2, Math.PI/2); g.stroke(); g.restore();
+}
+
+// ------------------------------------------------------------------ poses
+function mixObj(a, b, u) { const o = {};
+  for (const k of new Set([...Object.keys(a ?? {}), ...Object.keys(b ?? {})])) { const x = a?.[k], y = b?.[k];
+    o[k] = typeof x === 'number' && typeof y === 'number' ? lerp(x, y, u) : Array.isArray(x) && Array.isArray(y) && typeof x[0] === 'number' ? lp2(x, y, u) : (u < .5 ? x ?? y : y ?? x); }
+  return o; }
+function mixPose(A, B, u) { const o = mixObj(A, B, u); for (const k of ['legs', 'arms']) if (A[k] || B[k]) o[k] = [0, 1].map(i => mixObj((A[k] ?? B[k])[i], (B[k] ?? A[k])[i], u)); return o; }
+function keyPose(t, K, e = easeInOutSine) {
+  if (t <= K[0][0]) return K[0][1]; if (t >= K[K.length - 1][0]) return K[K.length - 1][1];
+  let i = 0; while (K[i + 1][0] < t) i++; const [t0, A, ee] = K[i], [t1, B] = K[i + 1]; return mixPose(A, B, (ee ?? e)(span(t, t0, t1)));
+}
+// gaits: a run and a walk as functions of stride phase (right-facing)
+function runPose(ph, amp = 1) { const q = TAU*ph, leg = o => ({a: .1 + .62*amp*Math.sin(q + o), k: -(.22 + 1.25*amp*Math.pow(Math.max(0, Math.cos(q + o + .45)), 1.4)), f: .25*Math.sin(q + o)});
+  return {lean: .3*amp, legs: [leg(0), leg(Math.PI)], arms: [{a: -.75*amp*Math.sin(q), e: 1.35}, {a: .75*amp*Math.sin(q), e: 1.35}], bob: -12*amp*Math.abs(Math.sin(q))}; }
+function walkPose(ph, amp = 1) { const q = TAU*ph, leg = o => ({a: .05 + .36*amp*Math.sin(q + o), k: -(.08 + .55*amp*Math.pow(Math.max(0, Math.cos(q + o + .5)), 2)), f: .12*Math.sin(q + o)});
+  return {lean: .06, legs: [leg(0), leg(Math.PI)], arms: [{a: -.3*amp*Math.sin(q), e: .35}, {a: .3*amp*Math.sin(q), e: .35}], bob: -5*amp*Math.abs(Math.sin(q))}; }
+const STAND = {lean: .02, nod: 0, legs: [{a: .06, k: -.05}, {a: -.06, k: -.05}], arms: [{a: .12, e: .18}, {a: -.06, e: .22}]};
+const KNEEL = {lean: .06, nod: .08, legs: [{a: 1.45, k: -2.95, f: Math.PI}, {a: 1.4, k: -2.9, f: Math.PI}], arms: [{a: .6, e: .15}, {a: .5, e: .2}]};   // sitting on the heels
+const KNEEL1 = {lean: .3, nod: .25, legs: [{a: .05, k: -1.6, f: Math.PI*.9}, {a: 1.25, k: -1.35}], arms: [{a: .9, e: .3}, {a: .7, e: .3}]};           // one knee down
+const SIT = {lean: .06, nod: .12, legs: [{a: 1.42, k: -2.8, f: .4}, {a: 1.32, k: -2.72, f: .4}], arms: [{a: .95, e: .75, hand: .4}, {a: .6, e: .55}]}; // cross-legged
+// how high the pelvis rides above the floor, from the legs (so feet and knees rest on it)
+function groundY(sp_, P) { const J = joints(sp_, {...P, x: 0, y: 0, dir: 1}); let low = -1e9;
+  for (const L of J.legs) low = Math.max(low, L.ankle[1] + 12, L.knee[1] + sp_.legW[1]/2); return FLOOR - low*sp_.s*(P.sc ?? 1); }
+
+// ------------------------------------------------------------------ timing (seconds)
+const T = {
+  fade: [0, 1.2], night: [0, 9.0], lesson: 8.4,
+  rise: [19.8, 21.7], jump: [22.6, 23.05], runA: [23.05, 24.4], runB: [23.0, 24.2], grab: [24.4, 24.95], lift: [25.0, 25.6], tug: [25.6, 29.4],
+  split: [29.6, 30.4], walkA: [31.0, 32.6], walkB: [31.2, 34.4], placeA: [32.6, 33.5], placeB: [34.4, 35.2], step: [35.5, 36.5], heart: [36.8, 37.7],
+  hall: 39.2, enter: [40.4, 43.4], bowIn: [43.5, 44.3], princesIn: [66.0, 68.6], page: 76.0, write1: [77.0, 80.2], write2: [80.4, 83.6], card: 86.4, end: 97.0,
+};
+const CAPS = [
+  [[4.8, 8.6], "Qadim Bag'dod. Xalifa Ma'mun saroyi."],
+  [[9.0, 13.8], "Xalifa Ma'mun ikki o'g'liga buyuk olim al-Farroni ustoz qilib tayinlagan edi."],
+  [[14.0, 18.4], "Shahzodalar har kuni undan saboq olardi."],
+  [[18.6, 22.4], "Bir kuni dars tugab, ustoz o'rnidan turdi."],
+  [[22.6, 26.6], "Ikki shahzoda uning kavushini keltirish uchun birdan yugurdi."],
+  [[26.8, 29.4], "«Men keltiraman!» — «Yo'q, men!»"],
+  [[29.6, 34.6], "Oxiri kelishdilar: har biri bittadan kavush keltirdi."],
+  [[35.0, 38.8], "Ustozning ko'ngli tog'dek ko'tarildi."],
+  [[39.8, 44.4], "Bu xabar Xalifaga yetib bordi. U ustozni huzuriga chorladi."],
+  [[44.8, 48.4], "Dunyoda eng aziz inson kim?", 'XALIFA'],
+  [[48.6, 52.6], "Amirul mo'minindan azizroq kishini bilmayman.", 'USTOZ'],
+  [[52.8, 59.4], "Yo'q. Eng aziz inson — o'rnidan turganda, kavushini xalifaning ikki valiahdi talashib keltiradigan kishidir.", 'XALIFA'],
+  [[59.6, 64.2], "Ularni to'xtatmoqchi edim. Ammo intilgan sharaflaridan mahrum qilishdan qo'rqdim.", 'USTOZ'],
+  [[64.4, 69.4], "To'xtatganingizda, sizni koyigan bo'lardim. Bu ish ularning qadrini tushirmadi — aksincha, yuksaltirdi.", 'XALIFA'],
+  [[69.6, 75.4], "Inson qanchalik ulug' bo'lmasin, uch zotga xizmat qilishdan ulug' emas: hukmdoriga, otasiga va ustoziga.", 'XALIFA'],
+  [[76.6, 85.6], "Hazrat Alisher Navoiy aytganlaridek:"],
+];
+
+// ------------------------------------------------------------------ the lesson and the shoes
+const PA = {x: 600, dir: -1}, PB = {x: 740, dir: -1}, TX = 250;
+const withY = (sp_, P, lift = 0) => ({...P, y: groundY(sp_, P) - lift});
+const TSIT = withY(TEACHER, {...SIT, x: TX, dir: 1}, 30), TSTAND = withY(TEACHER, {...STAND, x: TX + 12, dir: 1}), TFIN = withY(TEACHER, {...STAND, x: TX + 44, dir: 1});
+const spotOf = (Pf, i) => { const J = joints(TEACHER, Pf); return stageOf(TEACHER, Pf, add(J.legs[i].ankle, [-14, 12])); };
+const S1 = spotOf(TFIN, 0), S2 = spotOf(TFIN, 1), KSC = TEACHER.s;
+function teacherAt(t) {
+  const lesson = {...TSIT, arms: [{a: .95 + .25*Math.sin(t*1.3), e: .75 + .2*Math.sin(t*1.3 + 1), hand: .4}, {a: .6, e: .55}], nod: .12 + .05*Math.sin(t*.9)};
+  if (t < T.rise[0]) return lesson;
+  const lean = withY(TEACHER, {...SIT, x: TX + 4, dir: 1, lean: .42, nod: .2, arms: [{a: .75, e: .2}, {a: .65, e: .2}]}, 24);
+  const kneel = withY(TEACHER, {x: TX + 10, dir: 1, lean: .32, nod: .15, legs: [{a: 1.15, k: -1.3}, {a: .15, k: -1.5, f: Math.PI*.9}], arms: [{a: .6, e: .2}, {a: .4, e: .2}]});
+  if (t < T.step[0]) return keyPose(t, [[T.rise[0], lesson], [T.rise[0] + .5, lean], [T.rise[0] + 1.1, kneel], [T.rise[1], {...TSTAND, nod: .1}], [T.rise[1] + 1.2, {...TSTAND, nod: .15}]]);
+  const mid = withY(TEACHER, {...STAND, x: TX + 28, dir: 1, legs: [{a: .3, k: -.35}, {a: -.18, k: -.12}]});
+  const fin = {...TFIN, nod: .12, legs: TFIN.legs.map(L => ({...L, foot: 'kavush'}))};
+  if (t < T.heart[0]) return keyPose(t, [[T.step[0], {...TSTAND, nod: .15}], [T.step[0] + .5, mid], [T.step[1], t >= T.step[1] ? fin : {...TFIN, nod: .12}]]);
+  const heart = {...fin, lean: .2, nod: .32, arms: [{a: .35, e: 2.25}, {a: -.05, e: .25}]};
+  return keyPose(t, [[T.heart[0], fin], [T.heart[1], heart]]);
+}
+// the shoes: where each one is at time t ({p: heel on the sole line, a: angle}); a carried shoe hangs from the hand by its heel
+const HANG = Math.PI/2, gripOff = where => [where === 'heel' ? 8 : where === 'toe' ? 64 : 36, -15].map(v => v*KSC);
+const grip = (s, where, u = null) => add(s.p, rot(u === null ? gripOff(where) : lp2(gripOff('heel'), gripOff('mid'), u), s.a));
+const mixShoe = (A, B, u) => ({p: lp2(A.p, B.p, u), a: lerp(A.a, B.a, u)});
+function shoesAt(t) {
+  const lift = span(t, T.lift[0], T.lift[1], easeInOutSine), tug = t > T.tug[0] && t < T.tug[1] + .3 ? 12*Math.sin(TAU*(t - T.tug[0])/1.15)*span(t, T.tug[0], T.tug[0] + .4)*(1 - span(t, T.tug[1] - .3, T.tug[1] + .3)) : 0;
+  const pair = [{p: [790 + tug, FLOOR - 96*lift], a: 0}, {p: [812 + tug, FLOOR - 3 - 96*lift], a: 0}];
+  if (t < T.split[0]) return pair;
+  const u = span(t, T.split[0], T.split[1], easeInOutSine);
+  let s1 = mixShoe(pair[0], carried(t, 'A'), u), s2 = mixShoe(pair[1], carried(t, 'B'), u);
+  s1 = mixShoe(s1, {p: S1, a: 0}, span(t, T.placeA[0] + .4, T.placeA[1], easeInOutSine)); s2 = mixShoe(s2, {p: S2, a: 0}, span(t, T.placeB[0] + .4, T.placeB[1], easeInOutSine));
+  return [s1, s2];
+}
+// the elder sets his shoe down and steps back; the younger comes up and sets down the other
+const WALKK = {A: [[T.walkA[0], 745], [T.walkA[1], 462], [33.9, 462], [34.6, 612]], B: [[T.walkB[0], 935], [33.6, 566], [33.85, 566], [T.walkB[1], 470]]};
+function pathX(t, K) { if (t <= K[0][0]) return K[0][1]; for (let i = 0; i < K.length - 1; i++) if (t < K[i + 1][0]) return lerp(K[i][1], K[i + 1][1], easeInOutSine(span(t, K[i][0], K[i + 1][0]))); return K[K.length - 1][1]; }
+const carrierX = (t, who) => pathX(t, WALKK[who]);
+const carrierDir = (t, who) => who === 'A' ? (t < T.walkA[0] ? 1 : -1) : -1;
+const carryHand = (t, who) => { const s = who === 'A' ? PRINCE.s : PRINCE2.s; return [carrierX(t, who) + carrierDir(t, who)*30*s, FLOOR - 170*s]; };
+const carried = (t, who) => ({p: add(carryHand(t, who), mul(rot(gripOff('heel'), HANG), -1)), a: HANG});
+// a walk along a path: stride phase from distance, amplitude from speed, so a pause is a stand
+function walker(sp_, t, K, dir, over = {}) { const x = pathX(t, K), v = (pathX(t + .03, K) - pathX(t - .03, K))/.06, amp = clamp(Math.abs(v)/150, 0, 1);
+  const Wk = walkPose(dir*(x - K[0][1])/(2*58*sp_.s), amp), P = withY(sp_, {...Wk, x, dir, nod: .1, ...over, arms: over.arms ? over.arms.map((a, i) => a ?? Wk.arms[i]) : Wk.arms}); return {...P, y: P.y + Wk.bob}; }
+function princeAt(t, who) {
+  const A = who === 'A', sp_ = A ? PRINCE : PRINCE2, x0 = A ? PA.x : PB.x, idx = A ? 0 : 1;
+  const nodd = .08 + .06*Math.max(0, Math.sin(t*1.1 + (A ? 0 : 1.7)));
+  const kneel = withY(sp_, {...KNEEL, x: x0, dir: -1, nod: nodd});
+  if (t < T.jump[0]) return {...kneel, nod: t > T.rise[0] + .6 ? .02 : nodd};
+  const [r0, r1] = A ? T.runA : T.runB, xs = A ? 745 : 935;
+  if (t < r0) { const u = span(t, T.jump[0], r0), mid = withY(sp_, {x: x0 + 10, dir: u < .5 ? -1 : 1, lean: .5, nod: 0, legs: [{a: .9, k: -1.6}, {a: .6, k: -1.3}], arms: [{a: .6, e: .8}, {a: .3, e: .8}]});
+    return u < .5 ? mixPose(kneel, mid, easeOut(u*2)) : mixPose(mid, withY(sp_, {...runPose(0), x: x0 + 20, dir: 1}), easeIn((u - .5)*2)); }
+  // the run: stride phase from the distance covered, so the feet do not skate
+  const pa = s => { const u = span(t, r0, r1), e = u < .8 ? u/.8*.86 : .86 + .14*easeOut((u - .8)/.2); return lerp(x0 + 20, xs, e); };
+  if (t < r1) { const x = pa(), R = runPose((x - x0)/(2*95*sp_.s)); return {...withY(sp_, {...R, x, dir: 1}), y: withY(sp_, {...R, x, dir: 1}).y + R.bob}; }
+  // bend to the shoes, both hands on the pair; then brace and tug
+  const face = A ? 1 : -1, pr = shoesAt(t), ga = A ? [grip(pr[0], 'heel'), grip(pr[1], 'heel')] : [grip(pr[1], 'toe'), grip(pr[0], 'toe')];
+  const bend = {x: xs, dir: face, lean: .95, nod: .35, legs: [{a: .75, k: -1.1}, {a: -.15, k: -.5}], arms: [{to: ga[0]}, {to: ga[1]}]};
+  const brace = {x: xs + (A ? -8 : 8), dir: face, lean: -.18 + .06*Math.sin(TAU*(t - T.tug[0])/1.15 + (A ? 0 : Math.PI)), nod: -.05, legs: [{a: .42, k: -.08}, {a: -.28, k: -.55}], arms: [{to: ga[0]}, {to: ga[1]}]};
+  const turnB = !A && t < r1 + .12;
+  if (t < T.split[0]) { const u = span(t, T.lift[0], T.lift[1] + .2, easeInOutSine), P = mixPose(withY(sp_, bend), withY(sp_, brace), u); return turnB ? {...P, dir: 1} : P; }
+  // each takes one shoe: stand, carry it to the teacher, kneel and set it before his feet
+  const K = WALKK[who], [w0] = A ? T.walkA : T.walkB, [p0, p1] = A ? T.placeA : T.placeB, xk = A ? K[1][1] : K[3][1];
+  const mine = shoesAt(t)[idx], hold = {to: grip(mine, null, span(t, p0 + .4, p1, easeInOutSine))}, mid = grip(mine, null, 1);
+  const stand = withY(sp_, {...STAND, x: xs, dir: face, nod: .1, arms: [hold, {a: .2, e: .6}]});
+  if (t < w0) return keyPose(t, [[T.split[0], {...mixPose(withY(sp_, brace), stand, 0), arms: [{to: ga[0]}, {to: ga[1]}]}], [T.split[1], stand]]);
+  if (t < p0) return walker(sp_, t, K, -1, {arms: [hold, null]});
+  const kn = withY(sp_, {...KNEEL1, x: xk, dir: -1, lean: .42, arms: [hold, {a: .5, e: .4}]}), knee = stageOf(sp_, kn, add(joints(sp_, {...kn, x: 0, y: 0, dir: 1}).legs[1].knee, [0, -14]));
+  const rest = {...kn, lean: .3, nod: .3, arms: [{to: knee}, {a: .5, e: .4}]};
+  if (t < p1 + .3) return keyPose(t, [[p0, walker(sp_, p0, K, -1, {arms: [hold, null]})], [p0 + .4, kn], [p1, kn], [p1 + .3, {...kn, arms: [{to: lp2(mid, knee, .5)}, {a: .5, e: .4}]}]]);
+  if (!A) return keyPose(t, [[p1 + .3, {...kn, arms: [{to: lp2(mid, knee, .5)}, {a: .5, e: .4}]}], [p1 + .7, rest], [T.heart[0] + .1, rest], [T.heart[1] + .2, {...rest, lean: .55, nod: .55}]]);
+  // the elder rises, steps back to make room, and kneels again further off
+  const up = withY(sp_, {...STAND, x: xk, dir: -1, nod: .15}), sit = withY(sp_, {...KNEEL, x: K[3][1], dir: -1, nod: .2});
+  if (t < K[2][0]) return keyPose(t, [[p1 + .3, {...kn, arms: [{to: lp2(mid, knee, .5)}, {a: .5, e: .4}]}], [K[2][0], up]]);
+  if (t < K[3][0]) return walker(sp_, t, K, -1, {nod: .15});
+  return keyPose(t, [[K[3][0], walker(sp_, K[3][0], K, -1, {nod: .15})], [K[3][0] + .45, sit], [T.heart[0] + .1, sit], [T.heart[1] + .2, {...sit, lean: .5, nod: .5}]]);
+}
+const princeA = t => princeAt(t, 'A'), princeB = t => princeAt(t, 'B');
+function rods(g, sp_, P, J) {
+  g.save(); g.strokeStyle = INK; g.globalAlpha = .5; g.lineWidth = 3;
+  for (const q of [J.neck, J.arms[0].wr]) { const s = stageOf(sp_, P, q); g.beginPath(); g.moveTo(...s); g.lineTo(s[0] + 30*(P.dir ?? 1), SCR.bot + 20); g.stroke(); }
+  g.restore();
+}
+// each puppet is cut in its own layer, so its knock-outs and piercings never bite into the set or another puppet;
+// a puppet held further from the cloth casts a softer, paler shadow
+const PUP = document.createElement('canvas'); PUP.width = 1080; PUP.height = 1920; const PG = PUP.getContext('2d');
+function drawFigure(g, sp_, P) {
+  PG.setTransform(1, 0, 0, 1, 0, 0); PG.clearRect(0, 0, 1080, 1920); PG.setTransform(g.getTransform());
+  const J = joints(sp_, P); rods(PG, sp_, P, J); puppet(PG, sp_, P);
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); if (P.soft) { g.filter = `blur(${P.soft}px)`; g.globalAlpha = 1 - P.soft*.07; } g.drawImage(PUP, 0, 0); g.restore();
+}
+function lessonSet(g, t) {
+  glassWindow(g, 540, 1060, 260, 480, 7);
+  qandil(g, 190, 760, t); qandil(g, 900, 760, t + 3);
+  floorAndCarpet(g, 60, 800); cushion(g, TX - 6);
+  if (t < 27) rahla(g, 420, t < T.rise[0] - .4 ? 1 : 0);          // cleared away while the camera is on the shoes
+}
+function lessonScene(g, t) {
+  lessonSet(g, t);
+  const sh = shoesAt(t), T0 = teacherAt(t), A = princeA(t), B = princeB(t);
+  const worn = t >= T.step[1];
+  if (!worn) kavush(g, sh[1].p[0], sh[1].p[1], sh[1].a, KSC);
+  drawFigure(g, TEACHER, T0);
+  drawFigure(g, PRINCE2, {...B, soft: .7});
+  if (!worn) kavush(g, sh[0].p[0], sh[0].p[1], sh[0].a, KSC, 1, true);
+  drawFigure(g, PRINCE, A);
+}
+
+// ------------------------------------------------------------------ the night city (a blue gel behind the cloth)
+function onionDome(g, cx, base, r, h) { g.fill(sp([[cx - r, base], [cx - r*1.04, base - h*.3], [cx - r*.86, base - h*.6], [cx - r*.46, base - h*.86], [cx - r*.1, base - h*.97], [cx, base - h], [cx + r*.1, base - h*.97], [cx + r*.46, base - h*.86], [cx + r*.86, base - h*.6], [cx + r*1.04, base - h*.3], [cx + r, base]]));
+  g.fillRect(cx - 3, base - h - 44, 6, 44); g.beginPath(); g.arc(cx, base - h - 50, 8, 0, TAU); g.fill(); }
+function minaret(g, x, base, h, w = 34) {
+  g.fillRect(x - w/2, base - h, w, h); for (const k of [.45, .78]) { g.fillRect(x - w*.9, base - h*k, w*1.8, 12); g.fill(sp([[x - w*.9, base - h*k + 12], [x, base - h*k + 36], [x + w*.9, base - h*k + 12]])); }
+  onionDome(g, x, base - h, w*.62, 70);
+}
+function palm(g, x, base, h, seed) { g.save(); g.lineCap = 'round'; g.strokeStyle = INK; g.lineWidth = 12; g.beginPath(); g.moveTo(x, base); g.quadraticCurveTo(x + 20*noise1(seed, 3), base - h*.6, x + 14, base - h); g.stroke();
+  for (let k = 0; k < 7; k++) { const a = -Math.PI*.95 + k*Math.PI*.95/6, L = 90 + 20*hash(k, seed); g.lineWidth = 7; g.beginPath(); g.moveTo(x + 14, base - h);
+    g.quadraticCurveTo(x + 14 + Math.cos(a)*L*.6, base - h + Math.sin(a)*L*.6 - 18, x + 14 + Math.cos(a)*L, base - h + Math.sin(a)*L*.5 + 30); g.stroke(); } g.restore(); }
+const PALACE_WIN = [540, 1188];
+function nightSet(g, t) {
+  g.fillStyle = INK;
+  palm(g, 70, 1500, 330, 3); minaret(g, 180, 1500, 620); palm(g, 330, 1500, 280, 5);
+  g.fillRect(340, 1250, 400, 260); for (let x = 344; x < 740; x += 36) g.fillRect(x, 1232, 22, 20);        // the palace walls and battlements
+  g.fillRect(420, 1070, 240, 200); onionDome(g, 540, 1080, 150, 250);
+  minaret(g, 900, 1500, 520, 30); onionDome(g, 780, 1300, 80, 130); g.fillRect(700, 1300, 160, 210); palm(g, 1010, 1500, 300, 8);
+  g.fillRect(-300, 1500, 1700, 400);
+  // lit windows: amber glass
+  const lit = (x, y, w, h, a = 1) => { g.save(); g.fillStyle = `rgba(255,${Math.round(196 + 20*noise1(t*2 + x, 9))},110,${a})`; g.fill(archPath(x, y, w, h)); g.restore(); };
+  lit(...PALACE_WIN, 46, 96); [[450, 1200], [630, 1200]].forEach(([x, y]) => lit(x, y, 30, 64, .9));
+  [[380, 1420], [460, 1420], [620, 1420], [700, 1420], [740, 1440], [820, 1440]].forEach(([x, y]) => lit(x, y, 24, 46, .8)); lit(180, 1100, 14, 30, .8); lit(900, 1160, 14, 30, .8);
+}
+function nightSky(c, t, V) {
+  c.save(); c.clip(screenPath);
+  for (let k = 0; k < 90; k++) { const x = SCR.l + hash(k, 41)*(SCR.r - SCR.l), y = SCR.peak + hash(k, 42)*560, tw = .55 + .45*Math.sin(t*(1 + hash(k, 43)*2) + k), r = .8 + 1.6*hash(k, 44);
+    c.fillStyle = `rgba(255,246,220,${.75*tw})`; c.beginPath(); c.arc(V.x + x*V.s, V.y + y*V.s, r*Math.min(V.s, 2), 0, TAU); c.fill(); }
+  const mx = V.x + 800*V.s, my = V.y + 700*V.s, R = 66*V.s;
+  const g = c.createRadialGradient(mx, my, R*.5, mx, my, R*4); g.addColorStop(0, 'rgba(255,240,200,.35)'); g.addColorStop(1, 'rgba(255,240,200,0)'); c.fillStyle = g; c.beginPath(); c.arc(mx, my, R*4, 0, TAU); c.fill();
+  c.save(); c.beginPath(); c.arc(mx, my, R, 0, TAU); c.clip(); c.fillStyle = '#fff4d6'; c.beginPath(); c.arc(mx, my, R, 0, TAU); c.arc(mx + R*.42, my - R*.18, R*.86, 0, TAU); c.fill('evenodd'); c.restore();
+  c.restore();
+}
+
+// ------------------------------------------------------------------ the throne hall
+const DAIS = 104, CX = 238;
+function hallSet(g, t) {
+  // the caliph's backrest: an arch of ruby and amber glass (no lattice, so his silhouette reads against it)
+  const bk = archPath(CX + 10, FLOOR - DAIS, 300, 470), gr = g.createLinearGradient(0, FLOOR - DAIS - 470, 0, FLOOR - DAIS);
+  gr.addColorStop(0, 'rgba(176,58,52,.62)'); gr.addColorStop(.6, 'rgba(226,140,52,.5)'); gr.addColorStop(1, 'rgba(240,190,90,.35)');
+  g.fillStyle = gr; g.fill(bk); g.strokeStyle = INK; g.lineWidth = 14; g.stroke(bk);
+  const st = new Path2D(); for (let k = 0; k < 9; k++) { const a = Math.PI*(.12 + .76*k/8); const q = [CX + 10 - Math.cos(a)*128, FLOOR - DAIS - 250 - Math.sin(a)*175]; for (let j = 0; j < 8; j++) { const b = j*Math.PI/4, r = j % 2 ? 3 : 7; j ? st.lineTo(q[0] + r*Math.cos(b), q[1] + r*Math.sin(b)) : st.moveTo(q[0] + r, q[1]); } st.closePath(); }
+  g.fillStyle = INK; g.fill(st);
+  // the dais: carved arcade along its front, a bolster behind the caliph
+  g.fillStyle = INK; g.fillRect(40, FLOOR - DAIS, 420, DAIS + 4); g.fillRect(28, FLOOR - DAIS - 10, 444, 14);
+  const arc = new Path2D(); for (let x = 70; x < 440; x += 52) arc.addPath(archPath(x, FLOOR - 16, 30, 62)); hole(g, arc);
+  g.fill(sp([[CX - 150, FLOOR - DAIS - 6], [CX - 156, FLOOR - DAIS - 40], [CX - 120, FLOOR - DAIS - 52], [CX - 92, FLOOR - DAIS - 40], [CX - 96, FLOOR - DAIS - 6]]));
+  // the great arch of the hall and its lamps
+  g.save(); g.strokeStyle = INK; g.lineWidth = 34; g.stroke(archPath(540, FLOOR + 40, 1020, 1100, .5)); g.restore();
+  const sc = new Path2D(); for (let k = 0; k < 29; k++) { const a = Math.PI*(.06 + .88*k/28), cx = 540 - Math.cos(a)*470, cy = FLOOR + 40 - 550 - Math.sin(a)*400, r = k % 2 ? 4 : 10;
+    if (k % 2) { sc.moveTo(cx + r, cy); sc.arc(cx, cy, r, 0, TAU); } else for (let j = 0; j < 16; j++) { const b = j*Math.PI/8, q = j % 2 ? r*.45 : r; j ? sc.lineTo(cx + q*Math.cos(b), cy + q*Math.sin(b)) : sc.moveTo(cx + q, cy); } }
+  g.fillStyle = INK; g.fill(sc);
+  qandil(g, 560, 700, t, 460); qandil(g, 820, 740, t + 2, 460);
+  floorAndCarpet(g, 470, 1030);
+}
+const CALIPH_SIT = () => withY(CALIPH, {...SIT, x: CX, dir: 1, nod: .06, arms: [{a: .7, e: .6}, {a: .55, e: .5}]}, DAIS + 22);
+function caliphAt(t) {
+  const base = {...CALIPH_SIT(), nod: .06 + .02*Math.sin(t*.7)};
+  const say = [[44.8, 48.4], [52.8, 59.4], [64.4, 69.4], [69.6, 75.4]];
+  const open = {a: 1.25, e: .55, hand: .5}, finger = {a: 2.1, e: .5}, rest = {a: .7, e: .6};
+  const K = [[T.hall, {...base, arms: [rest, base.arms[1]]}]];
+  // gestures: an open hand to ask; a raised hand for "No"; a hand towards the teacher; a raised hand again for the saying
+  [[44.9, open], [48.2, rest], [53.0, finger], [54.6, finger], [55.4, open], [59.2, rest], [64.6, open], [69.0, rest], [69.8, finger], [72.2, finger], [73.0, open], [75.2, rest]].forEach(([tt, a]) => K.push([tt, {...base, arms: [a, base.arms[1]], nod: a === finger ? -.04 : .08}]));
+  return keyPose(t, K);
+}
+function hallTeacherAt(t) {
+  const xe = 690, K = [[T.enter[0], 1180], [T.enter[1], xe]];
+  if (t < T.enter[1]) return {...walker(TEACHER, t, K, -1, {nod: .08}), legs: walker(TEACHER, t, K, -1).legs.map(L => ({...L, foot: 'kavush'}))};
+  const kv = L => ({...L, foot: 'kavush'}), st = withY(TEACHER, {...STAND, x: xe, dir: -1, nod: .1}); st.legs = st.legs.map(kv);
+  const bow = {...st, lean: .3, nod: .35, arms: [{a: .35, e: 2.25}, {a: -.05, e: .25}]}, hold = {...st, nod: .12, arms: [{a: .35, e: 2.25}, {a: -.05, e: .25}]};
+  const open = {...st, lean: .08, nod: .05, arms: [{a: .9, e: .5, hand: .5}, {a: -.05, e: .25}]};
+  return keyPose(t, [[T.enter[1], st], [T.bowIn[0] + .3, bow], [T.bowIn[1] + .5, hold], [48.8, hold], [49.4, bow], [51.8, bow], [52.6, hold], [59.8, hold], [60.4, open], [62.4, open], [63.0, bow], [64.2, hold], [73.6, hold], [74.6, {...bow, lean: .42, nod: .45}]]);
+}
+function hallPrinceAt(t, who) {
+  const A = who === 'A', sp_ = A ? PRINCE : PRINCE2, xe = A ? 850 : 950, K = [[T.princesIn[0] + (A ? 0 : .35), 1200], [T.princesIn[1] + (A ? 0 : .35), xe]];
+  if (t < K[1][0]) return walker(sp_, t, K, -1, {nod: .1});
+  const st = withY(sp_, {...STAND, x: xe, dir: -1, nod: .2, lean: .06}), bow = {...st, lean: .4, nod: .5};
+  return keyPose(t, [[K[1][0], st], [K[1][0] + .8, bow], [72.0, bow], [72.8, {...st, nod: .25}], [73.8, st], [74.8, {...bow, lean: .5}]]);
+}
+function hallScene(g, t) {
+  hallSet(g, t);
+  drawFigure(g, CALIPH, caliphAt(t));
+  if (t > T.princesIn[0]) { drawFigure(g, PRINCE2, {...hallPrinceAt(t, 'B'), soft: .7}); drawFigure(g, PRINCE, hallPrinceAt(t, 'A')); }
+  drawFigure(g, TEACHER, hallTeacherAt(t));
+}
+
+// ------------------------------------------------------------------ the page: Navoi's couplet, then the greeting
+function pageFrame(g, t) {
+  const fr = archPath(540, 1530, 860, 1000, .7); g.save(); g.strokeStyle = INK; g.lineWidth = 26; g.stroke(fr); g.lineWidth = 5; g.save(); g.translate(540, 1030); g.scale(.95, .96); g.translate(-540, -1030); g.stroke(fr); g.restore();
+  const st = new Path2D(); for (let x = 150; x <= 930; x += 52) { st.moveTo(x, 1520); st.lineTo(x + 8, 1530); st.lineTo(x, 1540); st.lineTo(x - 8, 1530); st.closePath(); } hole(g, st);
+  g.fillStyle = INK; g.fillRect(60, 1552, 960, 60); g.restore();
+}
+function inkText(c, str, x, y, u, o) {                       // written left to right, as if by a pen
+  if (u <= 0) return; c.save(); c.font = `${o.font ?? 'italic 400'} ${o.size}px ${o.fam ?? 'Literata'}`; const w = c.measureText(uz(str)).width;
+  c.beginPath(); c.rect(x - w/2 - 20, y - o.size*1.3, (w + 40)*u, o.size*2); c.clip(); text(c, str, x, y, {color: INK, ...o}); c.restore();
+}
+function pageText(c, t) {
+  const fade = 1 - span(t, T.card - 1.2, T.card - .2);
+  if (fade > 0) { c.save(); c.globalAlpha = fade;
+    inkText(c, "Haq yo'lida kim senga", 540, 960, span(t, T.write1[0], T.write1[0] + 1.6, easeInOutSine), {size: 58});
+    inkText(c, "bir harf o'qitmish ranj ila,", 540, 1040, span(t, T.write1[0] + 1.6, T.write1[1], easeInOutSine), {size: 58});
+    inkText(c, "Aylamak bo'lmas ado", 540, 1160, span(t, T.write2[0], T.write2[0] + 1.6, easeInOutSine), {size: 58});
+    inkText(c, "oning haqin yuz ganj ila.", 540, 1240, span(t, T.write2[0] + 1.6, T.write2[1], easeInOutSine), {size: 58});
+    text(c, 'Alisher Navoiy', 540, 1350, {size: 38, font: '600', fam: 'Fraunces', color: '#6b2a18', alpha: span(t, T.write2[1] + .2, T.write2[1] + 1), spacing: '2px'});
+    c.restore(); }
+  if (t < T.card) return;
+  const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut), up = k => 14*(1 - a(k));
+  text(c, "Ustoz va murabbiylar kuni", 540, 1010 + up(1.2), {size: 56, font: '600', fam: 'Fraunces', color: INK, alpha: a(1.2)});
+  text(c, "muborak bo'lsin!", 540, 1078 + up(1.5), {size: 56, font: '600', fam: 'Fraunces', color: INK, alpha: a(1.5)});
+  text(c, "Menga o'rgatgan har bir", 540, 1190 + up(3), {size: 44, color: '#3a2216', alpha: a(3)});
+  text(c, "harfingiz uchun rahmat!", 540, 1246 + up(3.3), {size: 44, color: '#3a2216', alpha: a(3.3)});
+  text(c, "Minnatdor shogirdingiz", 540, 1372 + up(5), {size: 46, color: '#7a2414', alpha: a(5)});
+}
+function cardBand(c, t) {
+  if (t < T.card) return; const a = k => span(t, T.card + k, T.card + k + 1.1, easeOut);
+  text(c, 'Aziz Ustozim,', 540, 250, {size: 52, alpha: a(0)});
+  text(c, 'Dilshod Bahodirovich Mannopov!', 540, 340, {size: 62, font: '600', fam: 'Fraunces', color: GOLD, alpha: a(.5), glow: 12});
+}
+function slipperTop(g, x, y, ang) {                  // a kavush from above: a pointed, upturned toe, the opening cut out
+  const m = new DOMMatrix().translate(x, y).rotate(ang/DEG).scale(1.15), P = pts => { const p = new Path2D(); p.addPath(sp(pts), m); return p; };
+  g.fillStyle = INK; g.fill(P([[0, -90], [14, -72], [26, -40], [29, -4], [26, 30], [15, 48], [0, 53], [-15, 48], [-26, 30], [-29, -4], [-26, -40], [-14, -72]]));
+  g.fill(P([[-3, -88], [0, -106], [6, -114], [4, -98], [3, -88]]));
+  hole(g, P([[0, -30], [15, -18], [20, 8], [16, 32], [0, 42], [-16, 32], [-20, 8], [-15, -18]]));
+  const d = new Path2D(); for (let k = 0; k < 3; k++) { const q = m.transformPoint(new DOMPoint(0, -70 + k*16)); d.moveTo(q.x + 3, q.y); d.arc(q.x, q.y, 3, 0, TAU); } hole(g, d);
+}
+function pageScene(g, t) {
+  pageFrame(g, t);
+  qandil(g, 540, 720, t, 470);
+  const e = span(t, T.card + .2, T.card + 1.6, easeInOutSine);             // the pair of shoes, set down neatly: the emblem of the greeting
+  if (e > 0) { g.save(); g.globalAlpha = e; for (const s of [-1, 1]) slipperTop(g, 540 + s*44, 912, s*.05); g.restore(); }
+}
+
+// ------------------------------------------------------------------ cameras, one per scene: the stage scaled inside the fixed screen
+const easeInQuint = x => x*x*x*x*x;
+const WIDE = [[540, 1180], 1.12, [540, 1190]];
+const CAMS = {
+  night: [[0, [540, 1100], 1, [540, 1100]], [5.2, [540, 1100], 1, [540, 1100]], [8.6, [PALACE_WIN[0], PALACE_WIN[1] - 44], 7, [540, 1030], easeInQuint]],
+  lesson: [[T.lesson, ...WIDE], [24.3, ...WIDE], [25.3, [848, FLOOR - 120], 1.75, [540, 1250]], [29.9, [848, FLOOR - 120], 1.75, [540, 1250]], [31.3, ...WIDE], [33.0, ...WIDE],
+    [34.3, [400, FLOOR - 190], 1.25, [540, 1236]], [T.hall, [400, FLOOR - 190], 1.25, [540, 1236]]],
+  hall: [[T.hall, [560, 1140], 1.02, [540, 1150]], [52.8, [560, 1140], 1.02, [540, 1150]], [56.0, [470, 1180], 1.14, [540, 1180]], [64.0, [470, 1180], 1.14, [540, 1180]], [67.0, [600, 1150], 1.0, [540, 1150]], [T.page, [600, 1150], 1.0, [540, 1150]]],
+  page: [[0, [540, 1100], 1, [540, 1100]]],
+};
+function view(t, K) {
+  const k = K.findIndex(q => q[0] > t), A = K[k < 0 ? K.length - 1 : Math.max(0, k - 1)], B = k < 0 ? A : K[k];
+  const u = B === A ? 0 : (B[4] ?? easeInOutSine)(span(t, A[0], B[0])), f = lp2(A[1], B[1], u), z = A[2]*Math.pow(B[2]/A[2], u), at = lp2(A[3], B[3], u);
+  return {x: at[0] - f[0]*z, y: at[1] - f[1]*z, s: z};
+}
+
+// ------------------------------------------------------------------ captions in the dark band above the screen
+function captions(c, t) {
+  const ta = win(t, .8, 4.6, .8, .6);
+  if (ta > 0) { text(c, 'Ustozning kavushi', 540, 282, {size: 84, font: '600', fam: 'Fraunces', color: GOLD, alpha: ta, glow: 16}); text(c, 'Sharq rivoyati', 540, 354, {size: 42, alpha: ta*.9}); }
+  for (const [[a, b], str, who] of CAPS) { const al = win(t, a, b, .5, .5); if (al <= 0) continue;
+    const lines = wrap(c, str, 50, 940), lh = 66, y0 = 300 - (lines.length - 1)*lh/2 + 10*(1 - span(t, a, a + .8, easeOut));
+    if (who) text(c, who, 540, y0 - 74, {size: 28, font: '600', fam: 'Fraunces', color: GOLD, alpha: al, spacing: '6px'});
+    lines.forEach((l, i) => text(c, l, 540, y0 + i*lh, {size: 50, alpha: al})); }
+  cardBand(c, t);
+}
+
+// ------------------------------------------------------------------ the frame
+const SCN = document.createElement('canvas'); SCN.width = 1080; SCN.height = 1920; const SG = SCN.getContext('2d');
+// one scene on the screen: its light, its stage through its camera, its glows
+function stage(c, t, which) {
+  const mood = which === 'night' ? 'night' : 'warm'; backlight(c, t, mood);
+  const V = view(t, CAMS[which]); LG.setTransform(1, 0, 0, 1, 0, 0); LG.clearRect(0, 0, 1080, 1920); LG.setTransform(V.s, 0, 0, V.s, V.x, V.y);
+  if (which === 'night') nightSky(c, t, V);
+  ({night: nightSet, lesson: lessonScene, hall: hallScene, page: pageScene})[which](LG, t);
+  LG.setTransform(1, 0, 0, 1, 0, 0);
+  c.save(); c.clip(screenPath); c.drawImage(LAYER, 0, 0);
+  const lamps = {lesson: [[190, 770, 0], [900, 770, 3]], hall: [[560, 710, 0], [820, 750, 2]], page: [[540, 730, 0]], night: []}[which];
+  for (const [x, y, o] of lamps) lampGlow(c, V.x + x*V.s, V.y + y*V.s, t + o, .9);
+  if (which === 'night') { const g = span(t, 7.0, 8.55, easeIn); if (g > 0) { c.fillStyle = `rgba(255,214,140,${g})`; c.fillRect(0, 0, W, H); } }   // into the lit window
+  c.restore();
+}
+function frame(c, tau) {
+  const t = Math.round(tau*FPS)/FPS; resetT(c);
+  proscenium(c, t);
+  const which = t < 8.6 ? 'night' : t < T.hall ? 'lesson' : t < T.page ? 'hall' : 'page';
+  stage(c, t, which);
+  if (t >= 8.6 && t < 9.4) { c.save(); c.clip(screenPath); c.fillStyle = `rgba(255,214,140,${1 - span(t, 8.6, 9.4, easeInOutSine)})`; c.fillRect(0, 0, W, H); c.restore(); }
+  // between scenes the lamp behind the cloth is lowered and raised again
+  const dim = Math.max(...[T.hall, T.page].map(ts => 1 - Math.min(1, Math.abs(t - ts)/.7)));
+  if (dim > 0) { c.save(); c.clip(screenPath); c.fillStyle = `rgba(12,6,4,${easeInOutSine(dim)*.97})`; c.fillRect(0, 0, W, H); c.restore(); }
+  cloth(c);
+  if (which === 'page') { c.save(); c.clip(screenPath); pageText(c, t); c.restore(); }
+  captions(c, t);
+  const f = 1 - span(t, T.fade[0], T.fade[1]); if (f > 0) { c.save(); c.globalAlpha = f; c.fillStyle = '#000'; c.fillRect(0, 0, W, H); c.restore(); }
+}
+
+// ------------------------------------------------------------------ score: D Hijaz (D Eb F# G A Bb C), synthesized, pitched sounds only
+const mtof = m => 440*Math.pow(2, (m - 69)/12);
+function score(ac, t0, dest) {
+  const SR = ac.sampleRate, G = (v, d) => { const g = ac.createGain(); g.gain.value = v; if (d) g.connect(d); return g; };
+  const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 2; comp.knee.value = 10; comp.attack.value = .01; comp.release.value = .3;
+  const master = G(.9, dest); comp.connect(master);
+  master.gain.setValueAtTime(.9, t0 + T.end - 1.2); master.gain.linearRampToValueAtTime(0, t0 + T.end - .05);
+  const len = Math.ceil(SR*3), ir = ac.createBuffer(2, len, SR);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(ch + 31); for (let i = 0; i < len; i++) d[i] = (r()*2 - 1)*Math.pow(1 - i/len, 3.2); }
+  const room = ac.createConvolver(); room.buffer = ir; const rlp = ac.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3000; room.connect(rlp); rlp.connect(G(1, comp));
+  const bus = G(1, comp); bus.connect(G(.36, room));
+  const env = (p, t, a, peak, d) => { p.setValueAtTime(0, t); p.linearRampToValueAtTime(peak, t + a); p.exponentialRampToValueAtTime(.0001, t + a + d); p.setValueAtTime(0, t + a + d + .01); };
+  const osc = (f, t, a, peak, d, dst, type = 'sine') => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; env(g.gain, t, a, peak, d); o.connect(g); g.connect(dst); o.start(t); o.stop(t + a + d + .05); };
+  // a plucked string (Karplus-Strong). The pluck is smoothed first, so the note starts as a soft tone, never a burst.
+  const KS = {};
+  const ksBuf = (m, bright, dur) => { const k = `${m}|${bright}`; if (KS[k]) return KS[k];
+    const f = mtof(m), N = Math.max(2, Math.round(SR/f - .5)), n = Math.ceil(SR*dur), b = ac.createBuffer(1, n, SR), d = b.getChannelData(0), line = new Float32Array(N), r = rng(m*7 + Math.round(bright*10));
+    for (let i = 0; i < N; i++) line[i] = r()*2 - 1;
+    for (let p = 0; p < Math.round(lerp(7, 1, bright)); p++) { let prev = line[N - 1]; for (let i = 0; i < N; i++) { const v = line[i]; line[i] = .5*(v + prev); prev = v; } }
+    let mean = 0; for (let i = 0; i < N; i++) mean += line[i]/N; for (let i = 0; i < N; i++) line[i] -= mean;
+    const S = lerp(.9975, .9992, bright); let idx = 0, peak = 1e-6;
+    for (let i = 0; i < n; i++) { const a = line[idx], c = line[(idx + 1) % N]; d[i] = a; line[idx] = S*.5*(a + c); idx = (idx + 1) % N; peak = Math.max(peak, Math.abs(a)); }
+    for (let i = 0; i < n; i++) d[i] /= peak; const fo = Math.round(SR*.05); for (let i = 0; i < fo; i++) d[n - 1 - i] *= i/fo;
+    return KS[k] = b; };
+  const pluck = (m, t, v, bright = .35, dur = 2.6, dst = bus) => { if (t + t0 < -dur) return; const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = ksBuf(m, bright, dur); g.gain.value = v; s.connect(g); g.connect(dst); const at = t0 + t; if (at >= 0) s.start(at); else s.start(0, -at); };
+  const oud = (m, t, v = .1) => pluck(m, t, v, .3, 2.8);
+  const santur = (m, t, v = .05) => pluck(m, t, v, .8, 2.2);
+  // a ney: a breathy-free flute of sines, a small scoop into the note and a vibrato that grows
+  const neyBus = G(1); const nlp = ac.createBiquadFilter(); nlp.type = 'lowpass'; nlp.frequency.value = 2600; neyBus.connect(nlp); nlp.connect(bus);
+  const ney = (m, t, d, v = .05) => { t += t0; const f = mtof(m), o = ac.createOscillator(), o2 = ac.createOscillator(), lfo = ac.createOscillator(), lg = ac.createGain(), g = ac.createGain(), g2 = ac.createGain();
+    o.frequency.setValueAtTime(f*.985, t); o.frequency.linearRampToValueAtTime(f, t + .09); o2.frequency.setValueAtTime(f*2*.985, t); o2.frequency.linearRampToValueAtTime(f*2, t + .09);
+    lfo.frequency.value = 5.1; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f*.007, t + Math.min(.7, d*.6)); lfo.connect(lg); lg.connect(o.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .14); g.gain.setValueAtTime(v, t + Math.max(.15, d - .05)); g.gain.linearRampToValueAtTime(0, t + d + .3);
+    g2.gain.value = .16; o.connect(g); o2.connect(g2); g2.connect(g); g.connect(neyBus); for (const x of [o, o2, lfo]) { x.start(t); x.stop(t + d + .4); } };
+  const bell = (m, t, v, d = 2) => { t += t0; const f = mtof(m), c = ac.createOscillator(), mo = ac.createOscillator(), mg = ac.createGain(), g = ac.createGain();
+    c.frequency.value = f; mo.frequency.value = f*2; mg.gain.setValueAtTime(f*.8, t); mg.gain.exponentialRampToValueAtTime(f*.02, t + d*.7); mo.connect(mg); mg.connect(c.frequency);
+    env(g.gain, t, .004, v, d); c.connect(g); g.connect(bus); c.start(t); mo.start(t); c.stop(t + d + .1); mo.stop(t + d + .1); };
+  // a frame drum, pitched: a low "dum" that falls, a short "tek"
+  const dum = (t, v = .16) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(96, t); o.frequency.exponentialRampToValueAtTime(56, t + .16); env(g.gain, t, .004, v, .42); o.connect(g); g.connect(bus); o.start(t); o.stop(t + .5); };
+  const tek = (t, v = .05) => { t += t0; osc(560, t, .002, v, .07, bus, 'triangle'); osc(560*1.58, t, .002, v*.4, .05, bus, 'sine'); };
+  // a drone under each scene
+  const droneBus = G(1); const dlp = ac.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 420; droneBus.connect(dlp); dlp.connect(bus);
+  const drone = (ms, a, b, v) => ms.forEach(m => [-5, 5].forEach(det => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
+    g.gain.setValueAtTime(0, t0 + a); g.gain.linearRampToValueAtTime(v, t0 + a + 2); g.gain.setValueAtTime(v, t0 + b - 1.5); g.gain.linearRampToValueAtTime(0, t0 + b); o.connect(g); g.connect(droneBus); o.start(t0 + a); o.stop(t0 + b + .1); }));
+  const seq = (arr, fn) => arr.forEach(e => fn(...e));
+
+  // --- the night: a slow ney over the drone, stars, a rising run into the lit window
+  drone([38, 45], .3, 39.4, .006);
+  seq([[1.2, 69, 1.4], [2.6, 70, .5], [3.1, 69, .6], [3.7, 67, .6], [4.3, 66, .9], [5.2, 63, .5], [5.7, 62, 2.0]], (t, m, d) => ney(m, t, d, .045));
+  seq([[1.0, 50], [3.0, 57], [5.0, 50], [6.6, 50], [6.7, 57], [6.8, 62]], (t, m) => oud(m, t, .09));
+  seq([[1.8, 86], [2.9, 81], [4.4, 78], [6.2, 86]], (t, m) => santur(m, t, .03));
+  [62, 66, 69, 74, 78, 81].forEach((m, i) => santur(m, 7.9 + i*.11, .04)); bell(81, 8.6, .04, 2.4);
+  // --- the lesson: an oud ostinato, a ney phrase for each line
+  const OST = [50, 57, 62, 63, 62, 57, 54, 55];
+  for (let b = 0; b < 5; b++) OST.forEach((m, i) => { const t = 9.0 + b*3 + i*.375; if (t < 19.8) oud(m, t, i === 0 ? .1 : .06); });
+  seq([[10.5, 74, .75], [11.25, 72, .375], [11.625, 70, .375], [12.0, 69, 1.5], [14.3, 70, .375], [14.675, 72, .375], [15.05, 70, .75], [15.8, 69, .75], [16.55, 67, .75], [17.3, 66, .75], [18.05, 67, .375], [18.425, 69, 1.4]], (t, m, d) => ney(m, t, d, .04));
+  oud(45, 19.4, .1); oud(50, 21.7, .09); santur(74, 21.9, .03);
+  // --- the race: a drum pulse, a run up the scale, the grab; the tug as a call and an answer
+  dum(22.6, .12); for (let t = 22.8; t < 24.9; t += .2) (Math.round((t - 22.8)/.2) % 4 ? tek : dum)(t, .05);
+  [62, 63, 66, 67, 69, 70, 72, 74, 75, 78, 79, 81].forEach((m, i) => oud(m, 23.05 + i*.1, .06));
+  dum(24.9, .12); [50, 57, 62].forEach((m, i) => oud(m, 24.9 + i*.02, .1));
+  for (let k = 0; k < 6; k++) { const t = 25.6 + k*.575*2; if (t > 29.2) break; [62, 66, 69].forEach((m, i) => oud(m, t + i*.09, .07)); [69, 67, 66].forEach((m, i) => oud(m, t + .575 + i*.09, .065)); tek(t, .04); tek(t + .575, .04); }
+  // --- they agree: a warm turn, a tender ney, a chime for each shoe set down
+  [50, 57, 62, 66, 69].forEach((m, i) => oud(m, 29.7 + i*.08, .08));
+  seq([[30.1, 69, 1.0], [31.1, 70, .5], [31.6, 69, .5], [32.1, 66, 1.0], [33.1, 67, .5], [33.6, 69, 1.4], [35.4, 74, 1.0], [36.4, 72, .5], [36.9, 70, .5], [37.4, 69, 1.6]], (t, m, d) => ney(m, t, d, .042));
+  for (let t = 30.2; t < 38.2; t += 1.0) oud([50, 57, 62, 57][Math.round((t - 30.2)) % 4], t, .05);
+  bell(81, T.placeA[1], .03, 1.8); bell(78, T.placeB[1], .03, 1.8); santur(86, T.step[1], .035); [62, 66, 69, 74].forEach((m, i) => bell(m + 12, T.heart[0] + .4 + i*.12, .018, 2.4));
+  bell(50, T.hall, .05, 2.6);
+  // --- the throne hall: a fuller drone, a slow drum, the oud low; the ney only between the lines
+  drone([38, 45, 50], T.hall + .4, T.page + .2, .005);
+  for (let t = 40.4; t < 43.5; t += .75) dum(t, .09);
+  for (let t = 44.0; t < 75.2; t += 3) { oud(50, t, .07); oud(57, t + 1.5, .05); }
+  for (let t = 45.5; t < 75.2; t += 6) dum(t, .06);
+  seq([[48.4, 69, .4], [52.6, 66, .5], [59.4, 67, .5], [64.2, 69, .5]], (t, m, d) => ney(m, t, d, .035));
+  bell(62, 52.9, .05, 3); [62, 66, 69, 74, 78].forEach((m, i) => santur(m, 55.4 + i*.09, .035));
+  [66, 68.4].forEach(t => { dum(t, .06); dum(t + .75, .05); });
+  seq([[69.7, 69, 1.8], [71.6, 70, .8], [72.5, 69, .6], [73.1, 74, 1.4], [74.6, 62, 1.2]], (t, m, d) => ney(m, t, d, .045));
+  bell(74, 73.1, .04, 2.6);
+  // --- Navoi's couplet: santur arpeggios, a bell as each line is written
+  drone([38, 45], T.page + .2, T.end, .005);
+  for (let k = 0; k < 9; k++) { const t = 76.6 + k*1.1; [62, 66, 69, 74].forEach((m, i) => santur(m + (k % 3 === 2 ? 12 : 0), t + i*.14, .028)); }
+  [T.write1[0], T.write1[0] + 1.6, T.write2[0], T.write2[0] + 1.6].forEach((t, i) => bell([81, 79, 78, 74][i], t, .03, 2));
+  seq([[77.2, 69, 1.4], [78.8, 70, .7], [79.5, 69, .9], [80.6, 67, 1.2], [82.0, 66, .7], [82.7, 63, .5], [83.2, 62, 2.2]], (t, m, d) => ney(m, t, d, .038));
+  // --- the greeting: rolled chords D, Cm, Gm, D and a last phrase home
+  [[86.4, [50, 57, 62, 66, 69]], [88.9, [48, 55, 60, 63, 67]], [91.4, [43, 50, 55, 58, 62]], [93.9, [50, 57, 62, 66, 69, 74]]].forEach(([t, ch]) => ch.forEach((m, i) => oud(m, t + i*.1, .08)));
+  seq([[86.8, 74, 1.2], [88.0, 72, .6], [88.6, 70, .6], [89.2, 69, 1.4], [91.6, 70, .6], [92.2, 69, .6], [92.8, 67, .6], [93.4, 66, .5], [94.0, 62, 2.6]], (t, m, d) => ney(m, t, d, .04));
+  bell(86, 94.0, .035, 2.8); bell(81, 94.12, .025, 2.8);
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: WOOD}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: 'rivoyat', dur: T.end, fn: frame}], score});
+}
+</script>

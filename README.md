@@ -33,6 +33,11 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/ustoz-rivoyat/`](films/ustoz-rivoyat/) — **"Ustozning kavushi"**.
+  Ustoz va murabbiylar kuni uchun uchinchi tabrik. Sharq soya teatri
+  uslubidagi 1:37 lik vertikal film: Xalifa Ma'munning ikki o'g'li ustozlari
+  al-Farroning kavushini keltirish uchun talashadi. Oxirida Navoiyning "Haq
+  yo'lida kim senga bir harf o'qitmish…" bayti va tabrik keladi.
 - [`films/ustoz-portret/`](films/ustoz-portret/) — **"Qalam"**. Ustoz va
   murabbiylar kuni uchun ikkinchi tabrik: shogird ustozining portretini qalamda
   chizadi, qo'llari orasida nur yonadi. Surat asosida ishlangani uchun surat
