@@ -22,12 +22,12 @@ Look: the guide's own design system: navy (#0b1f3a), brand blue (#2563eb), the
   Sans. The real screens of the guide (captured from the site by
   tools/capture.mjs) play inside a phone, with taps, pushes and a scroll, as a
   user would move through it. Headlines and chips sit above the phone. It ends
-  on the address and a QR code.
+  on the guide's Telegram bot, t.me/ibkdarslik_bot, and its QR code.
 Beats: 0–3.2 title and the "Yangilandi" badge · 3.2–8.4 the guide (home, the
   learning path scrolled to PF-174) · 8.4–14.4 PF-174 (module, goals) ·
   14.4–19.6 video lessons (the drawn lesson playing) and calculators ·
   19.6–25.6 the final test (a question, the result, the certificate) ·
-  25.6–29.5 the address and QR code.
+  25.6–29.5 the Telegram bot's address and QR code.
 Sound: synthesized here, pitched sounds only: plucked chords, a soft pad, a
   bass, a pitched kick, tap "pops" and pitched sweeps at the scene changes.
 */
@@ -195,14 +195,18 @@ function closing(c, t) {
   c.save();
   const ew = 150, eh = ew*IMG.emblem.height/IMG.emblem.width; c.globalAlpha = al(0); c.drawImage(IMG.emblem, 540 - ew/2, 330 - eh/2 + up(0), ew, eh); c.globalAlpha = 1;
   text(c, "Qo'llanmani hoziroq oching", 540, 560 + up(1), {size: 64, w: 800, alpha: al(1), spacing: '-1px', shadow: 10});
-  const url = 'nshakhobiddin.github.io/ibkdarslik', uw = measure(c, url, 40, 700) + 80;
-  c.save(); c.globalAlpha = al(2); c.translate(540, 650 + up(2)); rr(c, -uw/2, -40, uw, 80, 40); c.fillStyle = 'rgba(37,99,235,.35)'; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(96,165,250,.8)'; c.stroke(); text(c, url, 0, 14, {size: 40, w: 700}); c.restore();
+  // the guide's Telegram bot: its address in a pill with Telegram's paper plane
+  const url = QR_URL.replace(/^https:\/\//, ''), uw = measure(c, url, 42, 700) + 140;
+  c.save(); c.globalAlpha = al(2); c.translate(540, 650 + up(2)); rr(c, -uw/2, -42, uw, 84, 42); c.fillStyle = 'rgba(34,158,217,.3)'; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(96,190,240,.85)'; c.stroke();
+  const ix = -uw/2 + 46; c.fillStyle = '#229ed9'; c.beginPath(); c.arc(ix, 0, 28, 0, TAU); c.fill();
+  c.fillStyle = WHITE; c.beginPath(); c.moveTo(ix - 15, -1); c.lineTo(ix + 14, -12); c.lineTo(ix + 8, 13); c.lineTo(ix + 1, 6); c.lineTo(ix - 3, 12); c.lineTo(ix - 3, 3); c.lineTo(ix + 9, -7); c.lineTo(ix - 6, 2); c.closePath(); c.fill();
+  text(c, url, ix + 46, 15, {size: 42, w: 700, align: 'left'}); c.restore();
   // the QR code, drawn module by module on a white tile
-  const n = QR_ROWS.length, m = 11, size = (n + 8)*m, x0 = 540 - size/2, y0 = 760 + up(3);
+  const n = QR_ROWS.length, m = Math.round(400/(n + 8)), size = (n + 8)*m, x0 = 540 - size/2, y0 = 760 + up(3);
   c.save(); c.globalAlpha = al(3); c.shadowColor = 'rgba(0,0,0,.4)'; c.shadowBlur = 40; rr(c, x0, y0, size, size, 28); c.fillStyle = WHITE; c.fill(); c.shadowColor = 'transparent';
   c.fillStyle = NAVY; QR_ROWS.forEach((row, y) => { for (let x = 0; x < n; x++) if (row[x] === '1') c.fillRect(x0 + (x + 4)*m, y0 + (y + 4)*m, m + .5, m + .5); }); c.restore();
   text(c, 'Telefon kamerasi bilan skanerlang', 540, y0 + size + 60, {size: 30, w: 600, color: ON2, alpha: al(4)});
-  text(c, 'Telefonda va Telegram ichida ishlaydi', 540, 1400 + up(5), {size: 38, w: 700, alpha: al(5)});
+  text(c, 'Telegram bot orqali oching', 540, 1400 + up(5), {size: 38, w: 700, alpha: al(5)});
   const ck = ['10 modul', 'Videodarslar', 'PF-174', 'Testlar']; let x = 540 - (ck.reduce((s, q) => s + measure(c, q, 28, 700) + 64, 0) + 14*3)/2;
   ck.forEach((q, i) => { const w = measure(c, q, 28, 700) + 64; chip(c, q, x + w/2, 1480, span(t, 26.5 + i*.08, 26.85 + i*.08, easeOutBack), q === 'PF-174'); x += w + 14; });
   text(c, "Huquqiy ma'lumotlar 2026-yil 2-oktabr holatiga ko'ra", 540, 1790, {size: 26, w: 600, color: 'rgba(169,193,227,.75)', alpha: al(6)});

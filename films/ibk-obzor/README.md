@@ -20,7 +20,7 @@ Sayt: <https://nshakhobiddin.github.io/ibkdarslik/>
 | 8–14 s | Yangi bo'lim: **PF-174 farmoni qo'shildi** (23 qadam, videodars, 20 savollik test) | PF-174 moduli, "Darsni boshlash", 2030-yil maqsadlari |
 | 14–19,5 s | **Videodarslar joylandi**: 10 ta videodars, subtitr, tezlik, kalkulyatorlar | PF-174 videodarsi qalamda chizilib boradi, keyin import kalkulyatori |
 | 19,5–25,5 s | **Test topshirish mumkin**: yakuniy test (25 savol, 30 daqiqa, 100 ball), natija tahlili, o'quv sertifikati, PF-174 testi | Test sahifasi, savol, javob tanlanadi, natija (92 ball, a'lo), sertifikat |
-| 25,5–29,5 s | **Qo'llanmani hoziroq oching**: manzil va QR-kod. "Telefonda va Telegram ichida ishlaydi". "Huquqiy ma'lumotlar 2026-yil 2-oktabr holatiga ko'ra" | — |
+| 25,5–29,5 s | **Qo'llanmani hoziroq oching**: Telegram bot manzili **t.me/ibkdarslik_bot** va uning QR-kodi, "Telegram bot orqali oching". "Huquqiy ma'lumotlar 2026-yil 2-oktabr holatiga ko'ra" | — |
 
 ## Qanday ishlangan
 
@@ -40,9 +40,11 @@ Sayt: <https://nshakhobiddin.github.io/ibkdarslik/>
 - **Ko'rinish** qo'llanmaning o'z dizayn tizimida: to'q ko'k (#0b1f3a),
   ko'k (#2563eb), PF-174 bo'limining binafsha rangi, oltin urg'u va saytning
   shrifti Plus Jakarta Sans (SIL OFL 1.1, [`fonts.js`](fonts.js)).
-- **QR-kod** sayt manziliga olib boradi. Uni
-  [`tools/qr.mjs`](tools/qr.mjs) (`qrcode` paketi) [`qr.js`](qr.js) ga yozadi,
-  film esa kodni katakma-katak o'zi chizadi.
+- **QR-kod** qo'llanmaning Telegram botiga (<https://t.me/ibkdarslik_bot>)
+  olib boradi. Uni [`tools/qr.mjs`](tools/qr.mjs) (`qrcode` paketi)
+  [`qr.js`](qr.js) ga yozadi, film esa kodni katakma-katak o'zi chizadi.
+  Yakuniy MP4 dagi QR-kod skaner kutubxonasi (jsQR) bilan o'qib
+  tekshirildi: aynan shu manzil chiqadi.
 - **Ovoz** to'liq shu faylda Web Audio bilan sintez qilingan va faqat
   ohangli tovushlardan iborat: chertma akkordlar, yumshoq fon, bas, past
   zarb, bosishdagi qisqa "pop" tovushlar va sahna almashganda ko'tariluvchi
