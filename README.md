@@ -33,6 +33,11 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/ibk-obzor/`](films/ibk-obzor/) — **"Bojxona xodimi qo'llanmasi"
+  obzori**. Yangilangan saytning 29,5 soniyalik rasmiy video obzori: PF-174
+  bo'limi qo'shilgani, videodarslar joylangani va test topshirish mumkinligi
+  haqida. Ichida saytning haqiqiy ekranlari telefon ramkasida, oxirida
+  manzil va QR-kod bor.
 - [`films/ustoz-rivoyat/`](films/ustoz-rivoyat/) — **"Ustozning kavushi"**.
   Ustoz va murabbiylar kuni uchun uchinchi tabrik. Sharq soya teatri
   uslubidagi 1:37 lik vertikal film: Xalifa Ma'munning ikki o'g'li ustozlari

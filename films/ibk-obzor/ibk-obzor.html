@@ -1,0 +1,286 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Bojxona xodimi qo'llanmasi — obzor</title>
+<style>body{margin:0;background:#0b1f3a;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="fonts.js"></script>
+<script src="shots.js"></script>
+<script src="qr.js"></script>
+<script>
+'use strict';
+/* Film brief
+Subject: a short official overview of the updated "Bojxona xodimi qo'llanmasi"
+  (https://nshakhobiddin.github.io/ibkdarslik/), the interactive study guide for
+  the officers of the Toshkent-AERO specialised customs complex. Four points, as
+  asked: the guide has been updated; a new section on the decree PF-174 has been
+  added; the video lessons are online; tests can be taken (and a certificate is
+  given).
+Format: 9:16, 1080x1920, 24 fps, 29.5 s (under 30 s).
+Look: the guide's own design system: navy (#0b1f3a), brand blue (#2563eb), the
+  violet of the PF-174 section, a gold accent, and its typeface Plus Jakarta
+  Sans. The real screens of the guide (captured from the site by
+  tools/capture.mjs) play inside a phone, with taps, pushes and a scroll, as a
+  user would move through it. Headlines and chips sit above the phone. It ends
+  on the address and a QR code.
+Beats: 0–3.2 title and the "Yangilandi" badge · 3.2–8.4 the guide (home, the
+  learning path scrolled to PF-174) · 8.4–14.4 PF-174 (module, goals) ·
+  14.4–19.6 video lessons (the drawn lesson playing) and calculators ·
+  19.6–25.6 the final test (a question, the result, the certificate) ·
+  25.6–29.5 the address and QR code.
+Sound: synthesized here, pitched sounds only: plucked chords, a soft pad, a
+  bass, a pitched kick, tap "pops" and pitched sweeps at the scene changes.
+*/
+{
+// ------------------------------------------------------------------ look
+const NAVY = '#0b1f3a', NAVY2 = '#12305a', BRAND = '#2563eb', VIOLET = '#7c3aed', GOLD = '#d9b45a', ON2 = '#a9c1e3', WHITE = '#ffffff';
+const uz = s => String(s).replace(/([oOgG])'/g, '$1ʻ').replace(/'/g, 'ʼ');
+for (const f of FILM_FONTS) { const ff = new FontFace(f.family, `url(${f.src})`, {weight: f.weight, style: f.style, unicodeRange: f.range}); document.fonts.add(ff); _photoLoads.push(ff.load()); }
+_photoLoads.push(document.fonts.load('800 40px Jakarta', uz("O'zbek")), document.fonts.load('600 40px Jakarta', uz("o'g'")));
+const IMG = {}; for (const [k, v] of Object.entries(SHOTS)) { const im = new Image(); im.src = v; IMG[k] = im; _photoLoads.push(im.decode()); }
+
+const FPS = 24, END = 29.5;
+const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
+const win = (t, a, b, fi = .45, fo = .35) => Math.min(span(t, a, a + fi, easeOut), 1 - span(t, b - fo, b, easeIn));
+const easeOutCubic = easeOut;
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function text(c, s, x, y, {size = 40, w = 700, color = WHITE, align = 'center', alpha = 1, spacing = '0px', shadow = 0} = {}) {
+  if (alpha <= 0) return; c.save(); c.globalAlpha *= alpha; c.font = `${w} ${size}px Jakarta`; c.textAlign = align; c.textBaseline = 'alphabetic'; c.letterSpacing = spacing;
+  if (shadow) { c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = shadow; c.shadowOffsetY = shadow/3; }
+  c.fillStyle = color; c.fillText(uz(s), x, y); c.restore();
+}
+function wrap(c, s, size, w, maxW) { c.save(); c.font = `${w} ${size}px Jakarta`; const out = []; let cur = '';
+  for (const word of uz(s).split(' ')) { const t = cur ? cur + ' ' + word : word; if (cur && c.measureText(t).width > maxW) { out.push(cur); cur = word; } else cur = t; } if (cur) out.push(cur); c.restore(); return out; }
+const measure = (c, s, size, w, spacing = '0px') => { c.save(); c.font = `${w} ${size}px Jakarta`; c.letterSpacing = spacing; const m = c.measureText(uz(s)).width; c.restore(); return m; };
+
+// ------------------------------------------------------------------ background: navy with slow light, a dot grid, a few rays
+function background(c, t) {
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0a1a33'); g.addColorStop(.55, NAVY); g.addColorStop(1, '#0d2647'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  const blob = (x, y, r, col, a) => { const q = c.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, `rgba(${col},${a})`); q.addColorStop(1, `rgba(${col},0)`); c.fillStyle = q; c.fillRect(x - r, y - r, 2*r, 2*r); };
+  blob(220 + 120*Math.sin(t*.35), 520 + 80*Math.cos(t*.27), 760, '37,99,235', .32);
+  blob(900 + 90*Math.cos(t*.3), 1380 + 120*Math.sin(t*.22), 820, '124,58,237', .24);
+  blob(540, 1900, 700, '217,180,90', .07);
+  c.save(); c.fillStyle = 'rgba(169,193,227,.08)'; for (let y = 30; y < H; y += 46) for (let x = 30 + ((y/46) % 2)*23; x < W; x += 46) c.fillRect(x, y, 2, 2); c.restore();
+  c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = 'rgba(120,160,255,.05)'; c.lineWidth = 60;
+  for (let k = 0; k < 3; k++) { const o = ((t*40 + k*420) % 1600) - 300; c.beginPath(); c.moveTo(o - 600, 0); c.lineTo(o + 500, H); c.stroke(); } c.restore();
+}
+// the guide's name in the corner, as on its own header
+function brandBar(c, t, a) {
+  if (a <= 0) return; c.save(); c.globalAlpha = a;
+  c.drawImage(IMG.emblem, 64, 54, 54, 54*IMG.emblem.height/IMG.emblem.width);
+  text(c, "BOJXONA XODIMI QO'LLANMASI", 134, 78, {size: 22, w: 800, align: 'left', spacing: '3px'}); text(c, 'Toshkent-AERO IBK', 134, 106, {size: 22, w: 600, color: ON2, align: 'left'});
+  c.restore();
+}
+
+// ------------------------------------------------------------------ the phone and its screen (screen space is the app's 390x844 CSS px)
+const SW = 560, K = SW/390, SH = 844*K, BZ = 16, PX = 540, PY = 548;
+function phoneAt(t) {
+  const up = span(t, 3.15, 3.95, easeOutCubic), out = span(t, 25.35, 26.0, easeIn);
+  const zoom = 1 + .1*span(t, 11.9, 13.4, easeInOutSine)*(1 - span(t, 14.0, 14.5, easeInOutSine));
+  return {dy: 1400*(1 - up) + 1400*out, z: zoom, fx: 195, fy: 300, a: 1 - out*.6};
+}
+function phone(c, t, drawScreen) {
+  const P = phoneAt(t); if (P.dy >= 1399) return;
+  c.save(); c.translate(0, P.dy); c.globalAlpha = P.a;
+  // zoom about a point of the screen, keeping the phone centred on it
+  const sx = PX - SW/2, sy = PY + BZ, fx = sx + P.fx*K, fy = sy + P.fy*K; c.translate(fx, fy); c.scale(P.z, P.z); c.translate(-fx, -fy);
+  c.save(); c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 70; c.shadowOffsetY = 30; rr(c, sx - BZ, PY, SW + 2*BZ, SH + 2*BZ, 72); c.fillStyle = '#05080f'; c.fill(); c.restore();
+  const edge = c.createLinearGradient(sx - BZ, 0, sx + SW + BZ, 0); edge.addColorStop(0, '#3a4a66'); edge.addColorStop(.5, '#141c2b'); edge.addColorStop(1, '#3a4a66');
+  rr(c, sx - BZ, PY, SW + 2*BZ, SH + 2*BZ, 72); c.lineWidth = 3; c.strokeStyle = edge; c.stroke();
+  c.fillStyle = '#1b2433'; c.beginPath(); c.arc(PX, PY + 9, 3.5, 0, TAU); c.fill();
+  c.save(); rr(c, sx, sy, SW, SH, 56); c.clip(); c.translate(sx, sy); c.scale(K, K); drawScreen(c, t); c.restore();
+  c.restore();
+}
+const shotImg = (c, k, x = 0, y = 0, a = 1) => { if (a <= 0) return; c.save(); c.globalAlpha *= a; c.drawImage(IMG[k], x, y, 390, 844); c.restore(); };
+// the learning path, rendered tall: fixed header and tab bar, the list scrolled between them
+const LM = SHOT_META.learn, LSCROLL = Math.min(LM.h - 844, Math.max(0, LM.pf[1] + LM.pf[3]/2 - (LM.top + (844 - LM.top - LM.tab)/2)));
+function learnScreen(c, t) {
+  const s = LSCROLL*span(t, 6.15, 7.7, easeInOutSine), im = IMG.learnTall, k = im.width/390, mid = 844 - LM.top - LM.tab;
+  c.drawImage(im, 0, (LM.top + s)*k, 780, mid*k, 0, LM.top, 390, mid);
+  c.drawImage(im, 0, 0, 780, LM.top*k, 0, 0, 390, LM.top);
+  c.drawImage(im, 0, (LM.h - LM.tab)*k, 780, LM.tab*k, 0, 844 - LM.tab, 390, LM.tab);
+  const ring = win(t, 7.7, 8.6, .3, .2);                                        // the new module, picked out
+  if (ring > 0) { const [x, y, w, h] = LM.pf; c.save(); c.globalAlpha = ring; c.lineWidth = 4; c.strokeStyle = GOLD; c.shadowColor = 'rgba(217,180,90,.8)'; c.shadowBlur = 18; rr(c, x - 4, y - s - 4, w + 8, h + 8, 22); c.stroke(); c.restore(); }
+}
+const SEG = [
+  [3.0, 'home'], [5.75, 'learn', 'fade', .25], [8.45, 'pf174', 'push', .4], [11.05, 'goals', 'push', .4],
+  [14.45, 'video1', 'push', .4], [15.55, 'video2', 'fade', .3], [16.6, 'video3', 'fade', .3], [17.65, 'video4', 'fade', .3], [18.6, 'calc', 'push', .4],
+  [19.85, 'exam', 'fade', .3], [21.2, 'examQ', 'push', .4], [22.05, 'examSel', 'cut', 0], [22.75, 'result', 'push', .4], [24.1, 'cert', 'sheet', .45],
+];
+const drawShot = (c, t, k) => k === 'learn' ? learnScreen(c, t) : shotImg(c, k);
+function screen(c, t) {
+  let i = 0; while (i + 1 < SEG.length && SEG[i + 1][0] <= t) i++;
+  const [t0, k, tr, d] = SEG[i], u = d ? span(t, t0, t0 + d, easeInOutSine) : 1, prev = i ? SEG[i - 1][1] : null;
+  if (!prev || u >= 1 || tr === 'cut') drawShot(c, t, k);
+  else if (tr === 'fade') { drawShot(c, t, prev); c.save(); c.globalAlpha = u; drawShot(c, t, k); c.restore(); }
+  else if (tr === 'push') { c.save(); c.translate(-117*u, 0); drawShot(c, t, prev); c.fillStyle = `rgba(0,0,0,${.18*u})`; c.fillRect(0, 0, 390, 844); c.restore(); c.save(); c.translate(390*(1 - u), 0); c.shadowColor = 'rgba(0,0,0,.25)'; c.shadowBlur = 24; drawShot(c, t, k); c.restore(); }
+  else if (tr === 'sheet') {                          // the page dims and the sheet slides up from the bottom
+    const st = SHOT_META.sheetTop, im = IMG[k], q = im.width/390; drawShot(c, t, prev);
+    c.save(); c.globalAlpha = u; c.drawImage(im, 0, 0, im.width, st*q, 0, 0, 390, st); c.restore();
+    c.drawImage(im, 0, st*q, im.width, (844 - st)*q, 0, st + (844 - st)*(1 - u), 390, 844 - st); }
+  confetti(c, t); taps(c, t);
+}
+// taps: a fingertip shows where, then a ring spreads
+const cen = r => [r[0] + r[2]/2, r[1] + r[3]/2];
+const TAPS = [[5.5, cen(SHOT_META.tabs[1])], [8.3, [LM.pf[0] + LM.pf[2]/2, LM.pf[1] - LSCROLL + LM.pf[3]/2]], [10.9, cen(SHOT_META.start)], [21.95, cen(SHOT_META.examOpt)], [23.92, cen(SHOT_META.cert)]];
+function taps(c, t) {
+  for (const [tt, [x, y]] of TAPS) {
+    const pre = span(t, tt - .3, tt - .05, easeOut)*(1 - span(t, tt + .05, tt + .25)), u = span(t, tt, tt + .5, easeOut);
+    if (pre > 0) { c.save(); c.globalAlpha = .55*pre; c.fillStyle = WHITE; c.beginPath(); c.arc(x, y, 15, 0, TAU); c.fill(); c.globalAlpha = .9*pre; c.lineWidth = 2; c.strokeStyle = BRAND; c.stroke(); c.restore(); }
+    if (u > 0 && u < 1) { c.save(); c.globalAlpha = .6*(1 - u); c.lineWidth = 3; c.strokeStyle = WHITE; c.beginPath(); c.arc(x, y, 12 + 30*u, 0, TAU); c.stroke(); c.restore(); }
+  }
+}
+// a small burst of confetti over the result (the guide shows its own for a good score)
+function confetti(c, t) {
+  const t0 = 22.95; if (t < t0 || t > 25.0) return; const r = rng(77), cols = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#d9b45a'];
+  for (let k = 0; k < 70; k++) { const a = -Math.PI/2 + (r() - .5)*2.2, v = 260 + 260*r(), x0 = 195 + (r() - .5)*60, y0 = 230, dt = t - t0 - r()*.15; if (dt <= 0) continue;
+    const x = x0 + Math.cos(a)*v*dt, y = y0 + Math.sin(a)*v*dt + 480*dt*dt, rot = r()*6 + dt*(4 + 6*r()), al = 1 - span(dt, 1.4, 2.0);
+    c.save(); c.globalAlpha = al; c.translate(x, y); c.rotate(rot); c.fillStyle = cols[k % cols.length]; c.fillRect(-4, -2.5, 8, 5); c.restore(); }
+}
+
+// ------------------------------------------------------------------ headlines and chips above the phone
+const HEADS = [
+  {t: [3.35, 8.35], kick: "YANGILANGAN VERSIYA", title: "Interaktiv o'quv qo'llanma", sub: "Toshkent-AERO IBK bojxona xodimlari uchun",
+    chips: [["10 ta modul", 4.3], ["95 qadam", 4.5], ["Telefon va Telegram", 4.7]]},
+  {t: [8.45, 14.35], kick: "YANGI BO'LIM", gold: 1, title: "PF-174 farmoni qo'shildi", sub: "«Yangi O'zbekiston bojxonasi — 2030» qadamma-qadam",
+    chips: [["23 qadam", 9.3], ["Videodars", 9.5], ["20 savollik test", 9.7]]},
+  {t: [14.45, 19.75], kick: "VIDEODARSLAR", title: "Videodarslar joylandi", sub: "10 ta videodars: qoidalar doskada chizib tushuntiriladi",
+    chips: [["Subtitr", 15.3], ["Tezlik", 15.5], ["Kalkulyatorlar", 18.75]]},
+  {t: [19.85, 25.45], kick: "TEST", title: "Test topshirish mumkin", sub: "Yakuniy test: 25 savol · 30 daqiqa · 100 ball",
+    chips: [["Natija tahlili", 23.1], ["O'quv sertifikati", 24.25], ["PF-174 testi", 24.55]]},
+];
+function chip(c, s, x, y, a, gold) {
+  const w = measure(c, s, 28, 700) + 64, h = 56; c.save(); c.globalAlpha *= a; c.translate(x, y + 12*(1 - a));
+  rr(c, -w/2, -h/2, w, h, h/2); c.fillStyle = gold ? 'rgba(217,180,90,.18)' : 'rgba(255,255,255,.09)'; c.fill(); c.lineWidth = 2; c.strokeStyle = gold ? 'rgba(217,180,90,.7)' : 'rgba(169,193,227,.35)'; c.stroke();
+  c.fillStyle = gold ? GOLD : '#60a5fa'; c.beginPath(); c.arc(-w/2 + 26, 0, 6, 0, TAU); c.fill();
+  text(c, s, -w/2 + 42, 10, {size: 28, w: 700, align: 'left'}); c.restore(); return w;
+}
+function heads(c, t) {
+  for (const Hd of HEADS) { const a = win(t, Hd.t[0], Hd.t[1]); if (a <= 0) continue;
+    const st = k => span(t, Hd.t[0] + k*.08, Hd.t[0] + k*.08 + .5, easeOut)*(1 - span(t, Hd.t[1] - .35, Hd.t[1], easeIn)), up = k => 18*(1 - span(t, Hd.t[0] + k*.08, Hd.t[0] + k*.08 + .5, easeOut));
+    // the kicker as a small pill
+    const kw = measure(c, Hd.kick, 24, 800, '4px') + 44; c.save(); c.globalAlpha = st(0); c.translate(540, 176 + up(0));
+    rr(c, -kw/2, -24, kw, 48, 24); c.fillStyle = Hd.gold ? GOLD : 'rgba(37,99,235,.35)'; c.fill(); if (!Hd.gold) { c.lineWidth = 2; c.strokeStyle = 'rgba(96,165,250,.6)'; c.stroke(); }
+    text(c, Hd.kick, 0, 9, {size: 24, w: 800, color: Hd.gold ? NAVY : WHITE, spacing: '4px'}); c.restore();
+    text(c, Hd.title, 540, 270 + up(1), {size: 66, w: 800, alpha: st(1), spacing: '-1px', shadow: 10});
+    wrap(c, Hd.sub, 34, 600, 960).forEach((l, i) => text(c, l, 540, 330 + i*44 + up(2), {size: 34, w: 600, color: ON2, alpha: st(2)}));
+    // chips in a row that stays centred as each one arrives
+    const ws = Hd.chips.map(([s]) => measure(c, s, 28, 700) + 64), gap = 16, grow = Hd.chips.map(([, tc]) => span(t, tc, tc + .35, easeOutCubic));
+    const tot = ws.reduce((x, w, i) => x + (w + (i ? gap : 0))*grow[i], 0); let x = 540 - tot/2;
+    Hd.chips.forEach(([s, tc], i) => { if (grow[i] <= 0) return; x += (i ? gap : 0)*grow[i]; const ca = span(t, tc, tc + .35, easeOutBack)*(1 - span(t, Hd.t[1] - .35, Hd.t[1], easeIn));
+      chip(c, s, x + ws[i]*grow[i]/2, 466, Math.min(1, ca), Hd.gold && i === 0); x += ws[i]*grow[i]; });
+  }
+}
+
+// ------------------------------------------------------------------ the opening title and the closing card
+function opening(c, t) {
+  const a = 1 - span(t, 2.85, 3.35, easeIn); if (a <= 0) return;
+  c.save(); c.globalAlpha = a;
+  const e = span(t, .15, 1.0, easeOutBack), ew = 300*e, eh = ew*IMG.emblem.height/IMG.emblem.width;
+  const gl = c.createRadialGradient(540, 760, 0, 540, 760, 420); gl.addColorStop(0, `rgba(37,99,235,${.45*e})`); gl.addColorStop(1, 'rgba(37,99,235,0)'); c.fillStyle = gl; c.fillRect(0, 300, W, 900);
+  if (ew > 1) c.drawImage(IMG.emblem, 540 - ew/2, 760 - eh/2, ew, eh);
+  const ta = span(t, .6, 1.2, easeOut), up = 20*(1 - ta);
+  text(c, "BOJXONA XODIMI", 540, 1030 + up, {size: 74, w: 800, alpha: ta, spacing: '2px', shadow: 12});
+  text(c, "QO'LLANMASI", 540, 1112 + up, {size: 74, w: 800, alpha: ta, spacing: '2px', shadow: 12});
+  text(c, 'Toshkent-AERO ixtisoslashtirilgan bojxona kompleksi', 540, 1176 + up, {size: 32, w: 600, color: ON2, alpha: span(t, .85, 1.4, easeOut)});
+  // the badge: updated, with the date of the guide's legal data
+  const b = span(t, 1.45, 1.85, easeOutBack); if (b > 0) { const s = "YANGILANDI  ·  2-OKTABR, 2026", w = measure(c, s, 30, 800, '3px') + 70;
+    c.save(); c.translate(540, 1290); c.scale(b, b); rr(c, -w/2, -34, w, 68, 34); const gg = c.createLinearGradient(-w/2, 0, w/2, 0); gg.addColorStop(0, '#c9a54a'); gg.addColorStop(.5, '#f1d48a'); gg.addColorStop(1, '#c9a54a'); c.fillStyle = gg; c.fill();
+    const sh = span(t, 1.9, 2.6); if (sh > 0 && sh < 1) { c.save(); rr(c, -w/2, -34, w, 68, 34); c.clip(); const x = -w/2 + (w + 200)*sh - 100, q = c.createLinearGradient(x - 60, 0, x + 60, 0); q.addColorStop(0, 'rgba(255,255,255,0)'); q.addColorStop(.5, 'rgba(255,255,255,.7)'); q.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = q; c.fillRect(-w/2, -34, w, 68); c.restore(); }
+    text(c, s, 0, 11, {size: 30, w: 800, color: NAVY, spacing: '3px'}); c.restore(); }
+  c.restore();
+}
+function closing(c, t) {
+  const a = span(t, 25.75, 26.35, easeOut); if (a <= 0) return; const up = k => 24*(1 - span(t, 25.75 + k*.1, 26.35 + k*.1, easeOut)), al = k => span(t, 25.75 + k*.1, 26.35 + k*.1, easeOut);
+  c.save();
+  const ew = 150, eh = ew*IMG.emblem.height/IMG.emblem.width; c.globalAlpha = al(0); c.drawImage(IMG.emblem, 540 - ew/2, 330 - eh/2 + up(0), ew, eh); c.globalAlpha = 1;
+  text(c, "Qo'llanmani hoziroq oching", 540, 560 + up(1), {size: 64, w: 800, alpha: al(1), spacing: '-1px', shadow: 10});
+  const url = 'nshakhobiddin.github.io/ibkdarslik', uw = measure(c, url, 40, 700) + 80;
+  c.save(); c.globalAlpha = al(2); c.translate(540, 650 + up(2)); rr(c, -uw/2, -40, uw, 80, 40); c.fillStyle = 'rgba(37,99,235,.35)'; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(96,165,250,.8)'; c.stroke(); text(c, url, 0, 14, {size: 40, w: 700}); c.restore();
+  // the QR code, drawn module by module on a white tile
+  const n = QR_ROWS.length, m = 11, size = (n + 8)*m, x0 = 540 - size/2, y0 = 760 + up(3);
+  c.save(); c.globalAlpha = al(3); c.shadowColor = 'rgba(0,0,0,.4)'; c.shadowBlur = 40; rr(c, x0, y0, size, size, 28); c.fillStyle = WHITE; c.fill(); c.shadowColor = 'transparent';
+  c.fillStyle = NAVY; QR_ROWS.forEach((row, y) => { for (let x = 0; x < n; x++) if (row[x] === '1') c.fillRect(x0 + (x + 4)*m, y0 + (y + 4)*m, m + .5, m + .5); }); c.restore();
+  text(c, 'Telefon kamerasi bilan skanerlang', 540, y0 + size + 60, {size: 30, w: 600, color: ON2, alpha: al(4)});
+  text(c, 'Telefonda va Telegram ichida ishlaydi', 540, 1400 + up(5), {size: 38, w: 700, alpha: al(5)});
+  const ck = ['10 modul', 'Videodarslar', 'PF-174', 'Testlar']; let x = 540 - (ck.reduce((s, q) => s + measure(c, q, 28, 700) + 64, 0) + 14*3)/2;
+  ck.forEach((q, i) => { const w = measure(c, q, 28, 700) + 64; chip(c, q, x + w/2, 1480, span(t, 26.5 + i*.08, 26.85 + i*.08, easeOutBack), q === 'PF-174'); x += w + 14; });
+  text(c, "Huquqiy ma'lumotlar 2026-yil 2-oktabr holatiga ko'ra", 540, 1790, {size: 26, w: 600, color: 'rgba(169,193,227,.75)', alpha: al(6)});
+  c.restore();
+}
+
+// ------------------------------------------------------------------ the frame
+function frame(c, tau) {
+  const t = Math.round(tau*FPS)/FPS; resetT(c);
+  background(c, t);
+  brandBar(c, t, span(t, 3.3, 3.8)*(1 - span(t, 25.4, 25.8)));
+  opening(c, t);
+  phone(c, t, screen);
+  heads(c, t);
+  closing(c, t);
+  const f = 1 - span(t, 0, .5); if (f > 0) { c.fillStyle = `rgba(5,10,20,${f})`; c.fillRect(0, 0, W, H); }
+}
+
+// ------------------------------------------------------------------ score: D major, 120 BPM; synthesized, pitched sounds only
+const mtof = m => 440*Math.pow(2, (m - 69)/12);
+function score(ac, t0, dest) {
+  const SR = ac.sampleRate, G = (v, d) => { const g = ac.createGain(); g.gain.value = v; if (d) g.connect(d); return g; };
+  const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 2.5; comp.knee.value = 8; comp.attack.value = .008; comp.release.value = .25;
+  const master = G(.9, dest); comp.connect(master); master.gain.setValueAtTime(.9, t0 + END - 1.1); master.gain.linearRampToValueAtTime(0, t0 + END - .05);
+  const len = Math.ceil(SR*2.2), ir = ac.createBuffer(2, len, SR);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(ch + 51); for (let i = 0; i < len; i++) d[i] = (r()*2 - 1)*Math.pow(1 - i/len, 3.6); }
+  const room = ac.createConvolver(); room.buffer = ir; const rlp = ac.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3600; room.connect(rlp); rlp.connect(G(1, comp));
+  const bus = G(1, comp); bus.connect(G(.26, room));
+  const env = (p, t, a, peak, d) => { p.setValueAtTime(0, t); p.linearRampToValueAtTime(peak, t + a); p.exponentialRampToValueAtTime(.0001, t + a + d); p.setValueAtTime(0, t + a + d + .01); };
+  const osc = (f, t, a, peak, d, dst = bus, type = 'sine') => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; env(g.gain, t, a, peak, d); o.connect(g); g.connect(dst); o.start(t); o.stop(t + a + d + .05); };
+  // a plucked string (Karplus-Strong from a smoothed pluck: a soft attack, no burst)
+  const KS = {};
+  const ksBuf = (m, bright, dur) => { const k = `${m}|${bright}`; if (KS[k]) return KS[k];
+    const f = mtof(m), N = Math.max(2, Math.round(SR/f - .5)), n = Math.ceil(SR*dur), b = ac.createBuffer(1, n, SR), d = b.getChannelData(0), line = new Float32Array(N), r = rng(m*13 + 3);
+    for (let i = 0; i < N; i++) line[i] = r()*2 - 1;
+    for (let p = 0; p < Math.round(lerp(6, 1, bright)); p++) { let prev = line[N - 1]; for (let i = 0; i < N; i++) { const v = line[i]; line[i] = .5*(v + prev); prev = v; } }
+    let mean = 0; for (let i = 0; i < N; i++) mean += line[i]/N; for (let i = 0; i < N; i++) line[i] -= mean;
+    const S = lerp(.997, .9991, bright); let idx = 0, peak = 1e-6;
+    for (let i = 0; i < n; i++) { const a = line[idx], c = line[(idx + 1) % N]; d[i] = a; line[idx] = S*.5*(a + c); idx = (idx + 1) % N; peak = Math.max(peak, Math.abs(a)); }
+    for (let i = 0; i < n; i++) d[i] /= peak; const fo = Math.round(SR*.05); for (let i = 0; i < fo; i++) d[n - 1 - i] *= i/fo; return KS[k] = b; };
+  const pluck = (m, t, v, bright = .55, dur = 1.6) => { const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = ksBuf(m, bright, dur); g.gain.value = v; s.connect(g); g.connect(bus); const at = t0 + t; if (at >= 0) s.start(at); else s.start(0, -at); };
+  const bell = (m, t, v, d = 1.6) => { t += t0; const f = mtof(m), c = ac.createOscillator(), mo = ac.createOscillator(), mg = ac.createGain(), g = ac.createGain();
+    c.frequency.value = f; mo.frequency.value = f*3.5; mg.gain.setValueAtTime(f*1.2, t); mg.gain.exponentialRampToValueAtTime(f*.02, t + d*.6); mo.connect(mg); mg.connect(c.frequency);
+    env(g.gain, t, .003, v, d); c.connect(g); g.connect(bus); c.start(t); mo.start(t); c.stop(t + d + .1); mo.stop(t + d + .1); };
+  const kick = (t, v = .3) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(44, t + .12); env(g.gain, t, .003, v, .32); o.connect(g); g.connect(comp); o.start(t); o.stop(t + .4); };
+  const tick = (t, v = .018) => osc(2637, t, .001, v, .04, bus, 'sine');
+  const pop = (t, v = .06) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(1250, t); o.frequency.exponentialRampToValueAtTime(700, t + .07); env(g.gain, t, .002, v, .09); o.connect(g); g.connect(bus); o.start(t); o.stop(t + .15); };
+  const sweep = (t, f0, f1, d, v = .03) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(), lp = ac.createBiquadFilter(); o.type = 'triangle'; lp.type = 'lowpass'; lp.frequency.value = 2400;
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + d*.7); g.gain.linearRampToValueAtTime(0, t + d);
+    o.connect(lp); lp.connect(g); g.connect(bus); o.start(t); o.stop(t + d + .05); };
+  const padBus = G(1); const plp = ac.createBiquadFilter(); plp.type = 'lowpass'; plp.frequency.value = 1300; padBus.connect(plp); plp.connect(bus);
+  const pad = (ch, t, d, v) => ch.forEach(m => [-7, 7].forEach(det => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det; const a = t0 + t;
+    g.gain.setValueAtTime(0, a); g.gain.linearRampToValueAtTime(v, a + .35); g.gain.setValueAtTime(v, a + d - .1); g.gain.linearRampToValueAtTime(0, a + d + .5); o.connect(g); g.connect(padBus); o.start(a); o.stop(a + d + .6); }));
+  const bass = (m, t, d, v = .16) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle'; o.frequency.value = mtof(m); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.setTargetAtTime(v*.6, t + .05, .15); g.gain.setTargetAtTime(0, t + d - .05, .04); o.connect(g); g.connect(comp); o.start(t); o.stop(t + d + .3); };
+
+  const B = .5, BAR = 2, CH = [[50, 62, 66, 69], [45, 61, 64, 69], [47, 62, 66, 71], [43, 62, 67, 71]];   // D A Bm G
+  // the opening: a pad swells, a rising figure, the badge rings
+  pad([62, 66, 69, 74], 0, 3.0, .006); [62, 66, 69, 74, 78, 81].forEach((m, i) => pluck(m, .5 + i*.18, .05, .7)); bell(86, 1.5, .05, 2); bell(90, 1.62, .03, 2);
+  sweep(2.6, 300, 1400, .6, .03);
+  // the groove under the guide: kick on the beat, bass, plucked arpeggios, a pad; ticks between the beats
+  for (let t = 3.2, b = 0; t < 25.55; t += BAR, b++) {
+    const ch = CH[b % 4], root = ch[0] - 12;
+    pad(ch.slice(1), t, BAR, .0045);
+    for (let k = 0; k < 4; k++) { const tb = t + k*B; if (tb > 25.55) break; kick(tb, k % 2 ? .18 : .26); tick(tb + B/2); }
+    bass(root, t, .7); bass(root, t + .75, .45, .12); bass(root + 12, t + 1.5, .4, .1);
+    const arp = [ch[1], ch[2], ch[3], ch[2] + 12, ch[3], ch[2], ch[1] + 12, ch[3]];
+    arp.forEach((m, k) => { const tk = t + k*B/2; if (tk < 25.55) pluck(m + 12, tk, k % 2 ? .035 : .05, .6, 1.2); });
+  }
+  // the scene changes: a pitched sweep up and a short motif; the taps pop
+  [8.35, 14.35, 19.75].forEach(t => { sweep(t - .3, 260, 1300, .4, .028); [74, 78, 81].forEach((m, i) => bell(m + 12, t + .12 + i*.1, .03, 1.2)); });
+  [5.5, 8.3, 10.9, 21.95, 23.92].forEach(t => pop(t));
+  [11.05, 14.45, 18.6, 21.2, 22.75].forEach(t => sweep(t, 500, 1100, .3, .016));
+  [62, 66, 69, 74, 78].forEach((m, i) => bell(m + 12, 22.9 + i*.07, .028, 1.4));                  // the good result
+  // the close: one long chord and a bell, then quiet
+  sweep(25.2, 300, 1500, .5, .03); pad([62, 66, 69, 74], 25.6, 3.2, .007); [50, 57, 62, 66, 69, 74].forEach((m, i) => pluck(m, 25.6 + i*.05, .07, .5, 3.4)); bass(38, 25.6, 3.0, .16); kick(25.6, .26);
+  bell(86, 25.7, .045, 2.6); bell(81, 25.85, .03, 2.6);
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: NAVY}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: 'obzor', dur: END, fn: frame}], score});
+}
+</script>
