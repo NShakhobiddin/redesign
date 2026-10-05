@@ -1,11 +1,14 @@
 # Pochtam promo — musiqa uchun prompt (soniyama-soniya)
 
-Video **120 BPM** to'riga kesilgan: bitta zarb (beat) 0,5 s, bitta takt (bar)
-2,000 s, 30 soniya = 15 takt. Barcha kesimlar zarbga yoki yarim zarbga tushadi.
-Shuning uchun 120 BPM da yaratilgan trek videoga aniq tushadi.
+Video 66 soniya, diktor ovozi bilan. Montaj **120 BPM** to'rida qilingan:
+bitta zarb (beat) 0,5 s, bitta takt (bar) 2,000 s. Barcha kesimlar zarbga
+tushadi. Logotip zarbasi va ikkala drop takt boshida keladi: **0:12**, **0:56**,
+**1:00**. Musiqa diktor uchun fon bo'ladi, shuning uchun o'rta chastotalarda
+bo'sh joy qoldiradi va gap paytida band melodiya chalmaydi.
 
 Musiqa generatorlari ingliz tilidagi promptni yaxshiroq tushunadi, shuning
-uchun promptlar inglizcha. Tushuntirishlar o'zbekcha.
+uchun promptlar inglizcha. Tushuntirishlar o'zbekcha. Diktor matni
+[`VOICEOVER.md`](VOICEOVER.md) da.
 
 - Ovozsiz video: [`out/pochtam-promo-silent.mp4`](out/pochtam-promo-silent.mp4)
 - Vaqtinchalik sintez musiqa (namuna, xuddi shu to'rda):
@@ -14,13 +17,13 @@ uchun promptlar inglizcha. Tushuntirishlar o'zbekcha.
 ## 1. Uslub (Suno: "Style of Music", Udio: prompt)
 
 ```
-instrumental, energetic electro-pop / future-bass commercial, 120 BPM, F# minor, cold open on a huge hit with no intro, four-on-the-floor kick, tight claps, bouncy sub bass, bright plucky saw-synth stabs, glassy bell lead, two big sidechained drops at 0:04 and 0:24, pitched synth risers, stop-and-hit transitions, modern TikTok/Reels ad energy, clean punchy mix, no vocals
+instrumental background music for a 66-second voice-over app commercial, energetic but uncluttered electro-pop / future bass, 120 BPM, F# minor, cold open on a hit with no intro, stop-and-hit hook, build with a pitched riser into a logo drop at 0:12, light four-on-the-floor groove under narration, bouncy sub bass, soft plucky synth chords, glassy bell accents, leaves space for the voice, breakdown at 0:52, second drop at 0:56, logo sting at 1:00, final hit at 1:03, clean modern mix, no vocals
 ```
 
 **Exclude styles** (Suno'dagi "Exclude" maydoni):
 
 ```
-vocals, singing, lyrics, spoken word, vocal chops, choir, white-noise riser, hiss, noise sweep, vinyl crackle, lo-fi, slow intro, fade-in, ambient, guitar solo, dubstep wobble
+vocals, singing, lyrics, spoken word, vocal chops, choir, busy lead melody, guitar solo, white-noise riser, hiss, noise sweep, vinyl crackle, lo-fi, slow intro, fade-in, dubstep wobble
 ```
 
 ## 2. Tuzilma (Suno: "Lyrics" maydoni)
@@ -32,94 +35,90 @@ quradi, lekin soniyani aniq ushlamaydi. Aniq moslash pastdagi 5-bo'limda.
 ```
 [Instrumental]
 
-[Cold Open: 0:00-0:04, 2 bars, starts instantly on a huge hit, stop-start hits at 0:00, 0:01 and 0:01.5, four rising eighth-note stabs 0:02-0:03, drums cut at 0:03, pitched riser, tiny silence right before 0:04]
+[Cold Open: 0:00-0:08, starts instantly on a hit, no intro, sparse stop-and-hit, hits at 0:00, 0:03 and 0:04, four punchy stabs at 0:05.5, 0:06.25, 0:07 and 0:07.75]
 
-[Drop 1: 0:04, full beat, logo impact, crash]
+[Build: 0:08-0:12, two hits at 0:08.5 and 0:09, drums out, pitched riser, camera-shutter click and tiny silence right before 0:12]
 
-[Groove: 0:04-0:18, driving four-on-the-floor, chords F#m - D - A - E one per bar, bright bell accent every 2 seconds on beat 3]
+[Drop: 0:12, logo impact, light groove starts]
 
-[Lift: 0:18-0:19, short pitched riser]
+[Verse Groove: 0:12-0:46, light four-on-the-floor under a voice-over, soft chords F#m - D - A - E one per bar, sub bass, a soft bell accent on each scene change, no lead melody]
 
-[Stabs: 0:19-0:22, six punchy stabs one per beat, each one step higher: C# E F# G# A B]
+[Lift: 0:46-0:52, short pitched riser, three big stabs at 0:47.5, 0:49 and 0:50.5]
 
-[Break: 0:22-0:24, kick out, sustained E major pad, pitched riser, snare roll speeding up, cut to silence at 0:23.75]
+[Breakdown: 0:52-0:56, kick out, sustained pad, riser, snare roll speeding up, tiny silence before 0:56]
 
-[Drop 2: 0:24-0:26, biggest drop, heavy impact]
+[Drop 2: 0:56-1:00, biggest drop, heavy impact]
 
-[Logo Sting: 0:26, single impact, sparkling A major chord at 0:26.3, bells]
+[Logo Sting: 1:00, impact and a sparkling A major chord with bells]
 
-[Final Hit: 0:28, last hit with a rising bell arpeggio]
+[Final Hit: 1:03.5, last hit with a rising bell arpeggio]
 
-[Outro: ring out, silence by 0:30]
+[Outro: ring out, silence by 1:06]
 
 [End]
 ```
 
 ## 3. Soniyama-soniya (cue sheet)
 
-Takt.zarb: 1.1 = 1-takt 1-zarb (0,00 s), 1.3 = 1-takt 3-zarb (1,00 s) va h.k.
-"&" belgisi zarbdan keyingi yarim zarb (0,25 s keyin) degani.
-
-| Vaqt (s) | Takt.zarb | Ekranda | Musiqada |
+| Vaqt (s) | Ekranda | Diktor | Musiqada |
 | --- | --- | --- | --- |
-| 0.00 | 1.1 | Krossovka uchib kiradi, **"Xitoyda"** | Intro yo'q, birinchi kadrdan katta zarba: kick, sub-bas va yorqin stab |
-| 0.50 | 1.2 | "shu narxda", ¥699 yorlig'i tebranadi | Kichik pluck-javob |
-| 1.00 | 1.3 | Ko'k fon: **"Uyingizgacha"** | Zarba (kick va bas) |
-| 1.50 | 1.4 | **"qanchaga tushadi?"** (salat rangda) | Zarba va balandroq stab, savol ohangi |
-| 2.00 · 2.25 · 2.50 · 2.75 | 2.1 · 2.1& · 2.2 · 2.2& | **Boj? · Kargo? · Kurs? · Kuryer?** (4 ta tez kesim) | 4 ta ko'tariluvchi stab (sakkizdan bir), har birida kick |
-| 3.00 | 2.3 | Qora fon: **"Javob —"** | Barabanlar to'xtaydi, bitta zarb, ohangli riser boshlanadi |
-| 3.50 | 2.4 | **"bitta skrinshotda"**, telefon ko'tariladi | Riser cho'qqiga chiqadi |
-| 3.75 | 2.4& | Oq "chirt" (skrinshot chaqnashi) | Kamera "chirt" tovushi va juda qisqa sukunat |
-| **4.00** | **3.1** | **DROP 1**: Pochtam logotipi tushadi (4.1), "Pochtam." yozuvi (4.5) | To'liq drop: kick, sub, akkord stablari, crash |
-| 5.00 | 3.3 | **"Rasmini yuklang"**, bosish (5.3), skan (5.5) | Qo'ng'iroqcha (bell) urg'usi |
-| 6.00 | 4.1 | AI do'konlarni topdi | Groove davom etadi |
-| 7.00 | 4.3 | **"Skrinshot oling"** — do'kon sahifasi | Bell urg'usi |
-| 7.45 | 4.4 dan sal oldin | Oq chaqnash | "Chirt" |
-| 7.50 | 4.4 | **"AI narxni o'qiydi"** | — |
-| 8.00 | 5.1 | Jami narx sanaladi: **$102.20** (8.05–8.45) | Yuqoriga yuguruvchi qisqa arpedjio |
-| 9.00 | 5.3 | **"Narx tarkibi"**, belgilar 9.2 · 9.4 · 9.6 · 9.8 da | Bell urg'usi va 4 ta sakkizdan bir "tik" |
-| 10.00 | 6.1 | Salat fon: **"Boj: $0"** | Urg'uli zarba |
-| 11.00 | 6.3 | **"Butun savat?"** — savat sahifasi, chaqnash 11.45 | Bell urg'usi va "chirt" |
-| 11.50 | 6.4 | **"Bitta skrinshot — bitta hisob"** | — |
-| 12.50 | 7.2 | Jami: **3 ta tovar → $117.99** | — |
-| 13.00 | 7.3 | **"Eng arzon kuryer"** | Bell urg'usi |
-| 13.75 | 7.4& | **"Kuryer siz uchun sotib oladi"** | — |
-| 14.10–14.20 | 8.1 | "Yozish" bosiladi, **"Xabar tayyor ✓"** chiqadi | Qisqa bildirishnoma "pop"i |
-| 15.00 | 8.3 | **"Qadam-baqadam qo'llanma"**, ekran har 0,5 s da almashadi | Bell urg'usi, sakkizdan bir pluck naqshi |
-| 17.00 | 9.3 | **"Jo'natmani kuzating"**, holat chizig'i 18.9 gacha to'ladi | Bell urg'usi |
-| 18.00–19.00 | 10.1–10.3 | Chiziq "Keldi"ga yetadi | Qisqa ohangli riser |
-| 19.00 · 19.50 · 20.00 · 20.50 · 21.00 · 21.50 | 10.3 … 11.4 | **43 do'kon · 20 kuryer · 7 qo'llanma · $200 oyiga bojsiz · AI · 3 til** | Har zarbda bitta stab, ko'tarilib boradi: C# E F# G# A B |
-| **22.00** | **12.1** | **"Hammasi —"** ekranlar mozaikasi, 22.5 da "bitta ilovada" | **BREAK**: kick yo'q, pad akkord (E), riser |
-| 23.50–24.00 | 12.4 | Kadr oqarib boradi | Snare roll tezlashadi, 23.75 dan qisqa sukunat |
-| **24.00** | **13.1** | **DROP 2**: quti tushadi (24.3 da yerga uriladi), **"Orzuingiz — eshigingiz oldida."** | Eng kuchli drop |
-| **26.00** | **14.1** | Oq fon, logotip: zarba; "p" 26.3 da qo'nadi | Bitta impact, 26.3 da yaltiroq A-major akkord va bell |
-| 27.00–28.20 | 14.3–15.1 | "Pochtam." yozuvi, yaltirash, shior | Cho'zilgan akkord, yengil hi-hat |
-| **28.00** | **15.1** | **pochtam.uz** paydo bo'ladi | Oxirgi zarba va ko'tariluvchi bell arpedjiosi |
-| 28.50–30.00 | 15.2–15.4 | "Orzu qiling — qolganini biz hal qilamiz" | Ohang so'nib boradi, 29.8 da jimlik |
+| 0.0 | Krossovka, **"Xitoyda — ¥699"** | "Xitoyda — olti yuz to'qson to'qqiz yuan." | Intro yo'q, birinchi kadrdan zarba: kick, sub va stab. Ostida yumshoq akkord |
+| 3.0 | Ko'k fon: **"Uyingizgacha"** | "Uyingizgacha qanchaga tushadi?" | Zarba |
+| 4.0 | **"qanchaga tushadi?"** | | Stab, savol ohangi |
+| 5.5 · 6.25 · 7.0 · 7.75 | **Boj? · Kargo? · Kurs? · Kuryer?** | so'zlar shu lahzalarda | Har so'zda bitta stab, ko'tarilib boradi |
+| 8.5 · 9.0 | **"Javob — bitta skrinshotda"** | "Javob — bitta skrinshotda." | Ikki zarba, keyin barabanlar to'xtaydi |
+| 10.0–12.0 | Telefon ko'tariladi, 11.75 da oq chaqnash | — | Ohangli riser, 11.75 da "chirt", juda qisqa sukunat |
+| **12.0** | **Logotip tushadi** | "Bu — Pochtam. Global xaridlar biz bilan oson." | **DROP**: impact, yengil groove boshlanadi |
+| 15.5 | **"Rasmini yuklang"**, bosish 16.1 | "Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi." | Bell urg'usi, bosishda kichik "pop" |
+| 20.5 | **"Skrinshot oling"**, chaqnash 22.45 | "Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi." | Bell urg'usi, 22.45 da "chirt" |
+| 23.5 | Jami narx sanaladi: **$102.20** | | Yuqoriga yuguruvchi qisqa arpedjio |
+| 26.5 | **"Narx tarkibi"** | "Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz." | Bell urg'usi |
+| 29.0 | Salat fon: **"Boj: $0"** | | Urg'uli bell |
+| 31.5 | **"Butun savat?"**, chaqnash 32.95 | "Butun savatni ham bitta skrinshot bilan hisoblang." | Bell urg'usi, "chirt" |
+| 35.5 | **"Eng arzon kuryer"** → **"Kuryer siz uchun sotib oladi"** (37.25) | "Eng arzon kuryerni tanlang — u siz uchun sotib oladi." | Bell urg'usi, 37.85 da "pop", 37.95 da bildirishnoma ohangi |
+| 40.0 | **"Qadam-baqadam qo'llanma"**, ekran har 1 s da almashadi | "Yetti do'kon uchun — qadam-baqadam qo'llanma." | Bell urg'usi |
+| 44.0 | **"Jo'natmani kuzating"** | "Jo'natmangizni eshigingizgacha kuzating." | Bell urg'usi |
+| 46.5–47.5 | | | Qisqa ohangli riser |
+| 47.5 · 49.0 · 50.5 | **43 do'kon · 20 kuryer · 3 til** | "Qirq uch do'kon. Yigirma kuryer. Uch til." | Har raqamda katta stab, ko'tarilib boradi: C# · E · A |
+| **52.0** | **"Hammasi — bitta ilovada"** | "Hammasi — bitta ilovada." | **BREAK**: kick yo'q, pad, 54 dan riser, 55 dan snare roll |
+| 55.5–56.0 | Kadr oqarib boradi | — | Qisqa sukunat |
+| **56.0** | **Quti tushadi** (56.3 da yerga uriladi) | "Orzuingiz — eshigingiz oldida." | **DROP 2**, eng kuchli |
+| **60.0** | Oq fon, logotip; "p" 60.3 da qo'nadi | "Pochtam. Orzu qiling — qolganini biz hal qilamiz." | Impact, 60.3 da yaltiroq A-major akkord va bell |
+| **63.5** | **pochtam.uz** | "Pochtam nuqta uz." | Oxirgi zarba va ko'tariluvchi bell arpedjiosi |
+| 64.5–66.0 | Logotip va manzil turibdi | — | Ohang so'nib boradi, 66 da jimlik |
 
-## 4. ElevenLabs Music uchun (composition plan, bo'limlar aniq uzunlikda)
+## 4. ElevenLabs Music uchun (composition plan)
 
-Bo'limlar takt chegarasida: 4 + 8 + 6 + 6 + 6 = 30 s.
+Bo'limlar takt chegarasida: 8 + 4 + 20 + 14 + 6 + 4 + 4 + 6 = 66 s.
 
 ```json
 {
-  "positive_global_styles": ["energetic electro-pop", "future bass", "commercial ad music", "120 BPM", "F# minor", "instrumental", "punchy sidechained drops", "bright plucky synth stabs", "glassy bell lead", "clean punchy mix"],
-  "negative_global_styles": ["vocals", "lyrics", "spoken word", "white noise", "hiss", "lo-fi", "slow intro", "fade-in"],
+  "positive_global_styles": ["background music for a voice-over commercial", "energetic but uncluttered electro-pop", "future bass", "120 BPM", "F# minor", "instrumental", "bouncy sub bass", "soft plucky synth chords", "glassy bell accents", "clean modern mix"],
+  "negative_global_styles": ["vocals", "lyrics", "spoken word", "busy lead melody", "white noise", "hiss", "lo-fi", "slow intro", "fade-in"],
   "sections": [
-    {"section_name": "Cold open hook", "duration_ms": 4000, "lines": [],
-     "positive_local_styles": ["starts instantly on a huge hit, no intro", "stop-start hits at 0, 1 and 1.5 seconds", "four rising eighth-note stabs from 2 to 3 seconds", "drums cut at 3 seconds, pitched riser", "tiny silence right before the drop"],
+    {"section_name": "Cold open hook", "duration_ms": 8000, "lines": [],
+     "positive_local_styles": ["starts instantly on a hit, no intro", "sparse stop-and-hit", "hits at 0, 3 and 4 seconds", "four punchy rising stabs at 5.5, 6.25, 7 and 7.75 seconds"],
      "negative_local_styles": ["steady groove", "fade-in"]},
-    {"section_name": "Drop 1 and groove", "duration_ms": 8000, "lines": [],
-     "positive_local_styles": ["full drop on the first beat", "four-on-the-floor", "chords F#m D A E, one per bar", "bell accent every 2 seconds on beat 3"],
-     "negative_local_styles": ["breakdown"]},
-    {"section_name": "Groove 2", "duration_ms": 6000, "lines": [],
-     "positive_local_styles": ["same groove, slightly brighter", "plucky eighth-note arpeggio", "bell accent every 2 seconds on beat 3"],
-     "negative_local_styles": ["breakdown"]},
-    {"section_name": "Ascending stabs and break", "duration_ms": 6000, "lines": [],
-     "positive_local_styles": ["first second: short pitched riser", "then six punchy stabs one per beat, each one step higher", "last 2 seconds: kick out, sustained pad, riser, snare roll speeding up", "a tiny silence right before the next drop"],
+    {"section_name": "Build to the logo", "duration_ms": 4000, "lines": [],
+     "positive_local_styles": ["two hits at the start", "drums drop out", "pitched synth riser", "a short camera-shutter click and a tiny silence at the very end"],
      "negative_local_styles": ["white noise riser"]},
-    {"section_name": "Drop 2 and logo outro", "duration_ms": 6000, "lines": [],
-     "positive_local_styles": ["biggest drop on the first beat", "after 2 seconds: groove stops, one impact and a sparkling A major chord with bells", "after 4 seconds: final hit with a rising bell arpeggio", "rings out to silence at the end"],
+    {"section_name": "Drop and groove under the voice", "duration_ms": 20000, "lines": [],
+     "positive_local_styles": ["logo impact on the first beat", "light four-on-the-floor", "soft chords F#m D A E, one per bar", "sub bass", "soft bell accents at 3.5, 8.5, 14.5 and 19.5 seconds into the section", "leaves room for narration"],
+     "negative_local_styles": ["lead melody", "breakdown"]},
+    {"section_name": "Groove continued", "duration_ms": 14000, "lines": [],
+     "positive_local_styles": ["same light groove", "soft bell accents at 3.5, 8 and 12 seconds into the section", "leaves room for narration"],
+     "negative_local_styles": ["lead melody", "breakdown"]},
+    {"section_name": "Numbers lift", "duration_ms": 6000, "lines": [],
+     "positive_local_styles": ["short pitched riser from 0.5 to 1.5 seconds", "three big rising stabs at 1.5, 3 and 4.5 seconds into the section"],
+     "negative_local_styles": ["white noise riser"]},
+    {"section_name": "Breakdown", "duration_ms": 4000, "lines": [],
+     "positive_local_styles": ["kick out", "sustained pad", "pitched riser in the second half", "snare roll speeding up", "tiny silence right before the next drop"],
+     "negative_local_styles": ["white noise riser"]},
+    {"section_name": "Drop 2", "duration_ms": 4000, "lines": [],
+     "positive_local_styles": ["biggest drop on the first beat", "full groove", "heavy impact"],
+     "negative_local_styles": ["breakdown"]},
+    {"section_name": "Logo outro", "duration_ms": 6000, "lines": [],
+     "positive_local_styles": ["one impact and a sparkling A major chord with bells", "groove stops", "final hit with a rising bell arpeggio at 3.5 seconds", "rings out to silence at the end"],
      "negative_local_styles": ["long fade", "new melody"]}
   ]
 }
@@ -132,15 +131,15 @@ Bo'limlar takt chegarasida: 4 + 8 + 6 + 6 + 6 = 30 s.
 2. **Birinchi zarbani 00:00.00 ga qo'ying.** Generator ko'pincha boshiga
    1–4 takt intro qo'shadi. Uni kesib tashlang, birinchi kuchli zarba videoning
    birinchi kadriga tushsin.
-3. **Droplarni tekshiring:** birinchisi **00:04.00** da (logotip), ikkinchisi
-   **00:24.00** da (quti). Takt 2,000 s bo'lgani uchun trekni istalgan takt
-   chegarasidan (2, 4, 6 … s) kesib ulasangiz ham, vaqt buzilmaydi.
-   Ishonchli yo'li: ~60 soniyalik trek yarating, keyin uni bo'laklardan
-   yig'ing: [hook 4 s] + [drop va groove 18 s] + [break 2 s] + [drop 2 va
-   final 6 s].
+3. **Asosiy nuqtalarni tekshiring:** logotip **00:12.00**, ikkinchi drop
+   **00:56.00**, final logotip **01:00.00**. Takt 2,000 s bo'lgani uchun
+   trekni istalgan takt chegarasidan (2, 4, 6 … s) kesib ulasangiz ham,
+   vaqt buzilmaydi. Groove qismi (12–46 s) uzun, uni bir xil taktlarni
+   takrorlab cho'zish yoki qisqartirish oson.
 4. **Namuna bilan yaratish.** Generatorda audio yuklash (Upload → Cover /
    Remix) imkoni bo'lsa, [`out/pochtam-promo-score.mp3`](out/pochtam-promo-score.mp3)
    ni yuklab, 1-bo'limdagi uslubni bering. Shunda tuzilma va vaqtlar
    saqlanib qolish ehtimoli yuqori bo'ladi.
-5. **Yakuniy ovoz:** oxirgi 0,3 s ni so'ndiring. Reels va TikTok uchun
-   balandlik taxminan −14 LUFS bo'lsin, eng baland nuqta −1 dBFS dan oshmasin.
+5. **Diktor bilan aralashtirish:** diktor gapirganda musiqa 10–14 dB
+   pastroq bo'lsin. Yakuniy balandlik taxminan −14 LUFS, eng baland nuqta
+   −1 dBFS dan oshmasin.

@@ -1,10 +1,10 @@
 {
   "file": "/home/user/redesign/films/pochtam-promo/pochtam-promo.html",
   "fps": 24,
-  "frames": 720,
+  "frames": 1584,
   "outputFps": 24,
-  "outputFrames": 720,
-  "duration": 30,
+  "outputFrames": 1584,
+  "duration": 66,
   "size": {
     "w": 1080,
     "h": 1920,

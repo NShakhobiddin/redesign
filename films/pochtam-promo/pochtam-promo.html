@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Pochtam — tezkor promo (30 s)</title>
+<title>Pochtam — promo (66 s, ovozli)</title>
 <style>body{margin:0;background:#101126;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
 <canvas id="c"></canvas>
 <script src="core.js"></script>
@@ -9,22 +9,24 @@
 <script>
 'use strict';
 /* Film brief
-Client: Pochtam (pochtam.uz), the app for buying from foreign stores. A 30-second
-  promo for Reels / TikTok / Telegram, remade from scratch: fast cuts, a hook in
-  the first second, the current app (captured from NShakhobiddin/Pochtachi as of
-  5 Oct 2026 with mocked AI and rates: nothing reached the live Worker).
-Edit grid: 120 BPM, a beat every 0.5 s (12 frames), a bar every 2 s. Every cut
-  lands on a beat or a half-beat, so a track generated at 120 BPM lines up
-  (the music prompt in the README follows the same timeline).
-Beats (s): 0 hook: the sneaker, "Xitoyda — ¥699" | 1 "Uyingizgacha qanchaga
-  tushadi?" | 2 "Boj? Kargo? Kurs? Kuryer?" on eighths | 3 "Javob — bitta
-  skrinshotda", shutter | 4 DROP: the logo | 5 photo search | 7 screenshot ->
-  total ($102.20, an example) | 9 what the price is made of, duty $0 within the
-  limit | 11 the whole cart in one count | 13 couriers, a courier buys for you |
-  15 step-by-step guides | 17 tracking | 19 numbers: 43 stores, 20 couriers,
-  7 guides, $200 a month duty-free, AI, 3 languages | 22 "Hammasi — bitta
-  ilovada" | 24 DROP 2: the parcel at the door | 26 the brand intro | 28
-  pochtam.uz | 30 end.
+Client: Pochtam (pochtam.uz), the app for buying from foreign stores. A 66-second
+  narrated promo for Reels / TikTok / Telegram: a hook in the first second, then
+  one feature per shot, each held long enough for its line of the voice-over
+  (VOICEOVER.md, written for ElevenLabs). The current app was captured from
+  NShakhobiddin/Pochtachi as of 5 Oct 2026 with mocked AI and rates: nothing
+  reached the live Worker.
+Edit grid: 120 BPM, a beat every 0.5 s (12 frames). Every cut lands on a beat,
+  the logo and the parcel drops on bar lines (12, 56, 60 s), so a track
+  generated at 120 BPM lines up (MUSIC-PROMPT.md follows the same timeline).
+Shots (s): 0 the sneaker, "Xitoyda — ¥699" | 3 "Uyingizgacha qanchaga
+  tushadi?" | 5.5 "Boj? Kargo? Kurs? Kuryer?", a word every 0.75 s | 8.5 "Javob
+  — bitta skrinshotda", shutter | 12 DROP: the logo | 15.5 photo search |
+  20.5 screenshot -> total ($102.20, an example) | 26.5 what the price is made
+  of, duty $0 up to $200 a month | 31.5 the whole cart in one count | 35.5
+  couriers, a courier buys for you | 40 step-by-step guides | 44 tracking |
+  47.5 numbers: 43 stores, 20 couriers, 3 languages | 52 "Hammasi — bitta
+  ilovada" | 56 DROP 2: the parcel at the door | 60 the brand, 63.5
+  pochtam.uz | 66 end.
 Look: Pochtam's own colours (blue #1A1FB0, lime #bbef45, navy, pale lilac), its
   typeface Onest and its logo pieces; full-bleed colour fields, big kinetic
   type, the real screens in a phone with camera push-ins, taps, viewfinder brackets
@@ -46,7 +48,7 @@ for (const [k, src] of Object.entries(BRAND_IMG)) { const im = new Image(); im.s
 for (const [k, src] of Object.entries(SCREENS)) { const im = new Image(); im.src = src; SCR[k] = im; _photoLoads.push(im.decode()); }
 const uz = s => String(s).replace(/([oOgG])'/g, '$1ʻ').replace(/'/g, 'ʼ');
 
-const FPS = 24, END = 30, BEAT = .5, DEG = Math.PI/180;
+const FPS = 24, BEAT = .5, DEG = Math.PI/180;
 const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
 const outBack = (t, s = 1.70158) => 1 + (s + 1)*Math.pow(t - 1, 3) + s*Math.pow(t - 1, 2);
 const outExpo = t => t >= 1 ? 1 : 1 - Math.pow(2, -10*t);
@@ -66,8 +68,8 @@ function dots(c, color, a = .12, step = 54) { c.save(); c.fillStyle = color; c.g
 function fill(c, color) { c.fillStyle = color; c.fillRect(0, 0, W, H); }
 function flash(c, t, t0, d = .14, color = '255,255,255', peak = 1) { const u = span(t, t0, t0 + d); if (t < t0 || u >= 1) return; c.save(); c.fillStyle = `rgba(${color},${peak*(1 - u)})`; c.fillRect(0, 0, W, H); c.restore(); }
 // small shakes on the hits, decaying fast
-const HITS = [0, 1.5, 2, 2.25, 2.5, 2.75, 3.5, 4, 5, 7, 7.45, 8, 9, 10, 11, 11.45, 13, 15, 17, 19, 19.5, 20, 20.5, 21, 21.5, 22, 24, 26.3, 28];
-function shakeAt(t) { let x = 0, y = 0; for (const h of HITS) { const d = t - h; if (d < 0 || d > .2) continue; const a = 14*(1 - d/.2); x += a*Math.sin(d*90 + h); y += a*Math.cos(d*77 + h*2); } return [x, y]; }
+const HITS = [0, 4, 5.5, 6.25, 7, 7.75, 9, 12, 29, 47.5, 49, 50.5, 52, 56.3, 60.3, 63.5];
+function shakeAt(t) { let x = 0, y = 0; for (const h of HITS) { const d = t - h; if (d < 0 || d > .2) continue; const a = 11*(1 - d/.2); x += a*Math.sin(d*90 + h); y += a*Math.cos(d*77 + h*2); } return [x, y]; }
 
 // ------------------------------------------------------------------ props: the sneaker, the price tag, the phone, the parcel
 const SNK = ['M-150 18 C-158 -10 -150 -44 -120 -64 C-96 -72 -70 -62 -60 -52 C-50 -84 -20 -96 4 -62 C40 -38 92 -16 138 2 C156 10 162 20 156 28 L60 28 L-60 26 Z',
@@ -150,7 +152,7 @@ function brandMark(c, T0, {word = true, tag = true} = {}) {
   c.save(); c.globalAlpha = IA.pOp(T0); c.translate(PC.x, PC.y - 520*(1 - u)); c.rotate(-14*DEG*(1 - u)); c.scale(pS*(1 + sq), pS*(1 - sq)); c.drawImage(IMG.p, -PSZ.w/2, -PSZ.h/2, PSZ.w, PSZ.h); c.restore();
 }
 
-// ------------------------------------------------------------------ shots (each gets the global time; cuts on the 120 BPM grid)
+// ------------------------------------------------------------------ shots (cuts on the 120 BPM grid, paced for the voice-over)
 const B = SCREEN_BOXES, cen = b => [b[0] + b[2]/2, b[1] + b[3]/2];
 function caption(c, t, t0, lines, {y = 250, color = NAVY, mark = LIME, size = 96} = {}) {
   lines.forEach(([s, hl], i) => { const st = slam(t, t0 + i*.12), w = tw(c, s, size);
@@ -165,126 +167,134 @@ function featurePhone(c, t, t0, draw, {s = PHONE.s, x = PHONE.x, y = PHONE.y, zo
   phone(c, x + dx, y + 8*Math.sin(t*2.2), s*(1 + .015*Math.sin(t*1.7)), (1 - k)*6*DEG, draw); c.restore();
 }
 function bgFeature(c, color = PALE, dot = BLUE) { fill(c, color); dots(c, dot, .1); }
+// one line of the voice-over per shot (VOICEOVER.md); a shot is [duration, draw(c, t, a)] with a = its start
 const SHOTS = [
-  // ---- the hook
-  [0, 1, (c, t) => { fill(c, WHITE); dots(c, BLUE, .08); const z = 1 + .06*t; c.save(); c.translate(540, 1000); c.scale(z, z); c.translate(-540, -1000);
-    const k = span(t, -.1, .16, outExpo); sneaker(c, 520 + 700*(1 - k), 1060, 2.7, (-14 + 8*k)*DEG);          // the very first frame is already full
-    const sw = span(t, .2, 1.0), ang = Math.exp(-4*sw)*Math.sin(sw*16)*22*DEG; if (t > .2) priceTag(c, 760, 690 + 160*(1 - span(t, .2, .35, outBack)), ang, 1.25, '¥699'); c.restore();
-    const st = slam(t, -.08); text(c, 'Xitoyda', 540, 430, {size: 150, color: NAVY, ...st}); const s2 = slam(t, .5); text(c, 'shu narxda', 540, 560, {size: 92, w: 700, color: INK, ...s2}); }],
-  [1, 2, (c, t) => { fill(c, BLUE); dots(c, WHITE, .1); const z = 1.05 - .05*span(t, 1.5, 1.7, outExpo);
+  // ---- the hook: "Xitoyda — olti yuz to'qson to'qqiz yuan."
+  [3, (c, t, a) => { const u = t - a, z = 1 + .04*u; fill(c, WHITE); dots(c, BLUE, .08); c.save(); c.translate(540, 1000); c.scale(z, z); c.translate(-540, -1000);
+    const k = span(u, -.1, .16, outExpo); sneaker(c, 520 + 700*(1 - k), 1060, 2.7, (-14 + 8*k)*DEG);          // the very first frame is already full
+    const sw = span(u, .2, 1.4), ang = Math.exp(-4*sw)*Math.sin(sw*16)*22*DEG; if (u > .2) priceTag(c, 760, 690 + 160*(1 - span(u, .2, .35, outBack)), ang, 1.25, '¥699'); c.restore();
+    text(c, 'Xitoyda', 540, 430, {size: 150, color: NAVY, ...slam(u, -.08)}); text(c, 'shu narxda', 540, 560, {size: 92, w: 700, color: INK, ...slam(u, .5)}); }],
+  // "Uyingizgacha qanchaga tushadi?"
+  [2.5, (c, t, a) => { const u = t - a, z = 1.05 - .05*span(u, 1, 1.2, outExpo); fill(c, BLUE); dots(c, WHITE, .1);
     c.save(); c.translate(540, 960); c.scale(z, z); c.translate(-540, -960);
-    const s1 = slam(t, 1); text(c, 'Uyingizgacha', 540, 820, {size: 108, color: WHITE, ...s1});
-    const s2 = slam(t, 1.5); const w = tw(c, 'qanchaga', 170); c.save(); c.translate(540, 1010); c.rotate(s2.rot); c.scale(s2.sc, s2.sc); marker(c, -w/2 - 26, -142, w + 52, 176, LIME, span(t, 1.55, 1.75, outExpo)); c.restore();
-    text(c, 'qanchaga', 540, 1010, {size: 170, color: NAVY, ...s2}); const s3 = slam(t, 1.62); text(c, 'tushadi?', 540, 1160, {size: 108, color: WHITE, ...s3}); c.restore(); }],
-  [2, 3, (c, t) => { const k = Math.min(3, Math.floor((t - 2)/.25)), W4 = [['Boj?', NAVY, LIME], ['Kargo?', LIME, NAVY], ['Kurs?', WHITE, BLUE], ['Kuryer?', BLUE, WHITE]][k];
+    text(c, 'Uyingizgacha', 540, 820, {size: 108, color: WHITE, ...slam(u, 0)});
+    const s2 = slam(u, 1), w = tw(c, 'qanchaga', 170); c.save(); c.translate(540, 1010); c.rotate(s2.rot); c.scale(s2.sc, s2.sc); marker(c, -w/2 - 26, -142, w + 52, 176, LIME, span(u, 1.05, 1.25, outExpo)); c.restore();
+    text(c, 'qanchaga', 540, 1010, {size: 170, color: NAVY, ...s2}); text(c, 'tushadi?', 540, 1160, {size: 108, color: WHITE, ...slam(u, 1.5)}); c.restore(); }],
+  // "Boj? Kargo? Kurs? Kuryer?" — a word every dotted beat
+  [3, (c, t, a) => { const u = t - a, k = Math.min(3, Math.floor(u/.75)), W4 = [['Boj?', NAVY, LIME], ['Kargo?', LIME, NAVY], ['Kurs?', WHITE, BLUE], ['Kuryer?', BLUE, WHITE]][k];
     fill(c, W4[1]); dots(c, W4[1] === NAVY || W4[1] === BLUE ? WHITE : NAVY, .1);
     for (let j = 0; j < k; j++) { const p = [['Boj?', 260, 380], ['Kargo?', 800, 520], ['Kurs?', 300, 1560]][j]; text(c, p[0], p[1], p[2], {size: 90, color: W4[2], alpha: .28, rot: (j % 2 ? 6 : -6)*DEG}); }
-    const st = slam(t, 2 + k*.25, .12); text(c, W4[0], 540, 1030, {size: 250, color: W4[2], ...st, rot: st.rot + (k % 2 ? 4 : -4)*DEG}); }],
-  [3, 4, (c, t) => { fill(c, NAVY); dots(c, WHITE, .08); const s1 = slam(t, 3); text(c, 'Javob —', 540, 760, {size: 120, color: WHITE, ...s1});
-    const s2 = slam(t, 3.5); const w = tw(c, 'skrinshotda', 140); text(c, 'bitta', 540, 920, {size: 140, color: LIME, ...s2});
-    text(c, 'skrinshotda', 540, 1070, {size: 140, color: LIME, ...slam(t, 3.58)});
-    const ph = span(t, 3.3, 3.75, outExpo); phone(c, 540, 1580 + 700*(1 - ph), .95, 0, cc => { scr(cc, 'demo-store-page'); });
-    flash(c, t, 3.75, .25); }],
-  // ---- the drop: the logo lands
-  [4, 5, (c, t) => { fill(c, WHITE); const g = c.createRadialGradient(540, 860, 0, 540, 860, 900); g.addColorStop(0, 'rgba(26,31,176,.10)'); g.addColorStop(1, 'rgba(26,31,176,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
-    brandMark(c, .1 + (t - 4)*1.8, {tag: false}); flash(c, t, 4, .12); }],
-  // ---- 1. photo search
-  [5, 7, (c, t) => { bgFeature(c); caption(c, t, 5, [['Rasmini yuklang', 1]], {y: 260});
-    text(c, 'AI tovarni topadi', 540, 380, {size: 64, w: 700, color: INK, alpha: span(t, 5.15, 5.3)});
-    featurePhone(c, t, 5, cc => {
-      if (t < 5.5) { scr(cc, 'p01-home'); tap(cc, ...cen(B['p01-home'].photoCard), t, 5.3); }
-      else if (t < 6) scr(cc, 'p02-photo-busy');
-      else { scr(cc, 'p03-photo-find'); hi(cc, [24, 202, 342, 126], t, 6.35); } }, {zoom: lerp(1, 1.2, span(t, 6, 6.3, outExpo)), fy: 280});
-    if (t >= 5.5 && t < 6.05) { const u = span(t, 5.5, 5.75, outExpo); c.save(); c.translate(250 - 200*(1 - u), 760); c.rotate(-8*DEG); c.fillStyle = WHITE; c.shadowColor = 'rgba(10,12,60,.3)'; c.shadowBlur = 30; c.fillRect(-170, -120, 340, 240); c.shadowColor = 'transparent';
-      c.drawImage(SCR['demo-photo'], -160, -110, 320, 220); const sy = -110 + 220*((t - 5.5)/.5 % 1); c.fillStyle = 'rgba(187,239,69,.9)'; c.fillRect(-160, sy, 320, 6); c.restore(); } }],
-  // ---- 2. a screenshot -> the total
-  [7, 9, (c, t) => {
-    if (t < 7.5) { fill(c, '#f4f4f4'); const z = 2.77 + .12*span(t, 7, 7.5); c.save(); c.translate(540, 1010); c.scale(z, z); c.drawImage(SCR['demo-store-page'], -195, -400, 390, 844); c.restore();
-      brackets(c, 50, 120, 980, 1680, span(t, 7.05, 7.3)); caption(c, t, 7, [['Skrinshot oling', 1]], {y: 300, size: 96}); flash(c, t, 7.45, .18); return; }
-    bgFeature(c, BLUE, WHITE); caption(c, t, 7.5, [['AI narxni o\'qiydi', 0]], {y: 250, color: WHITE, size: 88});
-    if (t >= 8) { const n = 102.2*span(t, 8.05, 8.45, outExpo); text(c, '$' + n.toFixed(2), 540, 420, {size: 120, color: LIME, sc: lerp(1.3, 1, span(t, 8, 8.2, outBack)), alpha: span(t, 8, 8.05)}); text(c, 'jami — boj, kargo, kurs bilan · misol', 540, 482, {size: 34, w: 600, color: PALE, alpha: span(t, 8.2, 8.35)}); }
-    featurePhone(c, t, 7.5, cc => { if (t < 8) scr(cc, 'p04-scan1'); else { scr(cc, 'p05-result'); hi(cc, [18, 78, 354, 152], t, 8.5); } }, {y: 1230, zoom: lerp(1, 1.16, span(t, 8, 8.3, outExpo)), fy: 200}); }],
-  // ---- 3. what the price is made of
-  [9, 11, (c, t) => {
-    if (t < 10) { bgFeature(c); caption(c, t, 9, [['Narx tarkibi', 1]], {y: 260}); text(c, 'hammasi ochiq ko\'rinadi', 540, 380, {size: 60, w: 700, color: INK, alpha: span(t, 9.15, 9.3)});
-      featurePhone(c, t, 9, cc => { scr(cc, 'p06-breakdown');
-        [158, 214, 271, 347].forEach((yy, i) => { const u = span(t, 9.2 + i*.2, 9.32 + i*.2, outBack); if (u <= 0) return; cc.save(); cc.translate(41, yy); cc.scale(u, u); cc.fillStyle = LIME; cc.beginPath(); cc.arc(0, 0, 13, 0, TAU); cc.fill(); cc.strokeStyle = NAVY; cc.lineWidth = 3.5; cc.lineCap = 'round'; cc.beginPath(); cc.moveTo(-6, 0); cc.lineTo(-1.5, 5); cc.lineTo(7, -5); cc.stroke(); cc.restore(); }); }, {zoom: 1.12, fy: 250}); return; }
-    fill(c, LIME); dots(c, NAVY, .08); text(c, 'Boj:', 540, 820, {size: 150, color: NAVY, ...slam(t, 10)}); text(c, '$0', 540, 1100, {size: 330, color: BLUE, ...slam(t, 10.1)});
-    text(c, "$200 me'yor ichida bo'lsa", 540, 1230, {size: 58, w: 700, color: NAVY, alpha: span(t, 10.3, 10.45)}); text(c, 'misol: $97.80 lik krossovka', 540, 1310, {size: 40, w: 600, color: INK, alpha: span(t, 10.45, 10.6)}); }],
-  // ---- 4. the whole cart
-  [11, 13, (c, t) => {
-    if (t < 11.5) { fill(c, '#f4f4f4'); const z = 2.77; c.save(); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR['demo-cart-page'], -195, -422, 390, 844); c.restore();
-      brackets(c, 30, 230, 1020, 820, span(t, 11.05, 11.3)); text(c, 'Butun savat?', 540, 1500, {size: 110, color: NAVY, ...slam(t, 11)}); flash(c, t, 11.45, .16); return; }
-    bgFeature(c); caption(c, t, 11.5, [['Bitta skrinshot —', 0], ['bitta hisob', 1]], {y: 220, size: 86});
-    featurePhone(c, t, 11.5, cc => { if (t < 12.5) { scr(cc, 'p15b-cart-list'); hi(cc, B['p15b-cart-list'].list, t, 11.9, {pad: 10}); } else scr(cc, 'p15-cart'); },
-      t < 12.5 ? {y: 1230, zoom: 1.12, fy: 420} : {y: 1230, zoom: lerp(1.12, 1.18, span(t, 12.5, 12.7, outExpo)), fy: 140});
-    if (t > 12.55) text(c, '3 ta tovar → $117.99', 540, 440, {size: 56, w: 800, color: BLUE, alpha: span(t, 12.55, 12.7)}); }],
-  // ---- 5. couriers
-  [13, 15, (c, t) => { bgFeature(c, BLUE, WHITE);
-    caption(c, t, 13, t < 13.75 ? [['Eng arzon kuryer', 0]] : [['Kuryer siz uchun', 0], ['sotib oladi', 0]], {y: t < 13.75 ? 260 : 210, color: t < 13.75 ? WHITE : LIME, size: 88});
-    featurePhone(c, t, 13, cc => { if (t < 13.75) scr(cc, 'p18-couriers'); else { scr(cc, 'p07-b4m'); tap(cc, ...cen(B['p07-b4m'].write), t, 14.1); } }, {y: 1230, zoom: t < 13.75 ? lerp(1, 1.08, span(t, 13, 13.75)) : 1.12, fy: t < 13.75 ? 300 : 240});
-    const m = span(t, 14.2, 14.45, outBack); if (m > 0) { c.save(); c.translate(760, 860); c.scale(m, m); c.fillStyle = WHITE; c.shadowColor = 'rgba(10,12,60,.35)'; c.shadowBlur = 30; c.beginPath(); c.roundRect(-250, -70, 500, 140, 40); c.fill(); c.shadowColor = 'transparent';
+    const st = slam(u, k*.75, .12); text(c, W4[0], 540, 1030, {size: 250, color: W4[2], ...st, rot: st.rot + (k % 2 ? 4 : -4)*DEG}); }],
+  // "Javob — bitta skrinshotda."
+  [3.5, (c, t, a) => { const u = t - a; fill(c, NAVY); dots(c, WHITE, .08); text(c, 'Javob —', 540, 760, {size: 120, color: WHITE, ...slam(u, 0)});
+    text(c, 'bitta', 540, 920, {size: 140, color: LIME, ...slam(u, .5)}); text(c, 'skrinshotda', 540, 1070, {size: 140, color: LIME, ...slam(u, .58)});
+    const ph = span(u, 1, 1.6, outExpo); phone(c, 540, 1580 + 700*(1 - ph), .95, 0, cc => scr(cc, 'demo-store-page'));
+    flash(c, u, 3.25, .25); }],
+  // ---- the drop: the logo lands — "Bu — Pochtam. Global xaridlar biz bilan oson."
+  [3.5, (c, t, a) => { const u = t - a, z = 1 + .015*u; fill(c, WHITE); const g = c.createRadialGradient(540, 860, 0, 540, 860, 900); g.addColorStop(0, 'rgba(26,31,176,.10)'); g.addColorStop(1, 'rgba(26,31,176,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.save(); c.translate(540, 900); c.scale(z, z); c.translate(-540, -900); brandMark(c, .1 + u); c.restore(); flash(c, u, 0, .12); }],
+  // ---- 1. photo search — "Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi."
+  [5, (c, t, a) => { const u = t - a; bgFeature(c); caption(c, u, 0, [['Rasmini yuklang', 1]], {y: 260});
+    text(c, 'AI tovarni topadi', 540, 380, {size: 64, w: 700, color: INK, alpha: span(u, .15, .3)});
+    featurePhone(c, t, a, cc => {
+      if (u < 1) { scr(cc, 'p01-home'); tap(cc, ...cen(B['p01-home'].photoCard), u, .6); }
+      else if (u < 2) scr(cc, 'p02-photo-busy');
+      else { scr(cc, 'p03-photo-find'); hi(cc, [24, 202, 342, 126], u, 2.4); } }, {zoom: lerp(1, 1.2, span(u, 2, 2.3, outExpo)), fy: 280});
+    if (u >= 1 && u < 2.05) { const v = span(u, 1, 1.25, outExpo); c.save(); c.translate(250 - 200*(1 - v), 760); c.rotate(-8*DEG); c.fillStyle = WHITE; c.shadowColor = 'rgba(10,12,60,.3)'; c.shadowBlur = 30; c.fillRect(-170, -120, 340, 240); c.shadowColor = 'transparent';
+      c.drawImage(SCR['demo-photo'], -160, -110, 320, 220); const sy = -110 + 220*(((u - 1)/.5) % 1); c.fillStyle = 'rgba(187,239,69,.9)'; c.fillRect(-160, sy, 320, 6); c.restore(); } }],
+  // ---- 2. a screenshot -> the total — "Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi."
+  [6, (c, t, a) => { const u = t - a;
+    if (u < 2) { fill(c, '#f4f4f4'); const z = 2.77 + .12*span(u, 0, 2); c.save(); c.translate(540, 1010); c.scale(z, z); c.drawImage(SCR['demo-store-page'], -195, -400, 390, 844); c.restore();
+      brackets(c, 50, 120, 980, 1680, span(u, .1, .4)); caption(c, u, 0, [['Skrinshot oling', 1]], {y: 300, size: 96}); flash(c, u, 1.95, .3); return; }
+    bgFeature(c, BLUE, WHITE); caption(c, u, 2, [['AI narxni o\'qiydi', 0]], {y: 250, color: WHITE, size: 88});
+    if (u >= 3) { const n = 102.2*span(u, 3.05, 3.6, outExpo); text(c, '$' + n.toFixed(2), 540, 420, {size: 120, color: LIME, sc: lerp(1.3, 1, span(u, 3, 3.2, outBack)), alpha: span(u, 3, 3.05)}); text(c, 'jami — boj, kargo, kurs bilan · misol', 540, 482, {size: 34, w: 600, color: PALE, alpha: span(u, 3.2, 3.35)}); }
+    featurePhone(c, t, a + 2, cc => { if (u < 3) { scr(cc, 'p04-scan1'); cc.fillStyle = 'rgba(187,239,69,.85)'; cc.fillRect(18, 78 + 419*(((u - 2)/.5) % 1), 354, 5); }
+      else { scr(cc, 'p05-result'); hi(cc, [18, 78, 354, 152], u, 3.6); } }, {y: 1230, zoom: lerp(1, 1.16, span(u, 3, 3.3, outExpo)), fy: 200});
+    flash(c, u, 1.95, .3); }],
+  // ---- 3. what the price is made of — "Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz."
+  [5, (c, t, a) => { const u = t - a;
+    if (u < 2.5) { bgFeature(c); caption(c, u, 0, [['Narx tarkibi', 1]], {y: 260}); text(c, 'hammasi ochiq ko\'rinadi', 540, 380, {size: 60, w: 700, color: INK, alpha: span(u, .15, .3)});
+      featurePhone(c, t, a, cc => { scr(cc, 'p06-breakdown');
+        [158, 214, 271, 347].forEach((yy, i) => { const v = span(u, .4 + i*.3, .52 + i*.3, outBack); if (v <= 0) return; cc.save(); cc.translate(41, yy); cc.scale(v, v); cc.fillStyle = LIME; cc.beginPath(); cc.arc(0, 0, 13, 0, TAU); cc.fill(); cc.strokeStyle = NAVY; cc.lineWidth = 3.5; cc.lineCap = 'round'; cc.beginPath(); cc.moveTo(-6, 0); cc.lineTo(-1.5, 5); cc.lineTo(7, -5); cc.stroke(); cc.restore(); }); }, {zoom: 1.12, fy: 250}); return; }
+    fill(c, LIME); dots(c, NAVY, .08); text(c, 'Boj:', 540, 820, {size: 150, color: NAVY, ...slam(u, 2.5)}); text(c, '$0', 540, 1100, {size: 330, color: BLUE, ...slam(u, 2.6)});
+    text(c, 'oyiga $200 gacha bo\'lsa', 540, 1230, {size: 58, w: 700, color: NAVY, alpha: span(u, 2.8, 2.95)}); text(c, 'misol: $97.80 lik krossovka', 540, 1310, {size: 40, w: 600, color: INK, alpha: span(u, 2.95, 3.1)}); }],
+  // ---- 4. the whole cart — "Butun savatni ham bitta skrinshot bilan hisoblang."
+  [4, (c, t, a) => { const u = t - a;
+    if (u < 1.5) { fill(c, '#f4f4f4'); const z = 2.77; c.save(); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR['demo-cart-page'], -195, -422, 390, 844); c.restore();
+      brackets(c, 30, 230, 1020, 820, span(u, .05, .3)); text(c, 'Butun savat?', 540, 1500, {size: 110, color: NAVY, ...slam(u, 0)}); flash(c, u, 1.45, .3); return; }
+    bgFeature(c); caption(c, u, 1.5, [['Bitta skrinshot —', 0], ['bitta hisob', 1]], {y: 220, size: 86});
+    featurePhone(c, t, a + 1.5, cc => { if (u < 2.9) { scr(cc, 'p15b-cart-list'); hi(cc, B['p15b-cart-list'].list, u, 1.9, {pad: 10}); } else scr(cc, 'p15-cart'); },
+      u < 2.9 ? {y: 1230, zoom: 1.12, fy: 420} : {y: 1230, zoom: lerp(1.12, 1.18, span(u, 2.9, 3.1, outExpo)), fy: 140});
+    if (u > 2.95) text(c, '3 ta tovar → $117.99', 540, 440, {size: 56, w: 800, color: BLUE, alpha: span(u, 2.95, 3.1)});
+    flash(c, u, 1.45, .3); }],
+  // ---- 5. couriers — "Eng arzon kuryerni tanlang — u siz uchun sotib oladi."
+  [4.5, (c, t, a) => { const u = t - a, b4m = u >= 1.75; bgFeature(c, BLUE, WHITE);
+    caption(c, u, b4m ? 1.75 : 0, b4m ? [['Kuryer siz uchun', 0], ['sotib oladi', 0]] : [['Eng arzon kuryer', 0]], {y: b4m ? 210 : 260, color: b4m ? LIME : WHITE, size: 88});
+    featurePhone(c, t, a, cc => { if (!b4m) scr(cc, 'p18-couriers'); else { scr(cc, 'p07-b4m'); tap(cc, ...cen(B['p07-b4m'].write), u, 2.35); } },
+      {y: 1230, zoom: b4m ? 1.12 : lerp(1, 1.08, span(u, 0, 1.75)), fy: b4m ? 240 : 300});
+    const m = span(u, 2.45, 2.7, outBack); if (m > 0) { c.save(); c.translate(760, 860); c.scale(m, m); c.fillStyle = WHITE; c.shadowColor = 'rgba(10,12,60,.35)'; c.shadowBlur = 30; c.beginPath(); c.roundRect(-250, -70, 500, 140, 40); c.fill(); c.shadowColor = 'transparent';
       c.fillStyle = '#2AABEE'; c.beginPath(); c.arc(-180, 0, 42, 0, TAU); c.fill(); c.fillStyle = WHITE; c.beginPath(); c.moveTo(-202, 2); c.lineTo(-158, -16); c.lineTo(-168, 22); c.lineTo(-178, 10); c.closePath(); c.fill();
       text(c, 'Xabar tayyor ✓', 50, 16, {size: 48, color: NAVY}); c.restore(); } }],
-  // ---- 6. guides
-  [15, 17, (c, t) => { bgFeature(c); caption(c, t, 15, [['Qadam-baqadam', 1], ["qo'llanma", 0]], {y: 220, size: 92});
-    const k = ['p20-guides', 'p08-guide', 'p09-steps', 'p09-steps-1'][Math.min(3, Math.floor((t - 15)/.5))];
-    featurePhone(c, t, 15, cc => scr(cc, k), {y: 1230, zoom: 1.06 - .06*(((t - 15) % .5)/.5), fy: 300});
-    text(c, '7 ta do\'kon uchun', 540, 440, {size: 50, w: 700, color: BLUE, alpha: span(t, 15.3, 15.45)}); }],
-  // ---- 7. tracking
-  [17, 19, (c, t) => { bgFeature(c, BLUE, WHITE); caption(c, t, 17, [['Jo\'natmani kuzating', 0]], {y: 250, color: WHITE, size: 86});
-    const k = ['p10-mine', 'p11-ordered', 'p13-road', 'p13-road'][Math.min(3, Math.floor((t - 17)/.5))];
-    featurePhone(c, t, 17, cc => scr(cc, k), {y: 1150, s: 1.22, zoom: 1.1, fy: 200});
-    const st = ['Topish', 'Narx', 'Buyurtma', "Yo'lda", 'Keldi'], p = span(t, 17.1, 18.9), x0 = 120, x1 = 960, Y = 1872;
+  // ---- 6. guides — "Yetti do'kon uchun — qadam-baqadam qo'llanma."
+  [4, (c, t, a) => { const u = t - a; bgFeature(c); caption(c, u, 0, [['Qadam-baqadam', 1], ["qo'llanma", 0]], {y: 220, size: 92});
+    const k = ['p20-guides', 'p08-guide', 'p09-steps', 'p09-steps-1'][Math.min(3, Math.floor(u))];
+    featurePhone(c, t, a, cc => scr(cc, k), {y: 1230, zoom: 1.05 - .05*span(u % 1, 0, .6, outExpo), fy: 300});
+    text(c, '7 ta do\'kon uchun', 540, 440, {size: 50, w: 700, color: BLUE, alpha: span(u, .3, .45)}); }],
+  // ---- 7. tracking — "Jo'natmangizni eshigingizgacha kuzating."
+  [3.5, (c, t, a) => { const u = t - a; bgFeature(c, BLUE, WHITE); caption(c, u, 0, [['Jo\'natmani kuzating', 0]], {y: 250, color: WHITE, size: 86});
+    const k = ['p10-mine', 'p11-ordered', 'p13-road'][Math.min(2, Math.floor(u))];
+    featurePhone(c, t, a, cc => scr(cc, k), {y: 1150, s: 1.22, zoom: 1.1, fy: 200});
+    const st = ['Topish', 'Narx', 'Buyurtma', "Yo'lda", 'Keldi'], p = span(u, .1, 3.3), x0 = 120, x1 = 960, Y = 1872;
     c.save(); c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = 10; c.lineCap = 'round'; c.beginPath(); c.moveTo(x0, Y); c.lineTo(x1, Y); c.stroke(); c.strokeStyle = LIME; c.beginPath(); c.moveTo(x0, Y); c.lineTo(lerp(x0, x1, p), Y); c.stroke(); c.restore();
     st.forEach((s, i) => { const x = lerp(x0, x1, i/4), on = p >= i/4 - .001; c.fillStyle = on ? LIME : BLUE; c.beginPath(); c.arc(x, Y, 18, 0, TAU); c.fill(); c.lineWidth = 4; c.strokeStyle = on ? LIME : 'rgba(255,255,255,.5)'; c.stroke();
       text(c, s, x, Y - 34, {size: 30, w: 700, color: on ? WHITE : 'rgba(255,255,255,.55)'}); }); }],
-  // ---- numbers, on every beat
-  [19, 22, (c, t) => { const i = Math.min(5, Math.floor((t - 19)/.5));
-    const N = [['43', "do'kon", 'p17-stores'], ['20', 'kuryer', 'p18-couriers'], ['7', "qo'llanma", 'p20-guides'], ['$200', 'oyiga bojsiz', 'p19-customs'], ['AI', 'savolga javob', 'p22-ai'], ['3', 'til', null]][i], t0 = 19 + i*.5;
-    const bg = [BLUE, NAVY, BLUE, NAVY, BLUE, LIME][i]; fill(c, bg);
-    if (N[2]) { c.save(); c.globalAlpha = .28; const z = 2.77*(1.05 - .05*span(t, t0, t0 + .5)); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR[N[2]], -195, -422, 390, 844); c.restore(); c.fillStyle = bg === NAVY ? 'rgba(19,20,41,.55)' : 'rgba(26,31,176,.55)'; c.fillRect(0, 0, W, H); }
-    if (i < 5) { text(c, N[0], 540, 980, {size: N[0].length > 2 ? 300 : 420, color: LIME, ...slam(t, t0, .12), shadow: 20}); text(c, N[1], 540, 1150, {size: 110, color: WHITE, ...slam(t, t0 + .06, .12)}); return; }
-    const L = [['p01-home', "O'zbekcha"], ['p24-home-cyr', 'Ўзбекча'], ['p25-home-ru', 'Русский']], j = Math.min(2, Math.floor((t - 21.5)/(.5/3)));
+  // ---- numbers, one per dotted bar — "Qirq uch do'kon. Yigirma kuryer. Uch til."
+  [4.5, (c, t, a) => { const u = t - a, i = Math.min(2, Math.floor(u/1.5)), t0 = i*1.5;
+    const N = [['43', "do'kon", 'p17-stores'], ['20', 'kuryer', 'p18-couriers'], ['3', 'til', null]][i], bg = [BLUE, NAVY, LIME][i]; fill(c, bg);
+    if (N[2]) { c.save(); c.globalAlpha = .28; const z = 2.77*(1.05 - .05*span(u, t0, t0 + 1.5)); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR[N[2]], -195, -422, 390, 844); c.restore(); c.fillStyle = bg === NAVY ? 'rgba(19,20,41,.55)' : 'rgba(26,31,176,.55)'; c.fillRect(0, 0, W, H);
+      text(c, N[0], 540, 980, {size: 420, color: LIME, ...slam(u, t0, .12), shadow: 20}); text(c, N[1], 540, 1150, {size: 110, color: WHITE, ...slam(u, t0 + .06, .12)}); return; }
+    const L = [['p01-home', "O'zbekcha"], ['p24-home-cyr', 'Ўзбекча'], ['p25-home-ru', 'Русский']], j = Math.min(2, Math.floor((u - t0)/.5));
     phone(c, 540, 1180, 1.25, 0, cc => scr(cc, L[j][0]));
-    text(c, '3 til', 540, 260, {size: 150, color: NAVY, ...slam(t, 21.5, .12)}); text(c, L[j][1], 540, 380, {size: 72, w: 800, color: BLUE, ...slam(t, 21.5 + j*.5/3, .08)}); }],
-  // ---- everything in one app
-  [22, 24, (c, t) => { fill(c, NAVY); const keys = ['p01-home', 'p03-photo-find', 'p05-result', 'p06-breakdown', 'p15-cart', 'p18-couriers', 'p08-guide', 'p10-mine', 'p16-ref', 'p17-stores', 'p22-ai', 'p20-guides'];
-    const zo = lerp(1.25, .92, span(t, 22, 24, easeInOutSine)); c.save(); c.translate(540, 960); c.scale(zo, zo); c.rotate(-8*DEG); c.translate(-540, -960);
-    for (let col = 0; col < 4; col++) { const off = (col % 2 ? 1 : -1)*240*(t - 22); for (let r = -1; r < 4; r++) { const k = keys[(col*3 + r + 12) % keys.length], x = 90 + col*300, y = 120 + r*560 + off;
+    text(c, '3 til', 540, 260, {size: 150, color: NAVY, ...slam(u, t0, .12)}); text(c, L[j][1], 540, 380, {size: 72, w: 800, color: BLUE, ...slam(u, t0 + j*.5, .08)}); }],
+  // ---- everything in one app — "Hammasi — bitta ilovada."
+  [4, (c, t, a) => { const u = t - a; fill(c, NAVY); const keys = ['p01-home', 'p03-photo-find', 'p05-result', 'p06-breakdown', 'p15-cart', 'p18-couriers', 'p08-guide', 'p10-mine', 'p16-ref', 'p17-stores', 'p22-ai', 'p20-guides'];
+    const zo = lerp(1.25, .92, span(u, 0, 4, easeInOutSine)); c.save(); c.translate(540, 960); c.scale(zo, zo); c.rotate(-8*DEG); c.translate(-540, -960);
+    for (let col = 0; col < 4; col++) { const off = (col % 2 ? 1 : -1)*130*u; for (let r = -1; r < 4; r++) { const k = keys[(col*3 + r + 12) % keys.length], x = 90 + col*300, y = 120 + r*560 + off;
       c.save(); c.translate(x, y); c.beginPath(); c.roundRect(0, 0, 260, 562, 30); c.clip(); c.drawImage(SCR[k], 0, 0, 260, 562); c.restore(); } }
     c.restore(); c.fillStyle = 'rgba(19,20,41,.45)'; c.fillRect(0, 0, W, H);
-    marker(c, 70, 820, 940, 300, BLUE, span(t, 22, 22.2, outExpo)); text(c, 'Hammasi —', 540, 945, {size: 120, color: WHITE, ...slam(t, 22)}); text(c, 'bitta ilovada', 540, 1080, {size: 120, color: LIME, ...slam(t, 22.5)});
-    const w = span(t, 23.5, 24); if (w > 0) { c.fillStyle = `rgba(255,255,255,${w*w})`; c.fillRect(0, 0, W, H); } }],
-  // ---- drop 2: the parcel at the door
-  [24, 26, (c, t) => { const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, BLUE2); g.addColorStop(1, BLUE); c.fillStyle = g; c.fillRect(0, 0, W, H); dots(c, WHITE, .08);
-    const f = span(t, 24, 24.3, x => x*x), land = t - 24.3, sq = land > 0 ? Math.exp(-6*land)*Math.sin(land*22)*.12 : 0;
-    parcel(c, 540, 1180 - 1300*(1 - f), 1.35, (1 - f)*-14*DEG, sq);
-    if (land > 0) for (let k = 0; k < 10; k++) { const a = -Math.PI*(.05 + .9*k/9), r = 260 + 260*span(land, 0, .5, outExpo); c.save(); c.globalAlpha = 1 - span(land, .3, .7); c.strokeStyle = LIME; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(540 + Math.cos(a)*r*.8, 1240 + Math.sin(a)*r*.8); c.lineTo(540 + Math.cos(a)*r, 1240 + Math.sin(a)*r); c.stroke(); c.restore(); }
-    text(c, 'Orzuingiz —', 540, 470, {size: 120, color: WHITE, ...slam(t, 24.25)}); text(c, 'eshigingiz', 540, 610, {size: 130, color: LIME, ...slam(t, 24.75)}); text(c, 'oldida.', 540, 740, {size: 130, color: LIME, ...slam(t, 24.85)});
-    flash(c, t, 24, .15); }],
-  // ---- the brand and the address
-  [26, 30, (c, t) => { fill(c, WHITE); c.save(); c.fillStyle = 'rgba(10,12,153,.08)'; for (let y = 30; y < H; y += 60) for (let x = 30; x < W; x += 60) { c.beginPath(); c.arc(x, y, 2.4, 0, TAU); c.fill(); } c.restore();
-    brandMark(c, t - 26);
-    const a = span(t, 28, 28.3, outBack); text(c, 'pochtam.uz', 540, 1640, {size: 100, color: BLUE, sc: a, alpha: span(t, 28, 28.05)});
-    if (t > 28.15) { c.save(); c.strokeStyle = LIME; c.lineWidth = 16; c.lineCap = 'round'; const L = 500*span(t, 28.15, 28.5, outExpo); c.beginPath(); c.moveTo(290, 1682); c.lineTo(290 + L, 1682); c.stroke(); c.restore(); }
-    text(c, "Orzu qiling — qolganini biz hal qilamiz", 540, 1790, {size: 40, w: 600, color: INK, alpha: span(t, 28.5, 28.8)}); flash(c, t, 26, .12); }],
+    marker(c, 70, 820, 940, 300, BLUE, span(u, 0, .2, outExpo)); text(c, 'Hammasi —', 540, 945, {size: 120, color: WHITE, ...slam(u, 0)}); text(c, 'bitta ilovada', 540, 1080, {size: 120, color: LIME, ...slam(u, .5)});
+    const w = span(u, 3.5, 4); if (w > 0) { c.fillStyle = `rgba(255,255,255,${w*w})`; c.fillRect(0, 0, W, H); } }],
+  // ---- drop 2: the parcel at the door — "Orzuingiz — eshigingiz oldida."
+  [4, (c, t, a) => { const u = t - a, g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, BLUE2); g.addColorStop(1, BLUE); c.fillStyle = g; c.fillRect(0, 0, W, H); dots(c, WHITE, .08);
+    const f = span(u, 0, .3, x => x*x), land = u - .3, sq = land > 0 ? Math.exp(-6*land)*Math.sin(land*22)*.12 : 0;
+    parcel(c, 540, 1180 - 1300*(1 - f) - (land > 1 ? 10*Math.sin((land - 1)*2.4) : 0), 1.35, (1 - f)*-14*DEG, sq);
+    if (land > 0) for (let k = 0; k < 10; k++) { const an = -Math.PI*(.05 + .9*k/9), r = 260 + 260*span(land, 0, .5, outExpo); c.save(); c.globalAlpha = 1 - span(land, .3, .7); c.strokeStyle = LIME; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(540 + Math.cos(an)*r*.8, 1240 + Math.sin(an)*r*.8); c.lineTo(540 + Math.cos(an)*r, 1240 + Math.sin(an)*r); c.stroke(); c.restore(); }
+    text(c, 'Orzuingiz —', 540, 470, {size: 120, color: WHITE, ...slam(u, .25)}); text(c, 'eshigingiz', 540, 610, {size: 130, color: LIME, ...slam(u, .75)}); text(c, 'oldida.', 540, 740, {size: 130, color: LIME, ...slam(u, .85)});
+    flash(c, u, 0, .15); }],
+  // ---- the brand and the address — "Pochtam. Orzu qiling — qolganini biz hal qilamiz. Pochtam nuqta uz."
+  [6, (c, t, a) => { const u = t - a; fill(c, WHITE); c.save(); c.fillStyle = 'rgba(10,12,153,.08)'; for (let y = 30; y < H; y += 60) for (let x = 30; x < W; x += 60) { c.beginPath(); c.arc(x, y, 2.4, 0, TAU); c.fill(); } c.restore();
+    brandMark(c, u);
+    text(c, 'Orzu qiling — qolganini biz hal qilamiz', 540, 1790, {size: 46, w: 600, color: INK, alpha: span(u, 1.2, 1.5)});
+    const s = span(u, 3.5, 3.8, outBack); text(c, 'pochtam.uz', 540, 1640, {size: 100, color: BLUE, sc: s, alpha: span(u, 3.5, 3.55)});
+    if (u > 3.65) { c.save(); c.strokeStyle = LIME; c.lineWidth = 16; c.lineCap = 'round'; const L = 500*span(u, 3.65, 4, outExpo); c.beginPath(); c.moveTo(290, 1682); c.lineTo(290 + L, 1682); c.stroke(); c.restore(); }
+    flash(c, u, 0, .12); }],
 ];
+let acc = 0; const CUTS = SHOTS.map(([d]) => { const a = acc; acc += d; return a; }), END = acc;
 
 // ------------------------------------------------------------------ the frame
 function frame(c, tau) {
   const t = Math.round(tau*FPS)/FPS; resetT(c);
   const [sx, sy] = shakeAt(t); c.save(); c.translate(sx, sy); c.translate(540, 960); c.scale(1.02, 1.02); c.translate(-540, -960);       // a little overscan, so a shake never shows an edge
-  const s = SHOTS.find(([a, b]) => t >= a && t < b) || SHOTS[SHOTS.length - 1]; s[2](c, t);
+  let k = CUTS.findIndex((a, i) => t >= a && t < a + SHOTS[i][0]); if (k < 0) k = SHOTS.length - 1; SHOTS[k][1](c, t, CUTS[k]);
   c.restore();
 }
 
-// ------------------------------------------------------------------ preview score: 120 BPM, the same sections the prompt asks for; pitched sounds only
+// ------------------------------------------------------------------ preview score: 120 BPM, the same sections the music prompt asks for; pitched sounds only
 const mtof = m => 440*Math.pow(2, (m - 69)/12);
 function score(ac, t0, dest) {
   const SR = ac.sampleRate, G = (v, d) => { const g = ac.createGain(); g.gain.value = v; if (d) g.connect(d); return g; };
   const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3; comp.knee.value = 6; comp.attack.value = .005; comp.release.value = .2;
-  const master = G(.85, dest); comp.connect(master); master.gain.setValueAtTime(.85, t0 + END - .8); master.gain.linearRampToValueAtTime(0, t0 + END - .02);
+  const master = G(.85, dest); comp.connect(master); master.gain.setValueAtTime(.85, t0 + END - 1.2); master.gain.linearRampToValueAtTime(0, t0 + END - .02);
   const len = Math.ceil(SR*1.6), ir = ac.createBuffer(2, len, SR); for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(ch + 71); for (let i = 0; i < len; i++) d[i] = (r()*2 - 1)*Math.pow(1 - i/len, 4); }
   const room = ac.createConvolver(); room.buffer = ir; const rlp = ac.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3800; room.connect(rlp); rlp.connect(G(1, comp));
   const bus = G(1, comp); bus.connect(G(.18, room));
@@ -303,29 +313,31 @@ function score(ac, t0, dest) {
   const bell = (m, t, v = .05, d = 1.2) => { osc(mtof(m), t, .002, v, d); osc(mtof(m)*2.76, t, .002, v*.25, d*.4); };
   // chords: F#m - D - A - E (in A major), one per bar from the drop
   const CH = [[54, 57, 61, 66], [50, 57, 62, 66], [45, 57, 61, 64], [52, 56, 59, 64]], ROOT = [42, 38, 45, 40];
-  // the hook: a hit, the question on the off-beats, eighth-note stabs under "Boj? Kargo? Kurs? Kuryer?", a riser to the drop
-  kick(0, .55); saw(66, 0, .25, .05); bell(81, 0, .05); bass(42, 0, .45);
-  [1.0, 1.5].forEach((t, i) => { kick(t, .45); saw([69, 73][i], t, .2, .05); bass(38, t, .4); });
-  [2, 2.25, 2.5, 2.75].forEach((t, i) => { kick(t, .4); saw([76, 78, 80, 81][i], t, .15, .06); clap(t + .125, .05); });
-  kick(3, .45); bass(40, 3, .45); saw(76, 3, .2, .05); riser(3, 1, 180, 2000, .05); tick(3.5); tick(3.75); osc(1200, 3.75, .002, .08, .12, 'triangle');
-  // the main groove, 4 on the floor, from the drop to the break
-  for (let t = 4, b = 0; t < 22 - .01; t += 2, b++) { const ch = CH[b % 4], r = ROOT[b % 4];
-    for (let k = 0; k < 4; k++) { const tb = t + k*BEAT; kick(tb, k ? .42 : .5); if (k % 2) clap(tb, .07); tick(tb + .25); }
-    [0, .75, 1.0, 1.5].forEach((o, i) => bass(r + (i === 2 ? 12 : 0), t + o, i === 0 ? .6 : .35));
-    for (let k = 0; k < 8; k++) saw(ch[k % 4] + 12, t + k*.25, .12, .03);
-    if (b % 2 === 0) bell(ch[3] + 24, t, .03, 1.4);
+  // the hook (0-12 s): sparse hits under the voice, a stab on each of the four words, a riser into the logo
+  kick(0, .55); saw(66, 0, .25, .05); bell(81, 0, .05); bass(42, 0, .9); [54, 57, 61].forEach(m => saw(m + 12, .5, 2.4, .012));
+  kick(3, .4); bass(38, 3, .9); kick(4, .45); saw(73, 4, .22, .05); bell(85, 4, .03, .6);
+  [5.5, 6.25, 7, 7.75].forEach((t, i) => { kick(t, .42); saw([76, 78, 80, 81][i], t, .18, .06); bass([42, 38, 45, 40][i], t, .5); clap(t + .375, .04); });
+  kick(8.5, .45); bass(40, 8.5, .9); saw(76, 8.5, .2, .05); kick(9, .4); saw(81, 9, .2, .05); [52, 56, 59].forEach(m => saw(m + 12, 9.5, 2.2, .012));
+  riser(10, 2, 180, 2000, .05); tick(11); tick(11.5); osc(1200, 11.75, .002, .08, .12, 'triangle');
+  // the groove under the voice, four on the floor, from the logo to the break
+  for (let t = 12, b = 0; t < 52 - .01; t += 2, b++) { const ch = CH[b % 4], r = ROOT[b % 4];
+    for (let k = 0; k < 4; k++) { const tb = t + k*BEAT; kick(tb, k ? .36 : .44); if (k % 2) clap(tb, .05); tick(tb + .25, .02); }
+    [0, .75, 1.0, 1.5].forEach((o, i) => bass(r + (i === 2 ? 12 : 0), t + o, i === 0 ? .6 : .35, .19));
+    for (let k = 0; k < 8; k++) saw(ch[k % 4] + 12, t + k*.25, .12, .022);
   }
-  // section accents on the cuts: a bell on each new feature, an up-sweep into the numbers
-  [5, 7, 9, 11, 13, 15, 17].forEach(t => bell(85, t, .04, .8)); riser(18, 1, 300, 2400, .035);
-  // the numbers: a stab on every beat
-  [19, 19.5, 20, 20.5, 21, 21.5].forEach((t, i) => { saw([73, 76, 78, 80, 81, 83][i], t, .18, .07); bell([85, 88, 90, 92, 93, 95][i], t, .03, .5); });
+  // the cues: a bell on each new feature, shutter clicks, tap pops, the total counting up, duty $0
+  [15.5, 20.5, 26.5, 31.5, 35.5, 40, 44].forEach(t => bell(85, t, .035, .8));
+  [22.45, 32.95].forEach(t => osc(1200, t, .002, .07, .12, 'triangle')); [16.1, 37.85].forEach(t => osc(1568, t, .002, .04, .08)); osc(1046, 37.95, .002, .04, .2);
+  [69, 73, 76, 81, 85].forEach((m, i) => osc(mtof(m), 23.55 + i*.1, .002, .035, .25)); bell(88, 29, .05, 1);
+  // the numbers: an up-sweep, then a stab on each
+  riser(46.5, 1, 300, 2400, .03); [47.5, 49, 50.5].forEach((t, i) => { saw([73, 76, 81][i], t, .25, .07); bell([85, 88, 93][i], t, .035, .8); });
   // the break: no kick, a pad and a riser to the second drop
-  [52, 56, 59, 64].forEach(m => saw(m + 12, 22, 1.9, .02)); riser(22, 2, 150, 2600, .06); for (let k = 0; k < 8; k++) tick(22 + k*.25 + (k > 5 ? .125 : 0), .03 + k*.005);
-  // the second drop: the parcel lands, the groove returns for a bar, the logo hit, the tail
-  for (let t = 24, b = 0; t < 26; t += 2, b++) { const ch = CH[0], r = ROOT[0]; for (let k = 0; k < 4; k++) { kick(t + k*BEAT, .5); if (k % 2) clap(t + k*BEAT, .08); tick(t + k*BEAT + .25); }
-    bass(r, t, .6); bass(r + 12, t + 1, .35); for (let k = 0; k < 8; k++) saw(ch[k % 4] + 12, t + k*.25, .12, .035); }
-  kick(26, .55); [57, 61, 64, 69].forEach(m => saw(m, 26.3, 1.6, .03)); bass(45, 26.3, 1.4); bell(81, 26.3, .06, 2); bell(88, 26.42, .04, 2);
-  kick(28, .5); bass(45, 28, 1.6); [57, 61, 64, 69, 73].forEach((m, i) => saw(m + 12, 28 + i*.05, 1.8, .025)); bell(93, 28.05, .05, 2.2);
+  [52, 56, 59, 64].forEach(m => saw(m + 12, 52, 3.9, .018)); riser(54, 2, 150, 2600, .06); for (let k = 0; k < 8; k++) tick(55 + k*.125, .03 + k*.005);
+  // the second drop: the parcel lands, two bars of groove, the logo hit, the address, the tail
+  for (let t = 56, b = 0; t < 60; t += 2, b++) { const ch = CH[b % 2 ? 1 : 0], r = ROOT[b % 2 ? 1 : 0]; for (let k = 0; k < 4; k++) { kick(t + k*BEAT, .48); if (k % 2) clap(t + k*BEAT, .07); tick(t + k*BEAT + .25); }
+    bass(r, t, .6); bass(r + 12, t + 1, .35); for (let k = 0; k < 8; k++) saw(ch[k % 4] + 12, t + k*.25, .12, .032); }
+  kick(60, .55); [57, 61, 64, 69].forEach(m => saw(m, 60.3, 3, .03)); bass(45, 60.3, 2.6); bell(81, 60.3, .06, 2); bell(88, 60.42, .04, 2);
+  kick(63.5, .5); bass(45, 63.5, 2.2); [57, 61, 64, 69, 73].forEach((m, i) => saw(m + 12, 63.5 + i*.05, 2.2, .025)); bell(93, 63.55, .05, 2.4);
 }
 
 defineFilm({palette: {...PALETTES.pencilMinimal, paper: WHITE}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: 'promo', dur: END, fn: frame}], score});

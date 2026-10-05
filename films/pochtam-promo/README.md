@@ -1,41 +1,47 @@
-# Pochtam — tezkor promo (30 s)
+# Pochtam — promo (66 s, diktor ovozi uchun)
 
-[pochtam.uz](https://pochtam.uz) uchun noldan qayta ishlangan 30 soniyalik
-vertikal (9:16) promo. Reels, TikTok va Telegram uchun mo'ljallangan. Kadrlar
-har 0,25–2 soniyada almashadi. Birinchi kadrdanoq savol bilan boshlanadi:
-*"Xitoyda shu narxda. Uyingizgacha qanchaga tushadi?"*
+[pochtam.uz](https://pochtam.uz) uchun noldan qayta ishlangan vertikal (9:16)
+promo. Reels, TikTok va Telegram uchun mo'ljallangan. Video birinchi
+kadrdanoq savol bilan boshlanadi: *"Xitoyda shu narxda. Uyingizgacha qanchaga
+tushadi?"* Keyin har sahnada bitta imkoniyat ko'rsatiladi. Har sahna 3–6
+soniya turadi, diktor o'z satrini aytib ulguradi. Diktor matni ElevenLabs
+uchun yozilgan.
 
 ![Kadr](out/pochtam-promo-poster.jpg)
 
-- Video (vaqtinchalik musiqa bilan): [`out/pochtam-promo-final.mp4`](out/pochtam-promo-final.mp4)
-- Ovozsiz nusxa (o'z musiqangiz uchun): [`out/pochtam-promo-silent.mp4`](out/pochtam-promo-silent.mp4)
-- Musiqa uchun prompt, soniyama-soniya: **[`MUSIC-PROMPT.md`](MUSIC-PROMPT.md)**
+- Video (vaqtinchalik musiqa bilan, diktorsiz): [`out/pochtam-promo-final.mp4`](out/pochtam-promo-final.mp4)
+- Ovozsiz nusxa (diktor va musiqa qo'yish uchun): [`out/pochtam-promo-silent.mp4`](out/pochtam-promo-silent.mp4)
+- **Diktor matni, ElevenLabs uchun: [`VOICEOVER.md`](VOICEOVER.md)**, vaqt belgilari: [`out/pochtam-promo-voiceover.srt`](out/pochtam-promo-voiceover.srt)
+- Musiqa uchun prompt, soniyama-soniya: [`MUSIC-PROMPT.md`](MUSIC-PROMPT.md)
 - Vaqtinchalik musiqa (namuna): [`out/pochtam-promo-score.mp3`](out/pochtam-promo-score.mp3)
 - Kadrlar varag'i: [`out/pochtam-promo-contact.jpg`](out/pochtam-promo-contact.jpg)
 
+Birinchi versiya 30 soniyalik, juda tez kesilgan edi (har 0,25–2 s). U git
+tarixida saqlanib qolgan.
+
 ## Ketma-ketlik
 
-Montaj 120 BPM to'rida: zarb 0,5 s, takt 2 s. Har bir kesim zarbga yoki
-yarim zarbga tushadi.
+Montaj 120 BPM to'rida: har kesim zarbga (0,5 s) tushadi, logotip va
+droplar takt boshida (12, 56, 60 s).
 
-| Vaqt | Ekranda | Kesimlar |
+| Vaqt | Ekranda | Diktor |
 | --- | --- | --- |
-| 0–1 s | Krossovka va ¥699 yorlig'i: **"Xitoyda shu narxda"** | birinchi kadrdan to'liq kompozitsiya |
-| 1–2 s | **"Uyingizgacha qanchaga tushadi?"** | so'zlar zarbda "urilib" chiqadi |
-| 2–3 s | **Boj? · Kargo? · Kurs? · Kuryer?** | har 0,25 s da yangi rang va so'z |
-| 3–4 s | **"Javob — bitta skrinshotda"**, telefon ko'tariladi, oq chaqnash | |
-| 4–5 s | **Drop**: ilovaning logotip introsi | |
-| 5–7 s | **Rasmini yuklang** — AI tovarni topadi | bosish → skan → topilgan do'konlar |
-| 7–9 s | **Skrinshot oling** → **AI narxni o'qiydi**: jami $102.20 (misol) | do'kon sahifasi, chaqnash, hisob |
-| 9–11 s | **Narx tarkibi** (qatorlar belgilanadi), **Boj: $0** — $200 me'yor ichida | |
-| 11–13 s | **Butun savat?** → **Bitta skrinshot — bitta hisob**: 3 ta tovar → $117.99 | |
-| 13–15 s | **Eng arzon kuryer** → **Kuryer siz uchun sotib oladi**: "Yozish", "Xabar tayyor ✓" | |
-| 15–17 s | **Qadam-baqadam qo'llanma** (7 ta do'kon uchun) | ekran har 0,5 s da |
-| 17–19 s | **Jo'natmani kuzating**: Topish → Narx → Buyurtma → Yo'lda → Keldi | |
-| 19–22 s | **43** do'kon · **20** kuryer · **7** qo'llanma · **$200** oyiga bojsiz · **AI** · **3 til** | har zarbda bitta raqam |
-| 22–24 s | **"Hammasi — bitta ilovada"**: ilova ekranlari mozaikasi | |
-| 24–26 s | **Drop 2**: quti eshik oldiga tushadi — **"Orzuingiz — eshigingiz oldida."** | |
-| 26–30 s | Logotip, **pochtam.uz**, "Orzu qiling — qolganini biz hal qilamiz" | |
+| 0–3 s | Krossovka va ¥699: **"Xitoyda shu narxda"** | Xitoyda — olti yuz to'qson to'qqiz yuan. |
+| 3–5,5 s | **"Uyingizgacha qanchaga tushadi?"** | Uyingizgacha qanchaga tushadi? |
+| 5,5–8,5 s | **Boj? · Kargo? · Kurs? · Kuryer?** (har 0,75 s da) | Boj? Kargo? Kurs? Kuryer? |
+| 8,5–12 s | **"Javob — bitta skrinshotda"**, telefon ko'tariladi, oq chaqnash | Javob — bitta skrinshotda. |
+| 12–15,5 s | Logotip introsi va shior | Bu — Pochtam. Global xaridlar biz bilan oson. |
+| 15,5–20,5 s | **Rasmini yuklang**: bosish → skan → topilgan do'konlar | Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi. |
+| 20,5–26,5 s | **Skrinshot oling** → **AI narxni o'qiydi**: jami $102.20 (misol) | Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi. |
+| 26,5–31,5 s | **Narx tarkibi** → **Boj: $0**, oyiga $200 gacha | Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz. |
+| 31,5–35,5 s | **Butun savat?** → **Bitta skrinshot — bitta hisob**: 3 ta tovar → $117.99 | Butun savatni ham bitta skrinshot bilan hisoblang. |
+| 35,5–40 s | **Eng arzon kuryer** → **Kuryer siz uchun sotib oladi**, "Xabar tayyor ✓" | Eng arzon kuryerni tanlang — u siz uchun sotib oladi. |
+| 40–44 s | **Qadam-baqadam qo'llanma**, 7 ta do'kon uchun | Yetti do'kon uchun — qadam-baqadam qo'llanma. |
+| 44–47,5 s | **Jo'natmani kuzating**: Topish → … → Keldi | Jo'natmangizni eshigingizgacha kuzating. |
+| 47,5–52 s | **43** do'kon · **20** kuryer · **3 til** | Qirq uch do'kon. Yigirma kuryer. Uch til. |
+| 52–56 s | **"Hammasi — bitta ilovada"** | Hammasi — bitta ilovada. |
+| 56–60 s | Quti eshik oldiga tushadi: **"Orzuingiz — eshigingiz oldida."** | Orzuingiz — eshigingiz oldida. |
+| 60–66 s | Logotip, shior, **pochtam.uz** (63,5 s) | Pochtam. Orzu qiling — qolganini biz hal qilamiz. Pochtam nuqta uz. |
 
 ## Qanday ishlangan
 
@@ -63,10 +69,11 @@ yarim zarbga tushadi.
   yaqinlashadi, bosishlar to'lqin bilan, muhim joylar salat ramka bilan
   ko'rsatiladi. Skrinshot paytida viewfinder burchaklari va oq chaqnash
   chiqadi, zarbalarda kadr bir oz silkinadi.
-- **Ovoz.** Video tashqi trek uchun kesilgan (prompt:
-  [`MUSIC-PROMPT.md`](MUSIC-PROMPT.md)). Ichidagi vaqtinchalik musiqa xuddi
-  shu to'rda Web Audio bilan sintez qilingan va faqat ohangli tovushlardan
-  iborat: F#m–D–A–E akkordlari, 120 BPM, ikkita drop, logotip zarbasi.
+- **Ovoz.** Video diktor ([`VOICEOVER.md`](VOICEOVER.md)) va tashqi trek
+  ([`MUSIC-PROMPT.md`](MUSIC-PROMPT.md)) uchun kesilgan. Ichidagi
+  vaqtinchalik musiqa xuddi shu to'rda Web Audio bilan sintez qilingan va
+  faqat ohangli tovushlardan iborat: F#m–D–A–E akkordlari, 120 BPM,
+  logotip zarbasi, ikkinchi drop va final.
 
 ## Fayllar va buyruqlar
 
@@ -80,19 +87,21 @@ node tools/embed.mjs /tmp/cap /tmp/pp
 # 2) render, ovoz balandligi, ovozsiz nusxa
 node render.mjs pochtam-promo.html --out out
 cd out && ffmpeg -y -i pochtam-promo.mp4 -i pochtam-promo-score.wav -map 0:v:0 -map 1:a:0 \
-  -af "volume=2.2dB,alimiter=limit=0.891:attack=5:release=80:level=disabled,apad" -t 30 \
+  -af "volume=3.1dB,alimiter=limit=0.891:attack=5:release=80:level=disabled,apad" -t 66 \
   -c:v copy -c:a aac -b:a 192k -movflags +faststart pochtam-promo-final.mp4
 ffmpeg -y -i pochtam-promo.mp4 -c:v copy -an -movflags +faststart pochtam-promo-silent.mp4
 ```
 
 ## Tekshiruv va cheklovlar
 
-- MP4 xatosiz dekodlanadi: 720 kadr, 30,0 s, 1080×1920, 24 fps, ovoz AAC
-  48 kHz. Vaqtinchalik musiqa −11,3 LUFS, eng baland nuqta −1,5 dBFS.
-  6 kHz dan yuqorida energiya deyarli yo'q (−65,8 dB), ya'ni shovqin yo'q.
-- Grid, ketma-ket kadrlar (hook 0–4 s) va to'liq o'lchamdagi kadrlar ko'zdan
-  kechirildi: telefon ichidagi ekranlar kesilmaydi, sarlavhalar telefon
-  ostida qolmaydi.
+- MP4 xatosiz dekodlanadi: 1584 kadr, 66,0 s, 1080×1920, 24 fps, ovoz AAC
+  48 kHz. Vaqtinchalik musiqa −10,7 LUFS, eng baland nuqta −1,5 dBFS.
+  6 kHz dan yuqorida energiya deyarli yo'q (−68,5 dB), ya'ni shovqin yo'q.
+- Grid va to'liq o'lchamdagi kadrlar ko'zdan kechirildi: telefon ichidagi
+  ekranlar kesilmaydi, sarlavhalar telefon ostida qolmaydi.
+- Diktor satrlarining uzunligi taxminan hisoblangan (sekundiga ~5 bo'g'in).
+  Haqiqiy uzunlik tanlangan ovoz va tezlikka bog'liq. Har satr oynasida
+  0,3–1,5 s zaxira bor.
 - Bu muhitdan pochtam.uz ning o'ziga kirib bo'lmadi. Shuning uchun ekranlar
   repozitoriydagi kod bilan lokal serverda olindi.
 - Videoni odatiy tezlikda ko'rish va ovozni eshitish imkoni bo'lmadi.
