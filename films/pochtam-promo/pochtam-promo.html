@@ -1,0 +1,333 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Pochtam — tezkor promo (30 s)</title>
+<style>body{margin:0;background:#101126;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh;object-fit:contain}.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:6px 10px;background:#161616ee;color:#ddd;font:12px ui-monospace,monospace}.bar input{flex:1}</style>
+<canvas id="c"></canvas>
+<script src="core.js"></script>
+<script src="brand-assets.js"></script>
+<script src="screens.js"></script>
+<script>
+'use strict';
+/* Film brief
+Client: Pochtam (pochtam.uz), the app for buying from foreign stores. A 30-second
+  promo for Reels / TikTok / Telegram, remade from scratch: fast cuts, a hook in
+  the first second, the current app (captured from NShakhobiddin/Pochtachi as of
+  5 Oct 2026 with mocked AI and rates: nothing reached the live Worker).
+Edit grid: 120 BPM, a beat every 0.5 s (12 frames), a bar every 2 s. Every cut
+  lands on a beat or a half-beat, so a track generated at 120 BPM lines up
+  (the music prompt in the README follows the same timeline).
+Beats (s): 0 hook: the sneaker, "Xitoyda — ¥699" | 1 "Uyingizgacha qanchaga
+  tushadi?" | 2 "Boj? Kargo? Kurs? Kuryer?" on eighths | 3 "Javob — bitta
+  skrinshotda", shutter | 4 DROP: the logo | 5 photo search | 7 screenshot ->
+  total ($102.20, an example) | 9 what the price is made of, duty $0 within the
+  limit | 11 the whole cart in one count | 13 couriers, a courier buys for you |
+  15 step-by-step guides | 17 tracking | 19 numbers: 43 stores, 20 couriers,
+  7 guides, $200 a month duty-free, AI, 3 languages | 22 "Hammasi — bitta
+  ilovada" | 24 DROP 2: the parcel at the door | 26 the brand intro | 28
+  pochtam.uz | 30 end.
+Look: Pochtam's own colours (blue #1A1FB0, lime #bbef45, navy, pale lilac), its
+  typeface Onest and its logo pieces; full-bleed colour fields, big kinetic
+  type, the real screens in a phone with camera push-ins, taps, viewfinder brackets
+  and shutter flashes. Numbers come from the app's own formulas with test
+  rates (1 USD = 12 650 so'm), so the totals are marked as an example.
+Sound: the film is cut for an external track (see the prompt); the preview
+  score here is synthesized on the same grid, pitched sounds only.
+*/
+{
+// ------------------------------------------------------------------ brand
+const BLUE = '#1A1FB0', BLUE2 = '#3B40E8', NAVY = '#131429', LIME = '#bbef45', PALE = '#E9EAFD', WHITE = '#ffffff', RED = '#ff3b1f', INK = '#4E4F6B';
+const RANGES = {latin: 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212',
+ 'latin-ext': 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+1E00-1E9F, U+20A0-20AB, U+2C60-2C7F, U+A720-A7FF',
+ cyrillic: 'U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116', 'cyrillic-ext': 'U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F'};
+for (const [k, url] of Object.entries(BRAND_FONT)) { const ff = new FontFace('Onest', `url(${url})`, {weight: '400 800', unicodeRange: RANGES[k]}); document.fonts.add(ff); _photoLoads.push(ff.load()); }
+_photoLoads.push(document.fonts.load('800 40px Onest'), document.fonts.load('600 40px Onest'), document.fonts.load('800 40px Onest', 'Ўзбекча Русский ¥'));
+const IMG = {}, SCR = {};
+for (const [k, src] of Object.entries(BRAND_IMG)) { const im = new Image(); im.src = src; IMG[k] = im; _photoLoads.push(im.decode()); }
+for (const [k, src] of Object.entries(SCREENS)) { const im = new Image(); im.src = src; SCR[k] = im; _photoLoads.push(im.decode()); }
+const uz = s => String(s).replace(/([oOgG])'/g, '$1ʻ').replace(/'/g, 'ʼ');
+
+const FPS = 24, END = 30, BEAT = .5, DEG = Math.PI/180;
+const span = (t, a, b, e = x => x) => e(clamp((t - a)/(b - a), 0, 1));
+const outBack = (t, s = 1.70158) => 1 + (s + 1)*Math.pow(t - 1, 3) + s*Math.pow(t - 1, 2);
+const outExpo = t => t >= 1 ? 1 : 1 - Math.pow(2, -10*t);
+const inOutQuart = t => t < .5 ? 8*t*t*t*t : 1 - Math.pow(-2*t + 2, 4)/2;
+const outElastic = t => { const c4 = 2*Math.PI/3; return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10*t)*Math.sin((t*10 - .75)*c4) + 1; };
+function text(c, s, x, y, {size = 80, w = 800, color = NAVY, align = 'center', alpha = 1, sc = 1, rot = 0, spacing = -.02, shadow = 0} = {}) {
+  if (alpha <= 0 || sc <= 0) return; c.save(); c.globalAlpha *= alpha; c.translate(x, y); c.rotate(rot); c.scale(sc, sc);
+  c.font = `${w} ${size}px Onest`; c.textAlign = align; c.textBaseline = 'alphabetic'; c.letterSpacing = (spacing*size).toFixed(1) + 'px';
+  if (shadow) { c.shadowColor = 'rgba(10,12,60,.35)'; c.shadowBlur = shadow; c.shadowOffsetY = shadow*.35; }
+  c.fillStyle = color; c.fillText(uz(s), 0, 0); c.restore();
+}
+const tw = (c, s, size, w = 800, spacing = -.02) => { c.save(); c.font = `${w} ${size}px Onest`; c.letterSpacing = (spacing*size).toFixed(1) + 'px'; const m = c.measureText(uz(s)).width; c.restore(); return m; };
+// a word slammed in on its beat: big and a little turned, then settled
+const slam = (t, t0, d = .16) => { const u = span(t, t0, t0 + d); return {sc: u <= 0 ? 0 : lerp(1.55, 1, outBack(u, 2.2)), alpha: span(t, t0, t0 + .05), rot: (1 - outExpo(u))*-6*DEG}; };
+function marker(c, x, y, w, h, color, u) { if (u <= 0) return; c.save(); c.fillStyle = color; c.beginPath(); c.roundRect(x, y, w*u, h, h*.18); c.fill(); c.restore(); }
+function dots(c, color, a = .12, step = 54) { c.save(); c.fillStyle = color; c.globalAlpha = a; for (let y = step/2; y < H; y += step) for (let x = step/2; x < W; x += step) { c.beginPath(); c.arc(x, y, 3, 0, TAU); c.fill(); } c.restore(); }
+function fill(c, color) { c.fillStyle = color; c.fillRect(0, 0, W, H); }
+function flash(c, t, t0, d = .14, color = '255,255,255', peak = 1) { const u = span(t, t0, t0 + d); if (t < t0 || u >= 1) return; c.save(); c.fillStyle = `rgba(${color},${peak*(1 - u)})`; c.fillRect(0, 0, W, H); c.restore(); }
+// small shakes on the hits, decaying fast
+const HITS = [0, 1.5, 2, 2.25, 2.5, 2.75, 3.5, 4, 5, 7, 7.45, 8, 9, 10, 11, 11.45, 13, 15, 17, 19, 19.5, 20, 20.5, 21, 21.5, 22, 24, 26.3, 28];
+function shakeAt(t) { let x = 0, y = 0; for (const h of HITS) { const d = t - h; if (d < 0 || d > .2) continue; const a = 14*(1 - d/.2); x += a*Math.sin(d*90 + h); y += a*Math.cos(d*77 + h*2); } return [x, y]; }
+
+// ------------------------------------------------------------------ props: the sneaker, the price tag, the phone, the parcel
+const SNK = ['M-150 18 C-158 -10 -150 -44 -120 -64 C-96 -72 -70 -62 -60 -52 C-50 -84 -20 -96 4 -62 C40 -38 92 -16 138 2 C156 10 162 20 156 28 L60 28 L-60 26 Z',
+  'M-150 18 L-60 26 L60 28 L156 28 C168 34 162 50 150 50 L70 56 L-60 56 L-154 48 Z', 'M-40 -64 L-8 -72 M-28 -48 L8 -58 M-14 -32 L24 -42 M2 -18 L40 -28', 'M-120 -8 C-70 -24 10 -10 70 6'].map(d => new Path2D(d));
+function sneaker(c, x, y, s, rot = 0, stripe = RED) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s); c.lineJoin = 'round'; c.lineCap = 'round';
+  c.save(); c.globalAlpha = .18; c.fillStyle = NAVY; c.beginPath(); c.ellipse(0, 70, 150, 16, 0, 0, TAU); c.fill(); c.restore();
+  c.fillStyle = '#eef2f7'; c.fill(SNK[0]); c.fillStyle = WHITE; c.fill(SNK[1]); c.strokeStyle = '#1b1b2a'; c.lineWidth = 5; c.stroke(SNK[0]); c.stroke(SNK[1]); c.stroke(SNK[2]);
+  c.strokeStyle = stripe; c.lineWidth = 9; c.stroke(SNK[3]); c.restore();
+}
+function priceTag(c, x, y, rot, s, label) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
+  c.strokeStyle = NAVY; c.lineWidth = 4; c.beginPath(); c.moveTo(0, -150); c.lineTo(0, -40); c.stroke();
+  c.fillStyle = RED; c.beginPath(); c.moveTo(-120, -40); c.lineTo(120, -40); c.lineTo(120, 70); c.lineTo(0, 120); c.lineTo(-120, 70); c.closePath(); c.fill();
+  c.fillStyle = WHITE; c.beginPath(); c.arc(0, -16, 9, 0, TAU); c.fill();
+  text(c, label, 0, 56, {size: 78, color: WHITE}); c.restore();
+}
+const PH = {w: 390, h: 888, bz: 18, r: 58, sb: 44};                                                 // the app's 844 px under a 44 px status bar
+function phone(c, cx, cy, s, rot, draw, {alpha = 1, blur = 0} = {}) {
+  c.save(); c.globalAlpha = alpha; c.translate(cx, cy); c.rotate(rot); c.scale(s, s);
+  const W2 = PH.w + 2*PH.bz, H2 = PH.h + 2*PH.bz;
+  c.save(); c.shadowColor = 'rgba(10,12,60,.45)'; c.shadowBlur = 60; c.shadowOffsetY = 26; c.fillStyle = '#0d0e1c'; c.beginPath(); c.roundRect(-W2/2, -H2/2, W2, H2, PH.r + PH.bz); c.fill(); c.restore();
+  c.strokeStyle = '#2b2d48'; c.lineWidth = 3; c.beginPath(); c.roundRect(-W2/2 + 1.5, -H2/2 + 1.5, W2 - 3, H2 - 3, PH.r + PH.bz); c.stroke();
+  c.save(); c.beginPath(); c.roundRect(-PH.w/2, -PH.h/2, PH.w, PH.h, PH.r); c.clip(); c.translate(-PH.w/2, -PH.h/2); c.fillStyle = '#F1F1F8'; c.fillRect(0, 0, PH.w, PH.h); c.translate(0, PH.sb); draw(c); c.restore();
+  c.fillStyle = '#0d0e1c'; c.beginPath(); c.roundRect(-52, -PH.h/2 + 10, 104, 28, 14); c.fill();
+  c.restore();
+}
+// a screen inside the phone (CSS px), under a status bar in the colour of the screen's top edge
+const TOPC = {};
+function topColor(k) { if (!TOPC[k]) { const cv = document.createElement('canvas'); cv.width = cv.height = 1; const x = cv.getContext('2d'); x.drawImage(SCR[k], 6, 6, 1, 1, 0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; TOPC[k] = `rgb(${d[0]},${d[1]},${d[2]})`; } return TOPC[k]; }
+function scr(c, k, a = 1) { if (a <= 0) return; c.save(); c.globalAlpha *= a; c.fillStyle = topColor(k); c.fillRect(0, -PH.sb, 390, PH.sb + 2); c.drawImage(SCR[k], 0, 0, 390, 844);
+  c.fillStyle = '#0d0e1c'; c.font = '700 16px Onest'; c.textAlign = 'left'; c.fillText('9:41', 34, -14);
+  [5, 8, 11, 14].forEach((h, i) => c.fillRect(300 + i*5, -14 - h, 3.4, h)); c.lineWidth = 1.6; c.strokeStyle = '#0d0e1c'; c.beginPath(); c.roundRect(328, -27, 25, 13, 4); c.stroke(); c.fillRect(330.5, -24.5, 18, 8); c.fillRect(354.5, -23, 2, 5);
+  c.restore(); }
+function tap(c, x, y, t, t0) { const pre = span(t, t0 - .2, t0)*(1 - span(t, t0 + .05, t0 + .2)), u = span(t, t0, t0 + .4, outExpo);
+  if (pre > 0) { c.save(); c.globalAlpha = .6*pre; c.fillStyle = WHITE; c.beginPath(); c.arc(x, y, 18, 0, TAU); c.fill(); c.lineWidth = 3; c.strokeStyle = BLUE; c.stroke(); c.restore(); }
+  if (u > 0 && u < 1) { c.save(); c.globalAlpha = .8*(1 - u); c.lineWidth = 4; c.strokeStyle = LIME; c.beginPath(); c.arc(x, y, 14 + 40*u, 0, TAU); c.stroke(); c.restore(); } }
+function hi(c, b, t, t0, {color = LIME, w = 5, pad = 6} = {}) { const u = span(t, t0, t0 + .18, outExpo); if (u <= 0) return; const [x, y, ww, hh] = b;
+  c.save(); c.strokeStyle = color; c.lineWidth = w; c.globalAlpha = Math.min(1, u*1.4); const sx = x - pad - 12*(1 - u), sy = y - pad - 8*(1 - u); c.beginPath(); c.roundRect(sx, sy, ww + 2*pad + 24*(1 - u), hh + 2*pad + 16*(1 - u), 14); c.stroke(); c.restore(); }
+// viewfinder brackets closing on a rectangle (screen space)
+function brackets(c, x, y, w, h, u, color = LIME) { if (u <= 0) return; const e = outExpo(u), g = 70*(1 - e), L = Math.min(w, h)*.22;
+  c.save(); c.strokeStyle = color; c.lineWidth = 12; c.lineCap = 'round'; c.globalAlpha = Math.min(1, u*2);
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { const px = x + w/2 + sx*(w/2 + g), py = y + h/2 + sy*(h/2 + g); c.beginPath(); c.moveTo(px - sx*L*-0 , py - sy*L); c.lineTo(px, py); c.lineTo(px - sx*L, py); c.stroke(); }
+  c.restore(); }
+function parcel(c, x, y, s, rot = 0, sq = 0) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s*(1 + sq), s*(1 - sq));
+  c.save(); c.globalAlpha = .22; c.fillStyle = NAVY; c.beginPath(); c.ellipse(0, 150, 230, 26, 0, 0, TAU); c.fill(); c.restore();
+  c.fillStyle = '#d8a86a'; c.beginPath(); c.moveTo(-200, -60); c.lineTo(200, -60); c.lineTo(200, 150); c.lineTo(-200, 150); c.closePath(); c.fill();
+  c.fillStyle = '#e6be8a'; c.beginPath(); c.moveTo(-200, -60); c.lineTo(-150, -130); c.lineTo(250, -130); c.lineTo(200, -60); c.closePath(); c.fill();
+  c.fillStyle = '#c48f52'; c.beginPath(); c.moveTo(200, -60); c.lineTo(250, -130); c.lineTo(250, 80); c.lineTo(200, 150); c.closePath(); c.fill();
+  c.fillStyle = LIME; c.fillRect(-30, -60, 60, 210); c.beginPath(); c.moveTo(-30, -60); c.lineTo(20, -130); c.lineTo(80, -130); c.lineTo(30, -60); c.closePath(); c.fill();
+  c.drawImage(IMG.p, -160, -20, 70, 70*IMG.p.height/IMG.p.width); text(c, 'pochtam', 110, 110, {size: 30, color: '#7a5326', w: 700});
+  c.restore();
+}
+
+// ------------------------------------------------------------------ the brand intro, ported from the app (1080x1920 stage)
+const HEX = (cx, cy, R) => Array.from({length: 6}, (_, k) => { const a = -Math.PI/2 + k*Math.PI/3; return [cx + R*Math.cos(a), cy + R*Math.sin(a)]; });
+const MS = .62, MW = 765*MS, MH = 835*MS, MARK = {x: (1080 - MW)/2, y: 470, w: MW, h: MH};
+const PSZ = {w: 295*MS, h: 482*MS}, PC = {x: MARK.x + (410 + 147.5)*MS, y: MARK.y + (274 + 241)*MS}, WS = .40;
+const GLYPHS = [{k: 'P', x: 897, w: 206}, {k: 'o', x: 1123, w: 214}, {k: 'c', x: 1361, w: 198}, {k: 'h', x: 1585, w: 194}, {k: 't', x: 1804, w: 134}, {k: 'a', x: 1966, w: 218}, {k: 'm', x: 2228, w: 303}, {k: 'dot', x: 2567, w: 52}];
+const WORD_W = (2619 - 897)*WS, WORD_X = (1080 - WORD_W)/2, WORD_Y = MARK.y + MH + 80, WORD_H = 288*WS;
+const TAG = {x: WORD_X, y: WORD_Y + WORD_H + 34, w: WORD_W, h: 96*WS}, HEX_C = {x: MARK.x + 382.5*MS, y: MARK.y + 417.5*MS};
+const an = (from, to, s, e, ease = easeOut) => T0 => from + (to - from)*ease(clamp((T0 - s)/(e - s), 0, 1));
+const ILAND = .3, WORD_CUE = 1.0;
+const IA = { u: an(0, 1, 0, ILAND, x => x*x*x), landS: an(.86, 1, ILAND, ILAND + .5, outBack), pOp: an(0, 1, 0, .15),
+ ringS: an(1, 1.6, ILAND, ILAND + .8), ringOp: an(1, 0, ILAND, ILAND + .7), hexOp: an(0, 1, ILAND - .06, ILAND + .1), hexS: an(.86, 1, ILAND - .04, ILAND + .55, outBack),
+ gX: an(-260, WORD_W + 260, WORD_CUE + .45, WORD_CUE + 1.15, inOutQuart), gOpA: an(0, 1, WORD_CUE + .45, WORD_CUE + .6), gOpB: an(1, 0, WORD_CUE + .95, WORD_CUE + 1.2),
+ tagCut: an(100, 0, WORD_CUE + .6, WORD_CUE + 1.2, inOutQuart), tagOp: an(0, 1, WORD_CUE + .6, WORD_CUE + .72) };
+function brandMark(c, T0, {word = true, tag = true} = {}) {
+  const ro = IA.ringOp(T0);
+  if (ro > 0 && T0 > ILAND) { c.save(); c.translate(HEX_C.x, HEX_C.y); c.scale(IA.ringS(T0), IA.ringS(T0)); c.globalAlpha = ro; c.strokeStyle = LIME; c.lineWidth = 12; c.lineJoin = 'round'; c.beginPath(); HEX(0, 0, 431*MS).forEach((q, i) => i ? c.lineTo(...q) : c.moveTo(...q)); c.closePath(); c.stroke(); c.restore(); }
+  const hs = IA.hexS(T0); c.save(); c.globalAlpha = IA.hexOp(T0); c.translate(MARK.x + MARK.w/2, MARK.y + MARK.h/2); c.scale(hs, hs); c.drawImage(IMG.hex, -MARK.w/2, -MARK.h/2, MARK.w, MARK.h); c.restore();
+  if (word) GLYPHS.forEach((g, i) => { const st = WORD_CUE + i*.05, dy = an(60, 0, st, st + (g.k === 'dot' ? .8 : .5), g.k === 'dot' ? outElastic : outBack)(T0), op = an(0, 1, st, st + .15)(T0);
+    if (op > 0) { c.save(); c.globalAlpha = op; c.drawImage(IMG[g.k], WORD_X + (g.x - 897)*WS, WORD_Y + dy, g.w*WS, WORD_H); c.restore(); } });
+  const gl = IA.gOpA(T0)*IA.gOpB(T0);
+  if (word && gl > 0) { c.save(); c.beginPath(); c.rect(WORD_X, WORD_Y - 12, WORD_W, WORD_H + 24); c.clip(); c.globalCompositeOperation = 'screen'; c.globalAlpha = gl; c.translate(WORD_X + IA.gX(T0), WORD_Y - 40); c.transform(1, 0, Math.tan(-14*DEG), 1, 0, 0); const gg = c.createLinearGradient(0, 0, 140, 0); gg.addColorStop(0, 'rgba(255,255,255,0)'); gg.addColorStop(.5, 'rgba(255,255,255,.85)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gg; c.fillRect(0, 0, 140, WORD_H + 100); c.restore(); }
+  const cut = IA.tagCut(T0), to = IA.tagOp(T0);
+  if (word && tag && to > 0) { c.save(); c.globalAlpha = to; c.beginPath(); c.rect(TAG.x, TAG.y - TAG.h*.14, TAG.w*(1 - cut/100), TAG.h*1.28); c.clip(); c.drawImage(IMG.tagline, TAG.x, TAG.y, TAG.w, TAG.h); c.restore(); }
+  const u = IA.u(T0), pS = u < 1 ? lerp(.7, .86, u) : IA.landS(T0), sq = Math.sin(Math.PI*clamp((T0 - ILAND)/.34, 0, 1))*.15;
+  c.save(); c.globalAlpha = IA.pOp(T0); c.translate(PC.x, PC.y - 520*(1 - u)); c.rotate(-14*DEG*(1 - u)); c.scale(pS*(1 + sq), pS*(1 - sq)); c.drawImage(IMG.p, -PSZ.w/2, -PSZ.h/2, PSZ.w, PSZ.h); c.restore();
+}
+
+// ------------------------------------------------------------------ shots (each gets the global time; cuts on the 120 BPM grid)
+const B = SCREEN_BOXES, cen = b => [b[0] + b[2]/2, b[1] + b[3]/2];
+function caption(c, t, t0, lines, {y = 250, color = NAVY, mark = LIME, size = 96} = {}) {
+  lines.forEach(([s, hl], i) => { const st = slam(t, t0 + i*.12), w = tw(c, s, size);
+    if (hl && st.alpha > 0) { c.save(); c.translate(540, y + i*size*1.08); c.rotate(st.rot); c.scale(st.sc, st.sc); marker(c, -w/2 - 22, -size*.82, w + 44, size*1.02, mark, span(t, t0 + i*.12 + .05, t0 + i*.12 + .25, outExpo)); c.restore(); }
+    text(c, s, 540, y + i*size*1.08, {size, color, ...st}); });
+}
+const PHONE = {x: 540, y: 1170, s: 1.36};
+function featurePhone(c, t, t0, draw, {s = PHONE.s, x = PHONE.x, y = PHONE.y, zoom = 1, fy = 422} = {}) {
+  const k = span(t, t0, t0 + .22, outExpo), dx = (1 - k)*900;                                   // whips in from the right on the bar
+  const Y = y + (fy + PH.sb - PH.h/2)*s; c.save(); c.translate(x, Y); c.scale(zoom, zoom); c.translate(-x, -Y);   // the camera pushes in on a point of the screen
+  if (k < 1) { for (let j = 3; j >= 1; j--) phone(c, x + dx + j*60*(1 - k), y, s, (1 - k)*6*DEG, draw, {alpha: .18*(1 - k)}); }
+  phone(c, x + dx, y + 8*Math.sin(t*2.2), s*(1 + .015*Math.sin(t*1.7)), (1 - k)*6*DEG, draw); c.restore();
+}
+function bgFeature(c, color = PALE, dot = BLUE) { fill(c, color); dots(c, dot, .1); }
+const SHOTS = [
+  // ---- the hook
+  [0, 1, (c, t) => { fill(c, WHITE); dots(c, BLUE, .08); const z = 1 + .06*t; c.save(); c.translate(540, 1000); c.scale(z, z); c.translate(-540, -1000);
+    const k = span(t, -.1, .16, outExpo); sneaker(c, 520 + 700*(1 - k), 1060, 2.7, (-14 + 8*k)*DEG);          // the very first frame is already full
+    const sw = span(t, .2, 1.0), ang = Math.exp(-4*sw)*Math.sin(sw*16)*22*DEG; if (t > .2) priceTag(c, 760, 690 + 160*(1 - span(t, .2, .35, outBack)), ang, 1.25, '¥699'); c.restore();
+    const st = slam(t, -.08); text(c, 'Xitoyda', 540, 430, {size: 150, color: NAVY, ...st}); const s2 = slam(t, .5); text(c, 'shu narxda', 540, 560, {size: 92, w: 700, color: INK, ...s2}); }],
+  [1, 2, (c, t) => { fill(c, BLUE); dots(c, WHITE, .1); const z = 1.05 - .05*span(t, 1.5, 1.7, outExpo);
+    c.save(); c.translate(540, 960); c.scale(z, z); c.translate(-540, -960);
+    const s1 = slam(t, 1); text(c, 'Uyingizgacha', 540, 820, {size: 108, color: WHITE, ...s1});
+    const s2 = slam(t, 1.5); const w = tw(c, 'qanchaga', 170); c.save(); c.translate(540, 1010); c.rotate(s2.rot); c.scale(s2.sc, s2.sc); marker(c, -w/2 - 26, -142, w + 52, 176, LIME, span(t, 1.55, 1.75, outExpo)); c.restore();
+    text(c, 'qanchaga', 540, 1010, {size: 170, color: NAVY, ...s2}); const s3 = slam(t, 1.62); text(c, 'tushadi?', 540, 1160, {size: 108, color: WHITE, ...s3}); c.restore(); }],
+  [2, 3, (c, t) => { const k = Math.min(3, Math.floor((t - 2)/.25)), W4 = [['Boj?', NAVY, LIME], ['Kargo?', LIME, NAVY], ['Kurs?', WHITE, BLUE], ['Kuryer?', BLUE, WHITE]][k];
+    fill(c, W4[1]); dots(c, W4[1] === NAVY || W4[1] === BLUE ? WHITE : NAVY, .1);
+    for (let j = 0; j < k; j++) { const p = [['Boj?', 260, 380], ['Kargo?', 800, 520], ['Kurs?', 300, 1560]][j]; text(c, p[0], p[1], p[2], {size: 90, color: W4[2], alpha: .28, rot: (j % 2 ? 6 : -6)*DEG}); }
+    const st = slam(t, 2 + k*.25, .12); text(c, W4[0], 540, 1030, {size: 250, color: W4[2], ...st, rot: st.rot + (k % 2 ? 4 : -4)*DEG}); }],
+  [3, 4, (c, t) => { fill(c, NAVY); dots(c, WHITE, .08); const s1 = slam(t, 3); text(c, 'Javob —', 540, 760, {size: 120, color: WHITE, ...s1});
+    const s2 = slam(t, 3.5); const w = tw(c, 'skrinshotda', 140); text(c, 'bitta', 540, 920, {size: 140, color: LIME, ...s2});
+    text(c, 'skrinshotda', 540, 1070, {size: 140, color: LIME, ...slam(t, 3.58)});
+    const ph = span(t, 3.3, 3.75, outExpo); phone(c, 540, 1580 + 700*(1 - ph), .95, 0, cc => { scr(cc, 'demo-store-page'); });
+    flash(c, t, 3.75, .25); }],
+  // ---- the drop: the logo lands
+  [4, 5, (c, t) => { fill(c, WHITE); const g = c.createRadialGradient(540, 860, 0, 540, 860, 900); g.addColorStop(0, 'rgba(26,31,176,.10)'); g.addColorStop(1, 'rgba(26,31,176,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    brandMark(c, .1 + (t - 4)*1.8, {tag: false}); flash(c, t, 4, .12); }],
+  // ---- 1. photo search
+  [5, 7, (c, t) => { bgFeature(c); caption(c, t, 5, [['Rasmini yuklang', 1]], {y: 260});
+    text(c, 'AI tovarni topadi', 540, 380, {size: 64, w: 700, color: INK, alpha: span(t, 5.15, 5.3)});
+    featurePhone(c, t, 5, cc => {
+      if (t < 5.5) { scr(cc, 'p01-home'); tap(cc, ...cen(B['p01-home'].photoCard), t, 5.3); }
+      else if (t < 6) scr(cc, 'p02-photo-busy');
+      else { scr(cc, 'p03-photo-find'); hi(cc, [24, 202, 342, 126], t, 6.35); } }, {zoom: lerp(1, 1.2, span(t, 6, 6.3, outExpo)), fy: 280});
+    if (t >= 5.5 && t < 6.05) { const u = span(t, 5.5, 5.75, outExpo); c.save(); c.translate(250 - 200*(1 - u), 760); c.rotate(-8*DEG); c.fillStyle = WHITE; c.shadowColor = 'rgba(10,12,60,.3)'; c.shadowBlur = 30; c.fillRect(-170, -120, 340, 240); c.shadowColor = 'transparent';
+      c.drawImage(SCR['demo-photo'], -160, -110, 320, 220); const sy = -110 + 220*((t - 5.5)/.5 % 1); c.fillStyle = 'rgba(187,239,69,.9)'; c.fillRect(-160, sy, 320, 6); c.restore(); } }],
+  // ---- 2. a screenshot -> the total
+  [7, 9, (c, t) => {
+    if (t < 7.5) { fill(c, '#f4f4f4'); const z = 2.77 + .12*span(t, 7, 7.5); c.save(); c.translate(540, 1010); c.scale(z, z); c.drawImage(SCR['demo-store-page'], -195, -400, 390, 844); c.restore();
+      brackets(c, 50, 120, 980, 1680, span(t, 7.05, 7.3)); caption(c, t, 7, [['Skrinshot oling', 1]], {y: 300, size: 96}); flash(c, t, 7.45, .18); return; }
+    bgFeature(c, BLUE, WHITE); caption(c, t, 7.5, [['AI narxni o\'qiydi', 0]], {y: 250, color: WHITE, size: 88});
+    if (t >= 8) { const n = 102.2*span(t, 8.05, 8.45, outExpo); text(c, '$' + n.toFixed(2), 540, 420, {size: 120, color: LIME, sc: lerp(1.3, 1, span(t, 8, 8.2, outBack)), alpha: span(t, 8, 8.05)}); text(c, 'jami — boj, kargo, kurs bilan · misol', 540, 482, {size: 34, w: 600, color: PALE, alpha: span(t, 8.2, 8.35)}); }
+    featurePhone(c, t, 7.5, cc => { if (t < 8) scr(cc, 'p04-scan1'); else { scr(cc, 'p05-result'); hi(cc, [18, 78, 354, 152], t, 8.5); } }, {y: 1230, zoom: lerp(1, 1.16, span(t, 8, 8.3, outExpo)), fy: 200}); }],
+  // ---- 3. what the price is made of
+  [9, 11, (c, t) => {
+    if (t < 10) { bgFeature(c); caption(c, t, 9, [['Narx tarkibi', 1]], {y: 260}); text(c, 'hammasi ochiq ko\'rinadi', 540, 380, {size: 60, w: 700, color: INK, alpha: span(t, 9.15, 9.3)});
+      featurePhone(c, t, 9, cc => { scr(cc, 'p06-breakdown');
+        [158, 214, 271, 347].forEach((yy, i) => { const u = span(t, 9.2 + i*.2, 9.32 + i*.2, outBack); if (u <= 0) return; cc.save(); cc.translate(41, yy); cc.scale(u, u); cc.fillStyle = LIME; cc.beginPath(); cc.arc(0, 0, 13, 0, TAU); cc.fill(); cc.strokeStyle = NAVY; cc.lineWidth = 3.5; cc.lineCap = 'round'; cc.beginPath(); cc.moveTo(-6, 0); cc.lineTo(-1.5, 5); cc.lineTo(7, -5); cc.stroke(); cc.restore(); }); }, {zoom: 1.12, fy: 250}); return; }
+    fill(c, LIME); dots(c, NAVY, .08); text(c, 'Boj:', 540, 820, {size: 150, color: NAVY, ...slam(t, 10)}); text(c, '$0', 540, 1100, {size: 330, color: BLUE, ...slam(t, 10.1)});
+    text(c, "$200 me'yor ichida bo'lsa", 540, 1230, {size: 58, w: 700, color: NAVY, alpha: span(t, 10.3, 10.45)}); text(c, 'misol: $97.80 lik krossovka', 540, 1310, {size: 40, w: 600, color: INK, alpha: span(t, 10.45, 10.6)}); }],
+  // ---- 4. the whole cart
+  [11, 13, (c, t) => {
+    if (t < 11.5) { fill(c, '#f4f4f4'); const z = 2.77; c.save(); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR['demo-cart-page'], -195, -422, 390, 844); c.restore();
+      brackets(c, 30, 230, 1020, 820, span(t, 11.05, 11.3)); text(c, 'Butun savat?', 540, 1500, {size: 110, color: NAVY, ...slam(t, 11)}); flash(c, t, 11.45, .16); return; }
+    bgFeature(c); caption(c, t, 11.5, [['Bitta skrinshot —', 0], ['bitta hisob', 1]], {y: 220, size: 86});
+    featurePhone(c, t, 11.5, cc => { if (t < 12.5) { scr(cc, 'p15b-cart-list'); hi(cc, B['p15b-cart-list'].list, t, 11.9, {pad: 10}); } else scr(cc, 'p15-cart'); },
+      t < 12.5 ? {y: 1230, zoom: 1.12, fy: 420} : {y: 1230, zoom: lerp(1.12, 1.18, span(t, 12.5, 12.7, outExpo)), fy: 140});
+    if (t > 12.55) text(c, '3 ta tovar → $117.99', 540, 440, {size: 56, w: 800, color: BLUE, alpha: span(t, 12.55, 12.7)}); }],
+  // ---- 5. couriers
+  [13, 15, (c, t) => { bgFeature(c, BLUE, WHITE);
+    caption(c, t, 13, t < 13.75 ? [['Eng arzon kuryer', 0]] : [['Kuryer siz uchun', 0], ['sotib oladi', 0]], {y: t < 13.75 ? 260 : 210, color: t < 13.75 ? WHITE : LIME, size: 88});
+    featurePhone(c, t, 13, cc => { if (t < 13.75) scr(cc, 'p18-couriers'); else { scr(cc, 'p07-b4m'); tap(cc, ...cen(B['p07-b4m'].write), t, 14.1); } }, {y: 1230, zoom: t < 13.75 ? lerp(1, 1.08, span(t, 13, 13.75)) : 1.12, fy: t < 13.75 ? 300 : 240});
+    const m = span(t, 14.2, 14.45, outBack); if (m > 0) { c.save(); c.translate(760, 860); c.scale(m, m); c.fillStyle = WHITE; c.shadowColor = 'rgba(10,12,60,.35)'; c.shadowBlur = 30; c.beginPath(); c.roundRect(-250, -70, 500, 140, 40); c.fill(); c.shadowColor = 'transparent';
+      c.fillStyle = '#2AABEE'; c.beginPath(); c.arc(-180, 0, 42, 0, TAU); c.fill(); c.fillStyle = WHITE; c.beginPath(); c.moveTo(-202, 2); c.lineTo(-158, -16); c.lineTo(-168, 22); c.lineTo(-178, 10); c.closePath(); c.fill();
+      text(c, 'Xabar tayyor ✓', 50, 16, {size: 48, color: NAVY}); c.restore(); } }],
+  // ---- 6. guides
+  [15, 17, (c, t) => { bgFeature(c); caption(c, t, 15, [['Qadam-baqadam', 1], ["qo'llanma", 0]], {y: 220, size: 92});
+    const k = ['p20-guides', 'p08-guide', 'p09-steps', 'p09-steps-1'][Math.min(3, Math.floor((t - 15)/.5))];
+    featurePhone(c, t, 15, cc => scr(cc, k), {y: 1230, zoom: 1.06 - .06*(((t - 15) % .5)/.5), fy: 300});
+    text(c, '7 ta do\'kon uchun', 540, 440, {size: 50, w: 700, color: BLUE, alpha: span(t, 15.3, 15.45)}); }],
+  // ---- 7. tracking
+  [17, 19, (c, t) => { bgFeature(c, BLUE, WHITE); caption(c, t, 17, [['Jo\'natmani kuzating', 0]], {y: 250, color: WHITE, size: 86});
+    const k = ['p10-mine', 'p11-ordered', 'p13-road', 'p13-road'][Math.min(3, Math.floor((t - 17)/.5))];
+    featurePhone(c, t, 17, cc => scr(cc, k), {y: 1150, s: 1.22, zoom: 1.1, fy: 200});
+    const st = ['Topish', 'Narx', 'Buyurtma', "Yo'lda", 'Keldi'], p = span(t, 17.1, 18.9), x0 = 120, x1 = 960, Y = 1872;
+    c.save(); c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = 10; c.lineCap = 'round'; c.beginPath(); c.moveTo(x0, Y); c.lineTo(x1, Y); c.stroke(); c.strokeStyle = LIME; c.beginPath(); c.moveTo(x0, Y); c.lineTo(lerp(x0, x1, p), Y); c.stroke(); c.restore();
+    st.forEach((s, i) => { const x = lerp(x0, x1, i/4), on = p >= i/4 - .001; c.fillStyle = on ? LIME : BLUE; c.beginPath(); c.arc(x, Y, 18, 0, TAU); c.fill(); c.lineWidth = 4; c.strokeStyle = on ? LIME : 'rgba(255,255,255,.5)'; c.stroke();
+      text(c, s, x, Y - 34, {size: 30, w: 700, color: on ? WHITE : 'rgba(255,255,255,.55)'}); }); }],
+  // ---- numbers, on every beat
+  [19, 22, (c, t) => { const i = Math.min(5, Math.floor((t - 19)/.5));
+    const N = [['43', "do'kon", 'p17-stores'], ['20', 'kuryer', 'p18-couriers'], ['7', "qo'llanma", 'p20-guides'], ['$200', 'oyiga bojsiz', 'p19-customs'], ['AI', 'savolga javob', 'p22-ai'], ['3', 'til', null]][i], t0 = 19 + i*.5;
+    const bg = [BLUE, NAVY, BLUE, NAVY, BLUE, LIME][i]; fill(c, bg);
+    if (N[2]) { c.save(); c.globalAlpha = .28; const z = 2.77*(1.05 - .05*span(t, t0, t0 + .5)); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR[N[2]], -195, -422, 390, 844); c.restore(); c.fillStyle = bg === NAVY ? 'rgba(19,20,41,.55)' : 'rgba(26,31,176,.55)'; c.fillRect(0, 0, W, H); }
+    if (i < 5) { text(c, N[0], 540, 980, {size: N[0].length > 2 ? 300 : 420, color: LIME, ...slam(t, t0, .12), shadow: 20}); text(c, N[1], 540, 1150, {size: 110, color: WHITE, ...slam(t, t0 + .06, .12)}); return; }
+    const L = [['p01-home', "O'zbekcha"], ['p24-home-cyr', 'Ўзбекча'], ['p25-home-ru', 'Русский']], j = Math.min(2, Math.floor((t - 21.5)/(.5/3)));
+    phone(c, 540, 1180, 1.25, 0, cc => scr(cc, L[j][0]));
+    text(c, '3 til', 540, 260, {size: 150, color: NAVY, ...slam(t, 21.5, .12)}); text(c, L[j][1], 540, 380, {size: 72, w: 800, color: BLUE, ...slam(t, 21.5 + j*.5/3, .08)}); }],
+  // ---- everything in one app
+  [22, 24, (c, t) => { fill(c, NAVY); const keys = ['p01-home', 'p03-photo-find', 'p05-result', 'p06-breakdown', 'p15-cart', 'p18-couriers', 'p08-guide', 'p10-mine', 'p16-ref', 'p17-stores', 'p22-ai', 'p20-guides'];
+    const zo = lerp(1.25, .92, span(t, 22, 24, easeInOutSine)); c.save(); c.translate(540, 960); c.scale(zo, zo); c.rotate(-8*DEG); c.translate(-540, -960);
+    for (let col = 0; col < 4; col++) { const off = (col % 2 ? 1 : -1)*240*(t - 22); for (let r = -1; r < 4; r++) { const k = keys[(col*3 + r + 12) % keys.length], x = 90 + col*300, y = 120 + r*560 + off;
+      c.save(); c.translate(x, y); c.beginPath(); c.roundRect(0, 0, 260, 562, 30); c.clip(); c.drawImage(SCR[k], 0, 0, 260, 562); c.restore(); } }
+    c.restore(); c.fillStyle = 'rgba(19,20,41,.45)'; c.fillRect(0, 0, W, H);
+    marker(c, 70, 820, 940, 300, BLUE, span(t, 22, 22.2, outExpo)); text(c, 'Hammasi —', 540, 945, {size: 120, color: WHITE, ...slam(t, 22)}); text(c, 'bitta ilovada', 540, 1080, {size: 120, color: LIME, ...slam(t, 22.5)});
+    const w = span(t, 23.5, 24); if (w > 0) { c.fillStyle = `rgba(255,255,255,${w*w})`; c.fillRect(0, 0, W, H); } }],
+  // ---- drop 2: the parcel at the door
+  [24, 26, (c, t) => { const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, BLUE2); g.addColorStop(1, BLUE); c.fillStyle = g; c.fillRect(0, 0, W, H); dots(c, WHITE, .08);
+    const f = span(t, 24, 24.3, x => x*x), land = t - 24.3, sq = land > 0 ? Math.exp(-6*land)*Math.sin(land*22)*.12 : 0;
+    parcel(c, 540, 1180 - 1300*(1 - f), 1.35, (1 - f)*-14*DEG, sq);
+    if (land > 0) for (let k = 0; k < 10; k++) { const a = -Math.PI*(.05 + .9*k/9), r = 260 + 260*span(land, 0, .5, outExpo); c.save(); c.globalAlpha = 1 - span(land, .3, .7); c.strokeStyle = LIME; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(540 + Math.cos(a)*r*.8, 1240 + Math.sin(a)*r*.8); c.lineTo(540 + Math.cos(a)*r, 1240 + Math.sin(a)*r); c.stroke(); c.restore(); }
+    text(c, 'Orzuingiz —', 540, 470, {size: 120, color: WHITE, ...slam(t, 24.25)}); text(c, 'eshigingiz', 540, 610, {size: 130, color: LIME, ...slam(t, 24.75)}); text(c, 'oldida.', 540, 740, {size: 130, color: LIME, ...slam(t, 24.85)});
+    flash(c, t, 24, .15); }],
+  // ---- the brand and the address
+  [26, 30, (c, t) => { fill(c, WHITE); c.save(); c.fillStyle = 'rgba(10,12,153,.08)'; for (let y = 30; y < H; y += 60) for (let x = 30; x < W; x += 60) { c.beginPath(); c.arc(x, y, 2.4, 0, TAU); c.fill(); } c.restore();
+    brandMark(c, t - 26);
+    const a = span(t, 28, 28.3, outBack); text(c, 'pochtam.uz', 540, 1640, {size: 100, color: BLUE, sc: a, alpha: span(t, 28, 28.05)});
+    if (t > 28.15) { c.save(); c.strokeStyle = LIME; c.lineWidth = 16; c.lineCap = 'round'; const L = 500*span(t, 28.15, 28.5, outExpo); c.beginPath(); c.moveTo(290, 1682); c.lineTo(290 + L, 1682); c.stroke(); c.restore(); }
+    text(c, "Orzu qiling — qolganini biz hal qilamiz", 540, 1790, {size: 40, w: 600, color: INK, alpha: span(t, 28.5, 28.8)}); flash(c, t, 26, .12); }],
+];
+
+// ------------------------------------------------------------------ the frame
+function frame(c, tau) {
+  const t = Math.round(tau*FPS)/FPS; resetT(c);
+  const [sx, sy] = shakeAt(t); c.save(); c.translate(sx, sy); c.translate(540, 960); c.scale(1.02, 1.02); c.translate(-540, -960);       // a little overscan, so a shake never shows an edge
+  const s = SHOTS.find(([a, b]) => t >= a && t < b) || SHOTS[SHOTS.length - 1]; s[2](c, t);
+  c.restore();
+}
+
+// ------------------------------------------------------------------ preview score: 120 BPM, the same sections the prompt asks for; pitched sounds only
+const mtof = m => 440*Math.pow(2, (m - 69)/12);
+function score(ac, t0, dest) {
+  const SR = ac.sampleRate, G = (v, d) => { const g = ac.createGain(); g.gain.value = v; if (d) g.connect(d); return g; };
+  const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3; comp.knee.value = 6; comp.attack.value = .005; comp.release.value = .2;
+  const master = G(.85, dest); comp.connect(master); master.gain.setValueAtTime(.85, t0 + END - .8); master.gain.linearRampToValueAtTime(0, t0 + END - .02);
+  const len = Math.ceil(SR*1.6), ir = ac.createBuffer(2, len, SR); for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(ch + 71); for (let i = 0; i < len; i++) d[i] = (r()*2 - 1)*Math.pow(1 - i/len, 4); }
+  const room = ac.createConvolver(); room.buffer = ir; const rlp = ac.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 3800; room.connect(rlp); rlp.connect(G(1, comp));
+  const bus = G(1, comp); bus.connect(G(.18, room));
+  const env = (p, t, a, peak, d) => { p.setValueAtTime(0, t); p.linearRampToValueAtTime(peak, t + a); p.exponentialRampToValueAtTime(.0001, t + a + d); p.setValueAtTime(0, t + a + d + .01); };
+  const osc = (f, t, a, v, d, type = 'sine', dst = bus) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; env(g.gain, t, a, v, d); o.connect(g); g.connect(dst); o.start(t); o.stop(t + a + d + .05); };
+  const kick = (t, v = .5) => { t += t0; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + .1); env(g.gain, t, .002, v, .34); o.connect(g); g.connect(comp); o.start(t); o.stop(t + .4); };
+  const clap = (t, v = .1) => { [1180, 1490, 1760].forEach((f, i) => osc(f, t + i*.008, .001, v*(1 - i*.25), .09, 'triangle')); };   // a pitched "clap": three short tones
+  const tick = (t, v = .03) => osc(3520, t, .001, v, .035, 'sine');
+  const lpBus = G(1); const lpf = ac.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 1800; lpf.Q.value = 2; lpBus.connect(lpf); lpf.connect(bus);
+  const saw = (m, t, d, v, dst = lpBus) => [-8, 8].forEach(det => { t += 0; const o = ac.createOscillator(), g = ac.createGain(), a = t0 + t; o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
+    g.gain.setValueAtTime(0, a); g.gain.linearRampToValueAtTime(v, a + .01); g.gain.setTargetAtTime(v*.5, a + .03, .08); g.gain.setTargetAtTime(0, a + d, .03); o.connect(g); g.connect(dst); o.start(a); o.stop(a + d + .2); });
+  const bass = (m, t, d, v = .22) => { t += t0; const o = ac.createOscillator(), o2 = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o2.type = 'triangle'; o.frequency.value = mtof(m); o2.frequency.value = mtof(m);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.setTargetAtTime(v*.7, t + .05, .1); g.gain.setTargetAtTime(0, t + d - .03, .02); o.connect(g); o2.connect(G(.4, g)); g.connect(comp); o.start(t); o2.start(t); o.stop(t + d + .2); o2.stop(t + d + .2); };
+  const riser = (t, d, f0 = 200, f1 = 1800, v = .05) => { const a = t0 + t, o = ac.createOscillator(), g = ac.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f0, a); o.frequency.exponentialRampToValueAtTime(f1, a + d);
+    g.gain.setValueAtTime(0, a); g.gain.linearRampToValueAtTime(v, a + d*.9); g.gain.linearRampToValueAtTime(0, a + d + .02); const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2600; o.connect(f); f.connect(g); g.connect(bus); o.start(a); o.stop(a + d + .05); };
+  const bell = (m, t, v = .05, d = 1.2) => { osc(mtof(m), t, .002, v, d); osc(mtof(m)*2.76, t, .002, v*.25, d*.4); };
+  // chords: F#m - D - A - E (in A major), one per bar from the drop
+  const CH = [[54, 57, 61, 66], [50, 57, 62, 66], [45, 57, 61, 64], [52, 56, 59, 64]], ROOT = [42, 38, 45, 40];
+  // the hook: a hit, the question on the off-beats, eighth-note stabs under "Boj? Kargo? Kurs? Kuryer?", a riser to the drop
+  kick(0, .55); saw(66, 0, .25, .05); bell(81, 0, .05); bass(42, 0, .45);
+  [1.0, 1.5].forEach((t, i) => { kick(t, .45); saw([69, 73][i], t, .2, .05); bass(38, t, .4); });
+  [2, 2.25, 2.5, 2.75].forEach((t, i) => { kick(t, .4); saw([76, 78, 80, 81][i], t, .15, .06); clap(t + .125, .05); });
+  kick(3, .45); bass(40, 3, .45); saw(76, 3, .2, .05); riser(3, 1, 180, 2000, .05); tick(3.5); tick(3.75); osc(1200, 3.75, .002, .08, .12, 'triangle');
+  // the main groove, 4 on the floor, from the drop to the break
+  for (let t = 4, b = 0; t < 22 - .01; t += 2, b++) { const ch = CH[b % 4], r = ROOT[b % 4];
+    for (let k = 0; k < 4; k++) { const tb = t + k*BEAT; kick(tb, k ? .42 : .5); if (k % 2) clap(tb, .07); tick(tb + .25); }
+    [0, .75, 1.0, 1.5].forEach((o, i) => bass(r + (i === 2 ? 12 : 0), t + o, i === 0 ? .6 : .35));
+    for (let k = 0; k < 8; k++) saw(ch[k % 4] + 12, t + k*.25, .12, .03);
+    if (b % 2 === 0) bell(ch[3] + 24, t, .03, 1.4);
+  }
+  // section accents on the cuts: a bell on each new feature, an up-sweep into the numbers
+  [5, 7, 9, 11, 13, 15, 17].forEach(t => bell(85, t, .04, .8)); riser(18, 1, 300, 2400, .035);
+  // the numbers: a stab on every beat
+  [19, 19.5, 20, 20.5, 21, 21.5].forEach((t, i) => { saw([73, 76, 78, 80, 81, 83][i], t, .18, .07); bell([85, 88, 90, 92, 93, 95][i], t, .03, .5); });
+  // the break: no kick, a pad and a riser to the second drop
+  [52, 56, 59, 64].forEach(m => saw(m + 12, 22, 1.9, .02)); riser(22, 2, 150, 2600, .06); for (let k = 0; k < 8; k++) tick(22 + k*.25 + (k > 5 ? .125 : 0), .03 + k*.005);
+  // the second drop: the parcel lands, the groove returns for a bar, the logo hit, the tail
+  for (let t = 24, b = 0; t < 26; t += 2, b++) { const ch = CH[0], r = ROOT[0]; for (let k = 0; k < 4; k++) { kick(t + k*BEAT, .5); if (k % 2) clap(t + k*BEAT, .08); tick(t + k*BEAT + .25); }
+    bass(r, t, .6); bass(r + 12, t + 1, .35); for (let k = 0; k < 8; k++) saw(ch[k % 4] + 12, t + k*.25, .12, .035); }
+  kick(26, .55); [57, 61, 64, 69].forEach(m => saw(m, 26.3, 1.6, .03)); bass(45, 26.3, 1.4); bell(81, 26.3, .06, 2); bell(88, 26.42, .04, 2);
+  kick(28, .5); bass(45, 28, 1.6); [57, 61, 64, 69, 73].forEach((m, i) => saw(m + 12, 28 + i*.05, 1.8, .025)); bell(93, 28.05, .05, 2.2);
+}
+
+defineFilm({palette: {...PALETTES.pencilMinimal, paper: WHITE}, format: {ar: '9:16', width: 1080}, fps: 24, timeline: [{name: 'promo', dur: END, fn: frame}], score});
+}
+</script>

@@ -33,6 +33,12 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 
 ### Filmlar
 
+- [`films/pochtam-promo/`](films/pochtam-promo/) — **Pochtam: tezkor promo**.
+  pochtam.uz uchun noldan qayta ishlangan 30 soniyalik vertikal promo. Kadrlar
+  tez almashadi, birinchi soniyadanoq savol beriladi: "Xitoyda shu narxda.
+  Uyingizgacha qanchaga tushadi?". Ichida ilovaning hozirgi haqiqiy
+  ekranlari bor. Montaj 120 BPM to'rida qilingan, musiqa generatori uchun
+  soniyama-soniya prompt ham bor ([`MUSIC-PROMPT.md`](films/pochtam-promo/MUSIC-PROMPT.md)).
 - [`films/ibk-obzor/`](films/ibk-obzor/) — **"Bojxona xodimi qo'llanmasi"
   obzori**. Yangilangan saytning 29,5 soniyalik rasmiy video obzori: PF-174
   bo'limi qo'shilgani, videodarslar joylangani va test topshirish mumkinligi
