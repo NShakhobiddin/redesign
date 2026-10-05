@@ -1,9 +1,9 @@
-# Pochtam — promo (66 s, diktor ovozi uchun)
+# Pochtam — promo (44,5 s, diktor ovozi uchun)
 
 [pochtam.uz](https://pochtam.uz) uchun noldan qayta ishlangan vertikal (9:16)
 promo. Reels, TikTok va Telegram uchun mo'ljallangan. Video birinchi
 kadrdanoq savol bilan boshlanadi: *"Xitoyda shu narxda. Uyingizgacha qanchaga
-tushadi?"* Keyin har sahnada bitta imkoniyat ko'rsatiladi. Har sahna 3–6
+tushadi?"* Keyin har sahnada bitta imkoniyat ko'rsatiladi. Sahnalar 2–5
 soniya turadi, diktor o'z satrini aytib ulguradi. Diktor matni ElevenLabs
 uchun yozilgan.
 
@@ -16,32 +16,32 @@ uchun yozilgan.
 - Vaqtinchalik musiqa (namuna): [`out/pochtam-promo-score.mp3`](out/pochtam-promo-score.mp3)
 - Kadrlar varag'i: [`out/pochtam-promo-contact.jpg`](out/pochtam-promo-contact.jpg)
 
-Birinchi versiya 30 soniyalik, juda tez kesilgan edi (har 0,25–2 s). U git
-tarixida saqlanib qolgan.
+Oldingi versiyalar git tarixida saqlangan:
+- 30 soniyalik versiya. Juda tez kesilgan edi, kadrlar har 0,25–2 s da almashardi.
+- 66 soniyalik versiya. Diktor uchun juda uzun bo'lgan edi.
 
 ## Ketma-ketlik
 
-Montaj 120 BPM to'rida: har kesim zarbga (0,5 s) tushadi, logotip va
-droplar takt boshida (12, 56, 60 s).
+Montaj 120 BPM to'rida: har kesim zarbga tushadi, logotip va ikkinchi drop
+takt boshida (8 va 38 s). Imkoniyat sahnalari bir-biriga salat rangli
+chiziq bilan "surilib" o'tadi.
 
 | Vaqt | Ekranda | Diktor |
 | --- | --- | --- |
 | 0–3 s | Krossovka va ¥699: **"Xitoyda shu narxda"** | Xitoyda — olti yuz to'qson to'qqiz yuan. |
-| 3–5,5 s | **"Uyingizgacha qanchaga tushadi?"** | Uyingizgacha qanchaga tushadi? |
-| 5,5–8,5 s | **Boj? · Kargo? · Kurs? · Kuryer?** (har 0,75 s da) | Boj? Kargo? Kurs? Kuryer? |
-| 8,5–12 s | **"Javob — bitta skrinshotda"**, telefon ko'tariladi, oq chaqnash | Javob — bitta skrinshotda. |
-| 12–15,5 s | Logotip introsi va shior | Bu — Pochtam. Global xaridlar biz bilan oson. |
-| 15,5–20,5 s | **Rasmini yuklang**: bosish → skan → topilgan do'konlar | Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi. |
-| 20,5–26,5 s | **Skrinshot oling** → **AI narxni o'qiydi**: jami $102.20 (misol) | Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi. |
-| 26,5–31,5 s | **Narx tarkibi** → **Boj: $0**, oyiga $200 gacha | Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz. |
-| 31,5–35,5 s | **Butun savat?** → **Bitta skrinshot — bitta hisob**: 3 ta tovar → $117.99 | Butun savatni ham bitta skrinshot bilan hisoblang. |
-| 35,5–40 s | **Eng arzon kuryer** → **Kuryer siz uchun sotib oladi**, "Xabar tayyor ✓" | Eng arzon kuryerni tanlang — u siz uchun sotib oladi. |
-| 40–44 s | **Qadam-baqadam qo'llanma**, 7 ta do'kon uchun | Yetti do'kon uchun — qadam-baqadam qo'llanma. |
-| 44–47,5 s | **Jo'natmani kuzating**: Topish → … → Keldi | Jo'natmangizni eshigingizgacha kuzating. |
-| 47,5–52 s | **43** do'kon · **20** kuryer · **3 til** | Qirq uch do'kon. Yigirma kuryer. Uch til. |
-| 52–56 s | **"Hammasi — bitta ilovada"** | Hammasi — bitta ilovada. |
-| 56–60 s | Quti eshik oldiga tushadi: **"Orzuingiz — eshigingiz oldida."** | Orzuingiz — eshigingiz oldida. |
-| 60–66 s | Logotip, shior, **pochtam.uz** (63,5 s) | Pochtam. Orzu qiling — qolganini biz hal qilamiz. Pochtam nuqta uz. |
+| 3–6 s | **"Uyingizgacha qanchaga tushadi?"**, atrofida **Boj? · Kargo? · Kurs? · Kuryer?** yorliqlari | Uyingizgacha qanchaga tushadi? |
+| 6–8 s | **"Javob — bitta skrinshotda"**, telefon ko'tariladi, oq chaqnash | Javob — bitta skrinshotda. |
+| 8–10 s | Logotip introsi | Bu — Pochtam. |
+| 10–14 s | **Rasmini yuklang**: bosish → skan → topilgan do'konlar | Rasmini yuklang — sun'iy intellekt tovarni topadi. |
+| 14–19 s | **Skrinshot oling** → hisob ko'z oldida quriladi: **$97.80 + $4.40 + $0 = $102.20** (misol) | Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor. |
+| 19–22 s | **Boj: $0**, oyiga $200 gacha, **BOJSIZ** muhri | Oyiga ikki yuz dollargacha — bojsiz. |
+| 22–25 s | **Butun savat?** → **Bitta skrinshot — bitta hisob**: 3 ta tovar → $117.99 | Butun savatni ham — bitta skrinshotda. |
+| 25–28,5 s | **Eng arzon kuryer** → **Kuryer siz uchun sotib oladi**, "Xabar tayyor ✓" | Eng arzon kuryer — u siz uchun sotib oladi. |
+| 28,5–32 s | **Qadam-baqadam qo'llanma** → **Jo'natmani kuzating** | Qadam-baqadam qo'llanma va kuzatuv. |
+| 32–35 s | **43** do'kon · **20** kuryer · **3 til** (raqamlar sanaladi) | Qirq uch do'kon. Yigirma kuryer. Uch til. |
+| 35–38 s | **"Hammasi — bitta ilovada"** | Hammasi — bitta ilovada. |
+| 38–41 s | Quti eshik oldiga tushadi, konfetti: **"Orzuingiz — eshigingiz oldida."** | Orzuingiz — eshigingiz oldida. |
+| 41–44,5 s | Logotip va **pochtam.uz** (42,5 s) | Pochtam nuqta uz. |
 
 ## Qanday ishlangan
 
@@ -87,21 +87,21 @@ node tools/embed.mjs /tmp/cap /tmp/pp
 # 2) render, ovoz balandligi, ovozsiz nusxa
 node render.mjs pochtam-promo.html --out out
 cd out && ffmpeg -y -i pochtam-promo.mp4 -i pochtam-promo-score.wav -map 0:v:0 -map 1:a:0 \
-  -af "volume=3.1dB,alimiter=limit=0.891:attack=5:release=80:level=disabled,apad" -t 66 \
+  -af "volume=3.1dB,alimiter=limit=0.891:attack=5:release=80:level=disabled,apad" -t 44.5 \
   -c:v copy -c:a aac -b:a 192k -movflags +faststart pochtam-promo-final.mp4
 ffmpeg -y -i pochtam-promo.mp4 -c:v copy -an -movflags +faststart pochtam-promo-silent.mp4
 ```
 
 ## Tekshiruv va cheklovlar
 
-- MP4 xatosiz dekodlanadi: 1584 kadr, 66,0 s, 1080×1920, 24 fps, ovoz AAC
+- MP4 xatosiz dekodlanadi: 1068 kadr, 44,5 s, 1080×1920, 24 fps, ovoz AAC
   48 kHz. Vaqtinchalik musiqa −10,7 LUFS, eng baland nuqta −1,5 dBFS.
-  6 kHz dan yuqorida energiya deyarli yo'q (−68,5 dB), ya'ni shovqin yo'q.
+  6 kHz dan yuqorida energiya deyarli yo'q (−67,8 dB), ya'ni shovqin yo'q.
 - Grid va to'liq o'lchamdagi kadrlar ko'zdan kechirildi: telefon ichidagi
   ekranlar kesilmaydi, sarlavhalar telefon ostida qolmaydi.
 - Diktor satrlarining uzunligi taxminan hisoblangan (sekundiga ~5 bo'g'in).
   Haqiqiy uzunlik tanlangan ovoz va tezlikka bog'liq. Har satr oynasida
-  0,3–1,5 s zaxira bor.
+  0,1–1,4 s zaxira bor.
 - Bu muhitdan pochtam.uz ning o'ziga kirib bo'lmadi. Shuning uchun ekranlar
   repozitoriydagi kod bilan lokal serverda olindi.
 - Videoni odatiy tezlikda ko'rish va ovozni eshitish imkoni bo'lmadi.

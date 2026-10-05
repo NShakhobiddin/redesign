@@ -1,9 +1,9 @@
 # Pochtam promo — diktor matni (ElevenLabs uchun)
 
-Video 66 soniya. Har bir sahnaga bitta satr to'g'ri keladi. Ekrandagi yozuvlar
-diktor aytayotgan gapni takrorlaydi. Matn TTS uchun tayyorlangan: raqamlar so'z
-bilan yozilgan, qisqartmalar yo'q ("AI" o'rniga "sun'iy intellekt",
-"pochtam.uz" o'rniga "Pochtam nuqta uz").
+Video 44,5 soniya. Har bir sahnaga bitta satr to'g'ri keladi. Ekrandagi
+yozuvlar diktor aytayotgan gapni takrorlaydi. Matn TTS uchun tayyorlangan:
+raqamlar so'z bilan yozilgan, qisqartmalar yo'q ("AI" o'rniga "sun'iy
+intellekt", "pochtam.uz" o'rniga "Pochtam nuqta uz").
 
 - Ovozsiz video: [`out/pochtam-promo-silent.mp4`](out/pochtam-promo-silent.mp4)
 - Subtitr / joylash uchun belgilar: [`out/pochtam-promo-voiceover.srt`](out/pochtam-promo-voiceover.srt)
@@ -16,27 +16,27 @@ ustunidagi vaqtga qo'ying. Har satr o'z "Oyna"sidan oshmasligi kerak.
 | # | Boshlanish | Oyna | Matn |
 | --- | --- | --- | --- |
 | 1 | 00:00.2 | 0–3 s | Xitoyda — olti yuz to'qson to'qqiz yuan. |
-| 2 | 00:03.1 | 3–5,5 s | Uyingizgacha qanchaga tushadi? |
-| 3 | 00:05.5 | 5,5–8,5 s | Boj? Kargo? Kurs? Kuryer? |
-| 4 | 00:08.6 | 8,5–12 s | Javob — bitta skrinshotda. |
-| 5 | 00:12.2 | 12–15,5 s | Bu — Pochtam. Global xaridlar biz bilan oson. |
-| 6 | 00:15.7 | 15,5–20,5 s | Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi. |
-| 7 | 00:20.7 | 20,5–26,5 s | Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi. |
-| 8 | 00:26.7 | 26,5–31,5 s | Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz. |
-| 9 | 00:31.6 | 31,5–35,5 s | Butun savatni ham bitta skrinshot bilan hisoblang. |
-| 10 | 00:35.7 | 35,5–40 s | Eng arzon kuryerni tanlang — u siz uchun sotib oladi. |
-| 11 | 00:40.2 | 40–44 s | Yetti do'kon uchun — qadam-baqadam qo'llanma. |
-| 12 | 00:44.2 | 44–47,5 s | Jo'natmangizni eshigingizgacha kuzating. |
-| 13 | 00:47.6 | 47,5–52 s | Qirq uch do'kon. Yigirma kuryer. Uch til. |
-| 14 | 00:52.2 | 52–56 s | Hammasi — bitta ilovada. |
-| 15 | 00:56.4 | 56–60 s | Orzuingiz — eshigingiz oldida. |
-| 16 | 01:00.3 | 60–63,5 s | Pochtam. Orzu qiling — qolganini biz hal qilamiz. |
-| 17 | 01:03.6 | 63,5–66 s | Pochtam nuqta uz. |
+| 2 | 00:03.1 | 3–6 s | Uyingizgacha qanchaga tushadi? |
+| 3 | 00:06.1 | 6–8 s | Javob — bitta skrinshotda. |
+| 4 | 00:08.2 | 8–10 s | Bu — Pochtam. |
+| 5 | 00:10.1 | 10–14 s | Rasmini yuklang — sun'iy intellekt tovarni topadi. |
+| 6 | 00:14.1 | 14–19 s | Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor. |
+| 7 | 00:19.1 | 19–22 s | Oyiga ikki yuz dollargacha — bojsiz. |
+| 8 | 00:22.1 | 22–25 s | Butun savatni ham — bitta skrinshotda. |
+| 9 | 00:25.1 | 25–28,5 s | Eng arzon kuryer — u siz uchun sotib oladi. |
+| 10 | 00:28.6 | 28,5–32 s | Qadam-baqadam qo'llanma va kuzatuv. |
+| 11 | 00:32.1 | 32–35 s | Qirq uch do'kon. Yigirma kuryer. Uch til. |
+| 12 | 00:35.1 | 35–38 s | Hammasi — bitta ilovada. |
+| 13 | 00:38.4 | 38–41 s | Orzuingiz — eshigingiz oldida. |
+| 14 | 00:42.6 | 41–44,5 s | Pochtam nuqta uz. |
 
 Ekrandagi aniq lahzalar:
-- 3-satr: so'zlar 5,5 · 6,25 · 7,0 · 7,75 s da chiqadi.
-- 13-satr: raqamlar 47,5 · 49,0 · 50,5 s da chiqadi.
-- 17-satr: "pochtam.uz" yozuvi 63,5 s da chiqadi.
+- 2-satr: "Boj? Kargo? Kurs? Kuryer?" yorliqlari 4,5–5,25 s da chiqadi.
+- 6-satr: hisob ekranda bo'lak-bo'lak quriladi: $97.80 (16,3 s), + $4.40
+  (16,6 s), + $0 (16,9 s), = $102.20 (17,25 s).
+- 10-satr: 30,25 s da "Jo'natmani kuzating" kadri chiqadi.
+- 11-satr: raqamlar 32 · 33 · 34 s da chiqadi.
+- 14-satr: "pochtam.uz" yozuvi 42,5 s da chiqadi.
 
 ## 2. Bitta matn holida (tez sinash uchun)
 
@@ -47,21 +47,18 @@ uchun keyin montajda satrlarni biroz surib to'g'rilash kerak bo'ladi.
 
 ```
 Xitoyda — olti yuz to'qson to'qqiz yuan. <break time="0.4s" />
-Uyingizgacha qanchaga tushadi? <break time="0.2s" />
-Boj? <break time="0.4s" /> Kargo? <break time="0.3s" /> Kurs? <break time="0.4s" /> Kuryer? <break time="0.4s" />
-Javob — bitta skrinshotda. <break time="1.8s" />
-Bu — Pochtam. Global xaridlar biz bilan oson. <break time="0.5s" />
-Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi. <break time="0.5s" />
-Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi. <break time="0.5s" />
-Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz. <break time="0.6s" />
-Butun savatni ham bitta skrinshot bilan hisoblang. <break time="0.8s" />
-Eng arzon kuryerni tanlang — u siz uchun sotib oladi. <break time="0.7s" />
-Yetti do'kon uchun — qadam-baqadam qo'llanma. <break time="0.9s" />
-Jo'natmangizni eshigingizgacha kuzating. <break time="0.5s" />
-Qirq uch do'kon. <break time="0.5s" /> Yigirma kuryer. <break time="0.4s" /> Uch til. <break time="1.0s" />
-Hammasi — bitta ilovada. <break time="2.0s" />
-Orzuingiz — eshigingiz oldida. <break time="1.4s" />
-Pochtam. Orzu qiling — qolganini biz hal qilamiz. <break time="0.5s" />
+Uyingizgacha qanchaga tushadi? <break time="0.6s" />
+Javob — bitta skrinshotda. <break time="0.3s" />
+Bu — Pochtam. <break time="1.0s" />
+Rasmini yuklang — sun'iy intellekt tovarni topadi. <break time="0.5s" />
+Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor. <break time="0.8s" />
+Oyiga ikki yuz dollargacha — bojsiz. <break time="0.4s" />
+Butun savatni ham — bitta skrinshotda. <break time="0.5s" />
+Eng arzon kuryer — u siz uchun sotib oladi. <break time="0.4s" />
+Qadam-baqadam qo'llanma va kuzatuv. <break time="0.8s" />
+Qirq uch do'kon. <break time="0.3s" /> Yigirma kuryer. <break time="0.3s" /> Uch til. <break time="0.3s" />
+Hammasi — bitta ilovada. <break time="1.5s" />
+Orzuingiz — eshigingiz oldida. <break time="1.7s" />
 Pochtam nuqta uz.
 ```
 
@@ -74,25 +71,21 @@ Xitoyda — olti yuz to'qson to'qqiz yuan.
 
 [curious] Uyingizgacha qanchaga tushadi?
 
-Boj?... Kargo?... Kurs?... Kuryer?
-
 Javob — bitta skrinshotda.
 
-[excited] Bu — Pochtam. Global xaridlar biz bilan oson.
+[excited] Bu — Pochtam.
 
-Rasmini yuklang — sun'iy intellekt tovarni do'konlardan topadi.
+Rasmini yuklang — sun'iy intellekt tovarni topadi.
 
-Narxni skrinshot qiling — ilova boj, kargo va kurs bilan jami summani chiqaradi.
+Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor.
 
-Narx tarkibi ochiq. Oyiga ikki yuz dollargacha — bojsiz.
+Oyiga ikki yuz dollargacha — bojsiz.
 
-Butun savatni ham bitta skrinshot bilan hisoblang.
+Butun savatni ham — bitta skrinshotda.
 
-Eng arzon kuryerni tanlang — u siz uchun sotib oladi.
+Eng arzon kuryer — u siz uchun sotib oladi.
 
-Yetti do'kon uchun — qadam-baqadam qo'llanma.
-
-Jo'natmangizni eshigingizgacha kuzating.
+Qadam-baqadam qo'llanma va kuzatuv.
 
 Qirq uch do'kon... Yigirma kuryer... Uch til.
 
@@ -100,7 +93,7 @@ Hammasi — bitta ilovada.
 
 [excited] Orzuingiz — eshigingiz oldida.
 
-Pochtam. Orzu qiling — qolganini biz hal qilamiz. Pochtam nuqta uz.
+Pochtam nuqta uz.
 ```
 
 ## 3. Ovoz va sozlamalar
@@ -141,6 +134,6 @@ Pochtam. Orzu qiling — qolganini biz hal qilamiz. Pochtam nuqta uz.
 2. Har bir satrni o'z vaqtiga qo'ying. Asosiysi, satr o'z oynasidan
    chiqib ketmasin.
 3. Musiqa diktor ostida 10–14 dB pastroq bo'lsin. Gap yo'q joylarda
-   (taxminan 10,5–12 s, 54,5–56 s va 65 s dan keyin) musiqani balandroq
-   qo'ying.
+   (taxminan 9–10 s, 37–38 s, 41–42,5 s va 43,7 s dan keyin) musiqani
+   balandroq qo'ying.
 4. Yakuniy balandlik: taxminan −14 LUFS, eng baland nuqta −1 dBFS.

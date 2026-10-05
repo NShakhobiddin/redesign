@@ -34,7 +34,7 @@ doodle (foto ustida chizish). Shuningdek uchta dvigatel mavjud: found motion
 ### Filmlar
 
 - [`films/pochtam-promo/`](films/pochtam-promo/) — **Pochtam: promo**.
-  pochtam.uz uchun noldan qayta ishlangan 66 soniyalik vertikal promo.
+  pochtam.uz uchun noldan qayta ishlangan 44,5 soniyalik vertikal promo.
   Birinchi soniyadanoq savol beriladi: "Xitoyda shu narxda. Uyingizgacha
   qanchaga tushadi?". Ichida ilovaning hozirgi haqiqiy ekranlari bor. Har
   sahna diktor satriga moslangan. ElevenLabs uchun diktor matni
