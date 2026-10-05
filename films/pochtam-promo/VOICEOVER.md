@@ -15,8 +15,8 @@ ustunidagi vaqtga qo'ying. Har satr o'z "Oyna"sidan oshmasligi kerak.
 
 | # | Boshlanish | Oyna | Matn |
 | --- | --- | --- | --- |
-| 1 | 00:00.2 | 0–3 s | Xitoyda — olti yuz to'qson to'qqiz yuan. |
-| 2 | 00:03.1 | 3–6 s | Uyingizgacha qanchaga tushadi? |
+| 1 | 00:00.2 | 0–4,5 s | Taxmin qiling! Uyingizgacha qanchaga tushadi? |
+| 2 | 00:04.5 | 4,5–6 s | Uch… ikki… bir… |
 | 3 | 00:06.1 | 6–8 s | Javob — bitta skrinshotda. |
 | 4 | 00:08.2 | 8–10 s | Bu — Pochtam. |
 | 5 | 00:10.1 | 10–14 s | Rasmini yuklang — sun'iy intellekt tovarni topadi. |
@@ -31,7 +31,14 @@ ustunidagi vaqtga qo'ying. Har satr o'z "Oyna"sidan oshmasligi kerak.
 | 14 | 00:42.6 | 41–44,5 s | Pochtam nuqta uz. |
 
 Ekrandagi aniq lahzalar:
-- 2-satr: "Boj? Kargo? Kurs? Kuryer?" yorliqlari 4,5–5,25 s da chiqadi.
+- 1-satr — hook: birinchi kadrdanoq "Taxmin qiling!" yozuvi chiqadi. 2,0 s da
+  "Uyingizgacha qanchaga tushadi?" savoli keladi, 3,5 · 3,75 · 4,0 s da esa
+  javob variantlari: A $98 · B $102 · C $150. "Uyingizgacha" so'zi taxminan
+  2,0 s ga to'g'ri kelsin; "Taxmin qiling!" dan keyin qisqa pauza qiling.
+- 2-satr: 3-2-1 sanog'i ekranda zarbda chiqadi: 4,5 · 5,0 · 5,5 s.
+  Bu satr ixtiyoriy, uni aytmasa ham bo'ladi, chunki musiqada soat chiqillaydi.
+  Aniq tushishi uchun "uch", "ikki", "bir" ni uchta alohida klip qiling.
+- To'g'ri javob (**B ✓**) 17,5 s da, jami narx yonida chiqadi.
 - 6-satr: hisob ekranda bo'lak-bo'lak quriladi: $97.80 (16,3 s), + $4.40
   (16,6 s), + $0 (16,9 s), = $102.20 (17,25 s).
 - 10-satr: 30,25 s da "Jo'natmani kuzating" kadri chiqadi.
@@ -46,8 +53,8 @@ uchun keyin montajda satrlarni biroz surib to'g'rilash kerak bo'ladi.
 **Multilingual v2 / Turbo uchun** (`<break>` pauza teglari bilan):
 
 ```
-Xitoyda — olti yuz to'qson to'qqiz yuan. <break time="0.4s" />
-Uyingizgacha qanchaga tushadi? <break time="0.6s" />
+Taxmin qiling! <break time="0.6s" /> Uyingizgacha qanchaga tushadi? <break time="0.8s" />
+Uch... <break time="0.2s" /> ikki... <break time="0.2s" /> bir... <break time="0.3s" />
 Javob — bitta skrinshotda. <break time="0.3s" />
 Bu — Pochtam. <break time="1.0s" />
 Rasmini yuklang — sun'iy intellekt tovarni topadi. <break time="0.5s" />
@@ -67,9 +74,9 @@ tinish belgilari bilan beriladi. Kvadrat qavsdagi teglar ovoz ohangini
 boshqaradi; ularni o'chirib tashlasangiz ham bo'ladi.
 
 ```
-Xitoyda — olti yuz to'qson to'qqiz yuan.
+[excited] Taxmin qiling!... [curious] Uyingizgacha qanchaga tushadi?
 
-[curious] Uyingizgacha qanchaga tushadi?
+Uch... ikki... bir...
 
 Javob — bitta skrinshotda.
 

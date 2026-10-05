@@ -17,7 +17,7 @@ uchun promptlar inglizcha. Tushuntirishlar o'zbekcha. Diktor matni
 ## 1. Uslub (Suno: "Style of Music", Udio: prompt)
 
 ```
-instrumental background music for a 45-second voice-over app commercial, energetic but uncluttered electro-pop / future bass, 120 BPM, F# minor, cold open on a hit with no intro, playful stop-and-hit hook with four quick pops at 0:04.5, pitched riser into a logo drop at 0:08, light four-on-the-floor groove under narration, bouncy sub bass, soft plucky synth chords, glassy bell accents, short breakdown at 0:35, second drop at 0:38, logo sting at 0:41, final hit at 0:42.5, clean modern mix, no vocals
+instrumental background music for a 45-second voice-over app commercial, energetic but uncluttered electro-pop / future bass, 120 BPM, F# minor, cold open on a hit with no intro, playful quiz-show hook with three answer pops at 0:03.5 and a ticking 3-2-1 clock at 0:04.5, 0:05 and 0:05.5, pitched riser into a logo drop at 0:08, light four-on-the-floor groove under narration, bouncy sub bass, soft plucky synth chords, glassy bell accents, short breakdown at 0:35, second drop at 0:38, logo sting at 0:41, final hit at 0:42.5, clean modern mix, no vocals
 ```
 
 **Exclude styles** (Suno'dagi "Exclude" maydoni):
@@ -35,13 +35,13 @@ quradi, lekin soniyani aniq ushlamaydi. Aniq moslash pastdagi 5-bo'limda.
 ```
 [Instrumental]
 
-[Cold Open: 0:00-0:06, starts instantly on a hit, no intro, sparse stop-and-hit, hits at 0:00, 0:03 and 0:04, four playful rising pops at 0:04.5, 0:04.75, 0:05 and 0:05.25]
+[Cold Open: 0:00-0:06, quiz-show hook, starts instantly on a hit, no intro, hits at 0:00, 0:02 and 0:02.5, three playful rising answer pops at 0:03.5, 0:03.75 and 0:04, a ticking clock on 0:04.5, 0:05 and 0:05.5]
 
 [Build: 0:06-0:08, two hits at 0:06 and 0:06.5, pitched riser, camera-shutter click and tiny silence right before 0:08]
 
 [Drop: 0:08, logo impact, light groove starts]
 
-[Verse Groove: 0:08-0:32, light four-on-the-floor under a voice-over, soft chords F#m - D - A - E one per bar, sub bass, a soft bell accent on each scene change, three rising plinks at 0:16.3, a sparkle at 0:17.25, an accent at 0:19, no lead melody]
+[Verse Groove: 0:08-0:32, light four-on-the-floor under a voice-over, soft chords F#m - D - A - E one per bar, sub bass, a soft bell accent on each scene change, three rising plinks at 0:16.3, a sparkle at 0:17.25, a bright reveal ding at 0:17.5, an accent at 0:19, no lead melody]
 
 [Counters: 0:32-0:35, three big rising stabs at 0:32, 0:33 and 0:34 with quick ticking]
 
@@ -62,10 +62,11 @@ quradi, lekin soniyani aniq ushlamaydi. Aniq moslash pastdagi 5-bo'limda.
 
 | Vaqt (s) | Ekranda | Diktor | Musiqada |
 | --- | --- | --- | --- |
-| 0.0 | Krossovka, **"Xitoyda — ¥699"** | "Xitoyda — olti yuz to'qson to'qqiz yuan." | Intro yo'q, birinchi kadrdan zarba: kick, sub va stab. Ostida yumshoq akkord |
-| 3.0 | Ko'k fon: **"Uyingizgacha"** | "Uyingizgacha qanchaga tushadi?" | Zarba |
-| 4.0 | **"qanchaga tushadi?"** | | Stab, savol ohangi |
-| 4.5 · 4.75 · 5.0 · 5.25 | **Boj? · Kargo? · Kurs? · Kuryer?** yorliqlari chiqadi | | To'rtta o'ynoqi "pop", ko'tarilib boradi |
+| 0.0 | **Hook:** "Taxmin qiling!" yozuvi, krossovka, ¥699 | "Taxmin qiling!" | Intro yo'q, birinchi kadrdan zarba: kick, sub va stab. Ostida yumshoq akkord |
+| 2.0 | Ko'k fon: **"Uyingizgacha"** | "Uyingizgacha qanchaga tushadi?" | Zarba |
+| 2.5 | **"qanchaga tushadi?"** | | Stab, savol ohangi |
+| 3.5 · 3.75 · 4.0 | Javoblar chiqadi: **A $98 · B $102 · C $150** | | Uchta o'ynoqi "pop", ko'tarilib boradi |
+| 4.5 · 5.0 · 5.5 | Soat: **3 · 2 · 1** | "Uch… ikki… bir…" (ixtiyoriy) | Soat chiqillashi, har zarbda |
 | 6.0 · 6.5 | **"Javob — bitta skrinshotda"**, telefon ko'tariladi | "Javob — bitta skrinshotda." | Ikki zarba, riser boshlanadi |
 | 7.75 | Oq chaqnash | — | "Chirt" va juda qisqa sukunat |
 | **8.0** | **Logotip tushadi** | "Bu — Pochtam." | **DROP**: impact, yengil groove boshlanadi |
@@ -73,6 +74,7 @@ quradi, lekin soniyani aniq ushlamaydi. Aniq moslash pastdagi 5-bo'limda.
 | 14.0 | **"Skrinshot oling"**, chaqnash 15.45 | "Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor." | Bell urg'usi, 15.45 da "chirt" |
 | 16.3 · 16.6 · 16.9 | Hisob quriladi: **$97.80 + $4.40 + $0** | | Uchta ko'tariluvchi "plink" |
 | 17.25 | **= $102.20** | | Yaltiroq arpedjio |
+| 17.5 | **B ✓** — viktorinaning to'g'ri javobi | | Yorqin "ding" |
 | 19.0 | Salat fon: **"Boj: $0"**, 19.7 da **BOJSIZ** muhri | "Oyiga ikki yuz dollargacha — bojsiz." | Urg'uli stab va bell, muhrda past "tuk" |
 | 22.0 | **"Butun savat?"**, chaqnash 22.95 | "Butun savatni ham — bitta skrinshotda." | Bell urg'usi, "chirt" |
 | 25.0 | **"Eng arzon kuryer"** → 26.25 da **"Kuryer siz uchun sotib oladi"** | "Eng arzon kuryer — u siz uchun sotib oladi." | Bell urg'usi, 26.75 da "pop", 26.85 da bildirishnoma ohangi |
@@ -96,13 +98,13 @@ Bo'limlar: 6 + 2 + 14 + 10 + 3 + 3 + 3 + 3,5 = 44,5 s.
   "negative_global_styles": ["vocals", "lyrics", "spoken word", "busy lead melody", "white noise", "hiss", "lo-fi", "slow intro", "fade-in"],
   "sections": [
     {"section_name": "Cold open hook", "duration_ms": 6000, "lines": [],
-     "positive_local_styles": ["starts instantly on a hit, no intro", "sparse stop-and-hit", "hits at 0, 3 and 4 seconds", "four playful rising pops at 4.5, 4.75, 5 and 5.25 seconds"],
+     "positive_local_styles": ["quiz-show hook, starts instantly on a hit, no intro", "hits at 0, 2 and 2.5 seconds", "three playful rising answer pops at 3.5, 3.75 and 4 seconds", "a ticking clock at 4.5, 5 and 5.5 seconds"],
      "negative_local_styles": ["steady groove", "fade-in"]},
     {"section_name": "Build to the logo", "duration_ms": 2000, "lines": [],
      "positive_local_styles": ["two hits at 0 and 0.5 seconds", "pitched synth riser", "a short camera-shutter click and a tiny silence at the very end"],
      "negative_local_styles": ["white noise riser"]},
     {"section_name": "Drop and groove under the voice", "duration_ms": 14000, "lines": [],
-     "positive_local_styles": ["logo impact on the first beat", "light four-on-the-floor", "soft chords F#m D A E, one per bar", "sub bass", "soft bell accents at 2 and 6 seconds into the section", "three rising plinks at 8.3, 8.6 and 8.9 seconds and a sparkle at 9.25", "an accent at 11 seconds", "leaves room for narration"],
+     "positive_local_styles": ["logo impact on the first beat", "light four-on-the-floor", "soft chords F#m D A E, one per bar", "sub bass", "soft bell accents at 2 and 6 seconds into the section", "three rising plinks at 8.3, 8.6 and 8.9 seconds and a sparkle at 9.25", "a bright reveal ding at 9.5 seconds", "an accent at 11 seconds", "leaves room for narration"],
      "negative_local_styles": ["lead melody", "breakdown"]},
     {"section_name": "Groove continued", "duration_ms": 10000, "lines": [],
      "positive_local_styles": ["same light groove", "soft bell accents at 0, 3, 6.5 and 8.25 seconds into the section", "leaves room for narration"],

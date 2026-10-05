@@ -1,10 +1,10 @@
 1
-00:00:00,200 --> 00:00:02,900
-Xitoyda — olti yuz to'qson to'qqiz yuan.
+00:00:00,200 --> 00:00:04,400
+Taxmin qiling! Uyingizgacha qanchaga tushadi?
 
 2
-00:00:03,100 --> 00:00:05,900
-Uyingizgacha qanchaga tushadi?
+00:00:04,500 --> 00:00:05,900
+Uch… ikki… bir…
 
 3
 00:00:06,100 --> 00:00:07,900
