@@ -100,6 +100,28 @@ ffmpeg -i out/pochtam-promo-silent.mp4 -i /tmp/fitted.wav -map 0:v -map 1:a \
   -af loudnorm=I=-14:TP=-1:LRA=11 -c:v copy -c:a aac -b:a 192k -t 44.5 out/pochtam-promo-music.mp4
 ```
 
+## Tayyor diktor ovozini joylash
+
+[`tools/place-voice.py`](tools/place-voice.py) bitta yozuvda o'qilgan diktor
+ovozini (ElevenLabs) pauzalari bo'yicha 22 bo'lakka ajratadi. Har bir bo'lak
+videodagi o'z lahzasiga qo'yiladi:
+- "Uyingizgacha…" — 2 s da;
+- "uch · ikki · bir" — 4,5 · 5 · 5,55 s da;
+- "Pochtam!" — logotip bilan;
+- raqamlar — har bir hisoblagichga;
+- "Pochtam nuqta uz" — 42,55 s da.
+
+Musiqa 2 dB past turadi va diktor gapirganda yana 8 dB pasayadi. Natijada
+ovoz musiqadan ~10,7 dB baland. Shu yo'l bilan foydalanuvchining Bekzod
+ovozidagi yozuvi joylandi: −14,1 LUFS, eng baland nuqta −1,4 dBFS. Ovoz ham,
+video (`out/pochtam-promo-voice.mp4`) ham ochiq repozitoriyga qo'yilmagan.
+
+```bash
+python3 tools/place-voice.py diktor.mp3 /tmp/fitted.wav /tmp/mix.wav
+ffmpeg -i out/pochtam-promo-silent.mp4 -i /tmp/mix.wav -map 0:v -map 1:a \
+  -af loudnorm=I=-14:TP=-1:LRA=11 -c:v copy -c:a aac -b:a 192k -t 44.5 out/pochtam-promo-voice.mp4
+```
+
 ## Fayllar va buyruqlar
 
 ```bash
