@@ -24,7 +24,8 @@ Shots (s): 0 the hook, a quiz: "Taxmin qiling!", the sneaker, "Xitoyda — ¥699
   clock (answered at 17.5 s: B) | 6 "Javob — bitta
   skrinshotda", shutter | 8 DROP: the logo | 10 photo search | 14 screenshot ->
   $97.80 + $4.40 + $0 = $102.20 (an example) | 19 duty $0 up to $200 a month |
-  22 the whole cart in one count | 25 couriers, a courier buys for you | 28.5
+  22 the whole cart: ticked, screenshotted, printed as one bill ($117.99) |
+  25 couriers, a courier buys for you | 28.5
   guides | 30.25 tracking | 32 43 stores, 20 couriers, 3 languages | 35
   "Hammasi — bitta ilovada" | 38 DROP 2: the parcel at the door | 41 the brand,
   42.5 pochtam.uz | 44.5 end.
@@ -183,6 +184,25 @@ const CONF = (() => { const R = rng(4242); return Array.from({length: 80}, () =>
 function confetti(c, x, y, u) { if (u <= 0 || u > 2.2) return; c.save(); c.globalAlpha = 1 - span(u, 1.5, 2.2);
   for (const p of CONF) { const px = x + Math.cos(p.a)*p.v*u*.9, py = y + Math.sin(p.a)*p.v*u + 1100*u*u; c.save(); c.translate(px, py); c.rotate(p.ph + p.w*u); c.scale(1, Math.abs(Math.sin(p.ph + u*9)) + .2); c.fillStyle = p.col; c.fillRect(-p.s/2, -p.s/3, p.s, p.s*.66); c.restore(); }
   c.restore(); }
+// the whole cart as one bill: it prints out of a slot, line by line (the app's own numbers for this cart; rates are an example)
+function receipt(c, u, t0) {
+  const X = 170, Wd = 740, Y0 = 440, full = 990, K = 1.13, p = span(u, t0, t0 + .8, x => 1 - Math.pow(1 - x, 2)), h = full*p; if (u < t0) return;
+  const fl = 6*Math.sin((u - t0)*2.2)*span(u, t0 + .8, t0 + 1.2);
+  c.save(); c.translate(0, fl); c.translate(540, Y0); c.scale(K, K); c.translate(-540, -Y0);
+  c.fillStyle = NAVY; c.beginPath(); c.roundRect(X - 34, Y0 - 30, Wd + 68, 44, 22); c.fill();
+  c.save(); c.translate(540, Y0); c.rotate(-1.2*DEG*p); c.translate(-540, -Y0);
+  const edge = () => { c.moveTo(X, Y0); c.lineTo(X + Wd, Y0); c.lineTo(X + Wd, Y0 + h); for (let x = X + Wd; x > X + 1; x -= 37) { c.lineTo(x - 18.5, Y0 + h + 16); c.lineTo(x - 37, Y0 + h); } c.closePath(); };
+  c.save(); c.shadowColor = 'rgba(10,12,60,.3)'; c.shadowBlur = 40; c.shadowOffsetY = 16; c.fillStyle = WHITE; c.beginPath(); edge(); c.fill(); c.restore();
+  c.save(); c.beginPath(); edge(); c.clip();
+  const L = X + 50, R = X + Wd - 50, row = (y, l, r, o = {}) => { text(c, l, L, Y0 + y, {size: o.size || 48, w: o.w || 600, color: o.lc || NAVY, align: 'left'}); text(c, r, R, Y0 + y, {size: o.rsize || o.size || 48, w: 800, color: o.rc || NAVY, align: 'right'}); };
+  const dash = y => { c.save(); c.strokeStyle = '#C9CBE3'; c.lineWidth = 3; c.setLineDash([12, 10]); c.beginPath(); c.moveTo(L, Y0 + y); c.lineTo(R, Y0 + y); c.stroke(); c.restore(); };
+  c.drawImage(IMG.p, L, Y0 + 40, 44, 44*IMG.p.height/IMG.p.width); text(c, 'Pochtam · hisob', L + 62, Y0 + 82, {size: 42, color: NAVY, align: 'left'}); text(c, '3 ta tovar · Amazon · bitta skrinshotdan', L + 62, Y0 + 128, {size: 28, w: 600, color: INK, align: 'left'});
+  dash(165); row(250, 'Krossovka', '$59.99'); row(335, 'Futbolka × 2', '$25.00'); row(420, 'Kepka', '$15.00'); dash(475);
+  row(560, 'Kargo', '$18.00'); text(c, 'ABU EXPRESS · 7–10 kun', L + 150, Y0 + 558, {size: 28, w: 600, color: INK, align: 'left'}); row(645, 'Boj', '$0.00', {rc: '#0F7B3E'}); dash(705);
+  const w = tw(c, '$117.99', 104); marker(c, R - w - 18, Y0 + 755, w + 36, 112, LIME, span(u, t0 + .95, t0 + 1.15, outExpo));
+  row(840, 'JAMI', '$117.99', {size: 66, w: 800, rsize: 104, rc: BLUE}); text(c, "1 492 574 so'm · misol", R, Y0 + 915, {size: 32, w: 600, color: INK, align: 'right'});
+  c.restore(); c.restore(); c.restore();
+}
 const count = (u, t0, n, d = .4) => Math.round(n*span(u, t0, t0 + d, outExpo));
 
 // one line of the voice-over per shot (VOICEOVER.md); a shot is [duration, draw(c, t, a), {wipe}] with a = its start
@@ -240,13 +260,13 @@ const SHOTS = [
       text(c, 'BOJSIZ', 0, 30, {size: 104, color: BLUE, spacing: .06}); c.restore(); } }],
   // ---- 4. the whole cart — "Butun savatni ham — bitta skrinshotda."
   [3, (c, t, a) => { const u = t - a;
-    if (u < 1) { fill(c, '#f4f4f4'); const z = 2.77; c.save(); c.translate(540, 960); c.scale(z, z); c.drawImage(SCR['demo-cart-page'], -195, -422, 390, 844); c.restore();
-      brackets(c, 30, 230, 1020, 820, span(u, .05, .3)); text(c, 'Butun savat?', 540, 1500, {size: 110, color: NAVY, ...slam(u, 0)}); flash(c, u, .95, .3); return; }
-    bgFeature(c); caption(c, u, 1, [['Bitta skrinshot —', 0], ['bitta hisob', 1]], {y: 220, size: 86});
-    featurePhone(c, t, a + 1, cc => { if (u < 2.1) { scr(cc, 'p15b-cart-list'); hi(cc, B['p15b-cart-list'].list, u, 1.3, {pad: 10}); } else scr(cc, 'p15-cart'); },
-      u < 2.1 ? {y: 1230, zoom: 1.12, fy: 420} : {y: 1230, zoom: lerp(1.12, 1.18, span(u, 2.1, 2.3, outExpo)), fy: 140});
-    if (u > 2.15) text(c, '3 ta tovar → $117.99', 540, 440, {size: 56, w: 800, color: BLUE, alpha: span(u, 2.15, 2.3)});
-    flash(c, u, .95, .3); }, {wipe: 1}],
+    if (u < 1) { bgFeature(c); caption(c, u, 0, [['Butun savat?', 1]], {y: 270, size: 110});        // the store's cart, whole, each item ticked, then the screenshot
+      featurePhone(c, t, a, cc => { scr(cc, 'demo-cart-page'); [112, 220, 328].forEach((yy, i) => { const t0 = .2 + i*.15; if (u < t0) return; const v = span(u, t0, t0 + .14, x => outBack(x, 2.2));
+        cc.save(); cc.translate(350, yy); cc.scale(v, v); cc.fillStyle = LIME; cc.beginPath(); cc.arc(0, 0, 17, 0, TAU); cc.fill(); cc.strokeStyle = NAVY; cc.lineWidth = 4; cc.lineCap = 'round'; cc.lineJoin = 'round'; cc.beginPath(); cc.moveTo(-7, 0); cc.lineTo(-2, 6); cc.lineTo(8, -6); cc.stroke(); cc.restore(); }); },
+        {y: 1180, s: 1.2});
+      brackets(c, 284, 626, 512, 1109, span(u, .55, .8)); flash(c, u, .95, .3); return; }
+    bgFeature(c); caption(c, u, 1, [['Bitta skrinshot —', 0], ['bitta hisob', 1]], {y: 230, size: 86});
+    receipt(c, u, 1.1); flash(c, u, .95, .3); }, {wipe: 1}],
   // ---- 5. couriers — "Eng arzon kuryer — u siz uchun sotib oladi."
   [3.5, (c, t, a) => { const u = t - a, b4m = u >= 1.25; bgFeature(c, BLUE, WHITE);
     caption(c, u, b4m ? 1.25 : 0, b4m ? [['Kuryer siz uchun', 0], ['sotib oladi', 0]] : [['Eng arzon kuryer', 0]], {y: b4m ? 210 : 260, color: b4m ? LIME : WHITE, size: 88});
@@ -355,7 +375,7 @@ function score(ac, t0, dest) {
   }
   // the cues: a bell on each new feature, shutter clicks, tap pops, the equation, duty $0, the counters
   [10, 14, 22, 25, 28.5, 30.25].forEach(t => bell(85, t, .035, .8));
-  [15.45, 22.95].forEach(t => osc(1200, t, .002, .07, .12, 'triangle')); [10.5, 26.75].forEach(t => osc(1568, t, .002, .04, .08)); osc(1046, 26.85, .002, .04, .2);
+  [15.45, 22.95].forEach(t => osc(1200, t, .002, .07, .12, 'triangle')); [22.2, 22.35, 22.5].forEach((t, i) => osc(mtof([81, 85, 88][i]), t, .002, .03, .12)); [23.2, 23.3, 23.4, 23.55, 23.65].forEach(t => osc(2093, t, .001, .012, .03)); bell(88, 24.05, .045, 1.1); [10.5, 26.75].forEach(t => osc(1568, t, .002, .04, .08)); osc(1046, 26.85, .002, .04, .2);
   [16.3, 16.6, 16.9].forEach((t, i) => osc(mtof([76, 81, 85][i]), t, .002, .04, .3)); [69, 73, 76, 81, 88].forEach((m, i) => osc(mtof(m), 17.25 + i*.05, .002, .03, .5));
   bell(90, 17.5, .045, 1.2); osc(mtof(97), 17.52, .002, .025, .6); saw(81, 19, .3, .07); bell(88, 19, .05, 1); osc(mtof(64), 19.7, .002, .06, .25, 'triangle');
   [32, 33, 34].forEach((t, i) => { saw([73, 76, 81][i], t, .25, .07); bell([85, 88, 93][i], t, .035, .8); for (let k = 0; k < 4; k++) osc(mtof([85, 88, 93][i] + k*2), t + .05 + k*.08, .002, .015, .06); });

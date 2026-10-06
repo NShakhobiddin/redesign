@@ -76,7 +76,8 @@ quradi, lekin soniyani aniq ushlamaydi. Aniq moslash pastdagi 5-bo'limda.
 | 17.25 | **= $102.20** | | Yaltiroq arpedjio |
 | 17.5 | **B ✓** — viktorinaning to'g'ri javobi | | Yorqin "ding" |
 | 19.0 | Salat fon: **"Boj: $0"**, 19.7 da **BOJSIZ** muhri | "Oyiga ikki yuz dollargacha — bojsiz." | Urg'uli stab va bell, muhrda past "tuk" |
-| 22.0 | **"Butun savat?"**, chaqnash 22.95 | "Butun savatni ham — bitta skrinshotda." | Bell urg'usi, "chirt" |
+| 22.0 | **"Butun savat?"**: savatdagi 3 tovar belgilanadi (22.2 · 22.35 · 22.5), chaqnash 22.95 | "Butun savatni ham — bitta skrinshotda." | Bell urg'usi, uchta kichik "pop", "chirt" |
+| 23.0–24.0 | **"Bitta skrinshot — bitta hisob"**: chek chiqadi, 24.05 da **JAMI $117.99** belgilanadi | | Yengil "printer" tiqillashi, 24.05 da bell |
 | 25.0 | **"Eng arzon kuryer"** → 26.25 da **"Kuryer siz uchun sotib oladi"** | "Eng arzon kuryer — u siz uchun sotib oladi." | Bell urg'usi, 26.75 da "pop", 26.85 da bildirishnoma ohangi |
 | 28.5 | **"Qadam-baqadam qo'llanma"** | "Qadam-baqadam qo'llanma va kuzatuv." | Bell urg'usi |
 | 30.25 | **"Jo'natmani kuzating"** | | Bell urg'usi |
@@ -107,7 +108,7 @@ Bo'limlar: 6 + 2 + 14 + 10 + 3 + 3 + 3 + 3,5 = 44,5 s.
      "positive_local_styles": ["logo impact on the first beat", "light four-on-the-floor", "soft chords F#m D A E, one per bar", "sub bass", "soft bell accents at 2 and 6 seconds into the section", "three rising plinks at 8.3, 8.6 and 8.9 seconds and a sparkle at 9.25", "a bright reveal ding at 9.5 seconds", "an accent at 11 seconds", "leaves room for narration"],
      "negative_local_styles": ["lead melody", "breakdown"]},
     {"section_name": "Groove continued", "duration_ms": 10000, "lines": [],
-     "positive_local_styles": ["same light groove", "soft bell accents at 0, 3, 6.5 and 8.25 seconds into the section", "leaves room for narration"],
+     "positive_local_styles": ["same light groove", "soft bell accents at 0, 3, 6.5 and 8.25 seconds into the section", "three tiny pops at 0.2, 0.35 and 0.5 seconds and a camera-shutter click at 0.95", "soft receipt-printer ticks from 1.2 to 1.65 seconds and a bell at 2.05", "leaves room for narration"],
      "negative_local_styles": ["lead melody", "breakdown"]},
     {"section_name": "Counters", "duration_ms": 3000, "lines": [],
      "positive_local_styles": ["three big rising stabs, one each second", "quick ticking after each stab"],

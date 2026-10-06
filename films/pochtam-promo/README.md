@@ -37,7 +37,7 @@ chiziq bilan "surilib" o'tadi.
 | 10–14 s | **Rasmini yuklang**: bosish → skan → topilgan do'konlar | Rasmini yuklang — sun'iy intellekt tovarni topadi. |
 | 14–19 s | **Skrinshot oling** → hisob ko'z oldida quriladi: **$97.80 + $4.40 + $0 = $102.20** (misol), viktorinaning javobi **B ✓** | Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor. |
 | 19–22 s | **Boj: $0**, oyiga $200 gacha, **BOJSIZ** muhri | Oyiga ikki yuz dollargacha — bojsiz. |
-| 22–25 s | **Butun savat?** → **Bitta skrinshot — bitta hisob**: 3 ta tovar → $117.99 | Butun savatni ham — bitta skrinshotda. |
+| 22–25 s | **Butun savat?** — do'kon savati telefonda, uchta tovar belgilanadi, skrinshot → **Bitta skrinshot — bitta hisob**: chek chiqadi (tovarlar $99.99 + kargo $18.00 + boj $0 = **$117.99**, misol) | Butun savatni ham — bitta skrinshotda. |
 | 25–28,5 s | **Eng arzon kuryer** → **Kuryer siz uchun sotib oladi**, "Xabar tayyor ✓" | Eng arzon kuryer — u siz uchun sotib oladi. |
 | 28,5–32 s | **Qadam-baqadam qo'llanma** → **Jo'natmani kuzating** | Qadam-baqadam qo'llanma va kuzatuv. |
 | 32–35 s | **43** do'kon · **20** kuryer · **3 til** (raqamlar sanaladi) | Qirq uch do'kon. Yigirma kuryer. Uch til. |
@@ -98,7 +98,7 @@ ffmpeg -y -i pochtam-promo.mp4 -c:v copy -an -movflags +faststart pochtam-promo-
 
 - MP4 xatosiz dekodlanadi: 1068 kadr, 44,5 s, 1080×1920, 24 fps, ovoz AAC
   48 kHz. Vaqtinchalik musiqa −10,8 LUFS, eng baland nuqta −1,5 dBFS.
-  6 kHz dan yuqorida energiya deyarli yo'q (−67,9 dB), ya'ni shovqin yo'q.
+  6 kHz dan yuqorida energiya deyarli yo'q (−67,8 dB), ya'ni shovqin yo'q.
 - Grid va to'liq o'lchamdagi kadrlar ko'zdan kechirildi: telefon ichidagi
   ekranlar kesilmaydi, sarlavhalar telefon ostida qolmaydi.
 - Diktor satrlarining uzunligi taxminan hisoblangan (sekundiga ~5 bo'g'in).
