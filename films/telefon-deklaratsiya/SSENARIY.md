@@ -312,5 +312,5 @@ Vertical 9:16, close-up, static camera. Over a customs desk, an officer's hand p
   qolsa, montajda xiralashtiraman.
 - Har klipdan 2–4 variant yarating va eng tabiiyini tanlang: yuz, qo'llar va
   lab harakatiga e'tibor bering.
-- Tayyor kliplarni shu chatga yuklang. Ularni montajga o'zim qo'yaman: 2-ovoz
-  yo'lini tanlasangiz, ElevenLabs ovozini ham men ulayman.
+- Tayyor kliplarni shu chatga yuklang. Ularni montajga o'zim qo'yaman. B yo'lni
+  tanlasangiz, ElevenLabs ovozini ham men ulayman.
