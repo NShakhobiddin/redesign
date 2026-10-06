@@ -36,7 +36,7 @@ Eng arzon kuryer — u siz uchun sotib oladi.
 
 10
 00:00:28,600 --> 00:00:31,900
-Qadam-baqadam qo'llanma va kuzatuv.
+Qo'llanma va jo'natmani kuzatish.
 
 11
 00:00:32,100 --> 00:00:34,900
@@ -51,5 +51,5 @@ Hammasi — bitta ilovada.
 Orzuingiz — eshigingiz oldida.
 
 14
-00:00:42,600 --> 00:00:44,400
-Pochtam nuqta uz.
+00:00:41,400 --> 00:00:44,400
+Hoziroq sinab ko'ring — Pochtam nuqta uz.

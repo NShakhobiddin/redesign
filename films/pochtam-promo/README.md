@@ -39,11 +39,11 @@ chiziq bilan "surilib" o'tadi.
 | 19–22 s | **Boj: $0**, oyiga $200 gacha, **BOJSIZ** muhri | Oyiga ikki yuz dollargacha — bojsiz. |
 | 22–25 s | **Butun savat?** — do'kon savati telefonda, uchta tovar belgilanadi, skrinshot → **Bitta skrinshot — bitta hisob**: chek chiqadi (tovarlar $99.99 + kargo $18.00 + boj $0 = **$117.99**, misol) | Butun savatni ham — bitta skrinshotda. |
 | 25–28,5 s | **Eng arzon kuryer** → **Kuryer siz uchun sotib oladi**, "Xabar tayyor ✓" | Eng arzon kuryer — u siz uchun sotib oladi. |
-| 28,5–32 s | **Qadam-baqadam qo'llanma** → **Jo'natmani kuzating** | Qadam-baqadam qo'llanma va kuzatuv. |
+| 28,5–32 s | **Qadam-baqadam qo'llanma** → **Jo'natmani kuzating** | Qo'llanma va jo'natmani kuzatish. |
 | 32–35 s | **43** do'kon · **20** kuryer · **3 til** (raqamlar sanaladi) | Qirq uch do'kon. Yigirma kuryer. Uch til. |
 | 35–38 s | **"Hammasi — bitta ilovada"** | Hammasi — bitta ilovada. |
 | 38–41 s | Quti eshik oldiga tushadi, konfetti: **"Orzuingiz — eshigingiz oldida."** | Orzuingiz — eshigingiz oldida. |
-| 41–44,5 s | Logotip va **pochtam.uz** (42,5 s) | Pochtam nuqta uz. |
+| 41–44,5 s | Logotip va **pochtam.uz** (42,5 s) | Hoziroq sinab ko'ring — Pochtam nuqta uz. |
 
 ## Qanday ishlangan
 
