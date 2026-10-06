@@ -256,18 +256,27 @@ Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look,
 
 **A variant — tashqaridan, umumiy plan:**
 ```
-Vertical 9:16, cinematic wide shot, slow tracking camera. A modern white passenger jet with no logos or writing lands on a long runway in clear daylight, rear wheels touch down with a small puff of tire smoke, then the nose wheel settles. Warm late-afternoon sun, light haze, distant mountains and a modern airport terminal far in the background. Realistic, documentary style, natural colors. Sound: deep jet engine roar, tire screech at touchdown, engines spooling down. No text, no airline logos, no registration numbers.
-Avoid: readable fake text, logos, distorted aircraft shape, extra wings or engines, cartoon look, camera shake.
+Vertical 9:16, cinematic wide shot, slow tracking camera. A modern Uzbekistan Airways passenger jet in the airline's real livery lands on a long runway in clear daylight, rear wheels touch down with a small puff of tire smoke, then the nose wheel settles. Warm late-afternoon sun, light haze, distant mountains and a modern airport terminal far in the background. Realistic, documentary style, natural colors. Sound: deep jet engine roar, tire screech at touchdown, engines spooling down. No other text, no registration numbers.
+Avoid: misspelled or garbled lettering, distorted logo, distorted aircraft shape, extra wings or engines, cartoon look, camera shake.
 ```
 
 **B variant — yo'lovchi derazasidan (hook bilan bog'lanadi):**
 ```
-Vertical 9:16, close-up from a passenger seat by the window, static camera. In the foreground a passenger's hand holds a brand-new smartphone without any logo; through the airplane window the wing and the runway rush past as the plane touches down, a gentle jolt at touchdown. Soft daylight through the window, shallow depth of field, realistic. Sound: muffled cabin engine noise, a soft thump at touchdown. No text, no logos, no faces.
+Vertical 9:16, close-up from a passenger seat by the window, static camera. In the foreground a passenger's hand holds a brand-new smartphone without any logo; through the window of an Uzbekistan Airways airplane the wing and the runway rush past as the plane touches down, a gentle jolt at touchdown. Soft daylight through the window, shallow depth of field, realistic. Sound: muffled cabin engine noise, a soft thump at touchdown. No text, no logos, no faces.
 Avoid: readable fake text, logos, distorted hands, extra fingers, cartoon look.
 ```
 
 Ikkalasini ham yaratib ko'rsangiz bo'ladi: A — 2-sahna boshiga, B — 1-sahna
 (hook)ga yoki 2-sahnaga mos keladi.
+
+**Uzbekistan Airways haqida:**
+- AI aviakompaniya logotipi va yozuvlarini ko'pincha buzib chizadi
+  (harflar aralashib ketadi, logotip boshqacha chiqadi). Natijani diqqat bilan
+  tekshiring.
+- Yozuv xato chiqsa, montajda o'sha joyni xiralashtiraman yoki kadrni
+  qirqaman.
+- Eng ishonchli yo'l — aeroportda haqiqiy Uzbekistan Airways samolyotini
+  o'zingiz suratga olish: rasmiy videoda logotip aniq va to'g'ri chiqadi.
 
 ### Qo'shimcha kadr (ixtiyoriy) · BKO uzatilishi, yaqin plan — ~4 s
 
