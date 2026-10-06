@@ -1,75 +1,76 @@
-# Mobil telefon deklaratsiyasi — montaj rejasi
+# Mobil telefon deklaratsiyasi — montaj
 
-Bu fayl qaysi kadr qaysi sahnaga borishini belgilaydi. Kadrlarning o'zi
-(aeroport, bojxona, ovozlar) ochiq repozitoriyga **qo'shilmaydi**, ular faqat
-montaj vaqtida ishlatiladi. Sahnalar: [`SSENARIY.md`](SSENARIY.md).
+Videoni montaj qiluvchi kod shu papkada. Kadrlar, ovozlar va tayyor video
+(aeroport, bojxona, ekran yozuvi) ochiq repozitoriyga **qo'shilmaydi**: kod
+ularni `--media` papkasidan nomi bo'yicha topadi, oraliq va tayyor fayllarni
+`--work` papkasiga yozadi. Sahnalar: [`SSENARIY.md`](SSENARIY.md).
 
-Hamma kadrlar vertikal, 1080×1920. Ko'pi 60 fps, K06, K07-alt-yashil va
-K09b-alt 30 fps. Flow kliplari 720×1280, 24 fps, ular 1080×1920 ga
-kattalashtiriladi. Yakuniy video 1080×1920, 30 fps bo'ladi.
+## 1-versiya (qoralama) — 2:33
 
-## Kelgan materiallar
+Video 1080×1920, 30 fps. Ovoz balandligi −14 LUFS. Hamma vaqtlar diktor
+ovoziga qarab qo'yilgan.
 
-| Fayl | Nima ko'rinadi | Sahna | Qaysi qismi |
+| Vaqt | Sahna | Kadr | Ekranda |
 | --- | --- | --- | --- |
-| Flow · Airplane landing from passenger | Illyuminator yonida qo'lda telefon, tashqarida Uzbekistan Airways samolyotlari | **1 · Hook** | 0–4 s |
-| Flow · Aircraft landing at airport | Uzbekistan Airways samolyoti yerga tegadi (tutun), terminal oldidan o'tadi | **2 · Qo'nish** | 1,5–6 s |
-| K03-terminalga-kirish | Kelish zali bo'ylab oldinga yurish | 2 · Qo'nish | 0–4 s |
-| K04-bagaj-lentasi | Qahramon 2-lenta yonida telefonga qaraydi → "Bagajni olish" belgisi | **3 · Bagaj zali** | 0–3 s, 4–6,5 s |
-| K05-telefonga-qarash | Lenta ustida telefon yozayotgan qo'llar, yaqin plan | 3 · Bagaj zali | 0–3 s |
-| K04-alt-bagaj-lentasi-odamlar | Bagaj zali, umumiy plan | 3 · zaxira | 3,7–7,5 s (odamlarsiz qismi) |
-| K01-telefon-qolda | Lenta yonida ybdweb'ni to'ldirish: kirish sahifasi → Face ID | **4–5 · Sayt / to'ldirish** | 0–6 s |
-| K05-alt-telefon-lenta-yaqin | Face ID ovali, yaqin plan | **5b · Face ID** | 1–4,3 s |
-| K09-alt-inspektor-kioskda | Xodim kioskda yo'lovchiga yordam beradi; devorda "Mobil qurilma olib kirdingizmi? · ybdweb.customs.uz" plakati | **4 · Sayt** (plakat) · 14 · UZIMEI | 4–6 s (plakat), 0–10 s |
-| K06-chamadon-olish | Chamadonni lentadan olib, yurib ketadi | **9 · Nazorat** | 0–7 s |
-| K07-bojxona-nazorati | Nazorat postiga yurish | 9 · Nazorat | 1,5–9 s (yo'lak belgisidan keyin) |
-| K09b-alt-imei-darcha-past-sifat | Qahramon darchada xodimga telefonini ko'rsatadi | 9 · Nazorat (QR ko'rsatish) | 2–9 s |
-| K08-bank-kassasi | "To'lovlar uchun kassa / Payment Desk" ga yaqinlashish | **12 · To'lov** | 2–8 s |
-| K09-alt-inspektor-kompyuterda | Xodim kompyuterda, qo'lida telefon, skaner | **13 · BKO** | 0–8 s |
-| K09-alt-uzimei-pullik-xizmat | "Bojxona-servis" banneri, "UZ IMEI" peshtaxtalari | **14 · UZIMEI** | 0–6 s |
-| K09b-imei-royxatga-olish | Yo'lovchi IMEI kioskida | 14 · UZIMEI | 1,5–7,5 s |
-| K09-alt-uzimei-peshtaxtalar | UZ IMEI peshtaxtalari, umumiy plan | 14 · zaxira | 2–5 s |
-| K10-chiqish | Eskalatordan tushib, shaharga chiqish | **14 → 16 · Chiqish / yakun** | 1,5–9 s |
-| K07-alt-qizil-yolak · K07-alt-yashil-yolak | Yo'lak belgilari | ishlatilmaydi | yo'lak nomi videoda ko'rsatilmaydi |
-| K08-alt-valyuta-ayirboshlash | Valyuta ayirboshlash, odamlar yaqin | ishlatilmaydi | to'lov kassasi emas, yuzlar yaqin |
-| K09-bojxona-servis | Ma'lumot peshtaxtasi va robot | zaxira | bojxona servisi emas |
-| K10-chiqish (2-nusxa) | Birinchisi bilan bir xil fayl | — | — |
+| 0:00 | 1 · Hook | Flow: illyuminator, qo'lda telefon | "Yangi telefon?" + muhr "Deklaratsiya majburiy!" |
+| 0:08 | 2 · Qo'nish | Flow: Uzbekistan Airways qo'nadi → K03 | "Xush kelibsiz!" |
+| 0:15 | 3 · Bagaj zali | K04 → K04-alt → K05 | "Bagaj kutyapsizmi?" |
+| 0:22 | 4 · Sayt | K05 | manzil yoziladi, saytga QR-kod, "Ilova o'rnatish shart emas" |
+| 0:29 | 5 · To'ldirish | ybdweb ekran yozuvi | 1–4-qadam kartochkalari, "Mobil qurilmani deklaratsiyalash" tugmasi belgilanadi |
+| 0:44 | 6 · IMEI maslahati | AI01 → *#06# grafikasi | `*#06#`, IMEI 1 · IMEI 2 |
+| 0:55 | 5 · Tekshiruv | ekran yozuvi, tezlashtirilgan | shakllantirish → joylashuv → bojxona tekshiruvi 100% |
+| 0:59 | 5 · QR-kod | ekran yozuvi | 5-qadam, QR-kod va "Yuklab olish" belgilanadi |
+| 1:04 | 7 · Qiymat | grafika | $1 000 me'yor, $1 300 misolida +$300 |
+| 1:13 | 8 · Istisno | grafika | UZIMEI'dagi telefon |
+| 1:18 | 9 · Nazorat | K06 → K07 → AI03 | "Bojxona nazorati", "Me'yor ichida — to'lovsiz" |
+| 1:35 | 11 · Oshganda | **AI04, AI05 o'rnida vaqtincha grafika** | yagona bojxona to'lovi, BKO |
+| 1:44 | 12 · To'lov | K08 → to'lov grafikasi | 1 · bank kassasi, 2 · istalgan to'lov tizimi |
+| 1:52 | 13 · BKO | **AI06 o'rnida vaqtincha K09-kompyuterda** | "BKO — bojxona kirim orderi" |
+| 1:58 | 14 · UZIMEI | grafika → K09-pullik-xizmat → K09-kioskda | IMEI → UZIMEI, uchta yo'l |
+| 2:13 | 15 · Eslatma | K10, xiralashtirilgan | 5 band |
+| 2:26 | 16 · Yakun | K10, xiralashtirilgan | «Toshkent-AERO», ybdweb.customs.uz, uzimei.uz |
 
-## Maxfiylik (montajda xiralashtiriladi)
+Ssenariydan farqi: IMEI maslahati (xodim) 4-qadamdan keyin turadi, ya'ni
+aynan IMEI kiritiladigan joyda. Diktorning 5-sahnadagi gaplari uchun
+keyingi yozilgan ovoz (10:32) olindi.
 
-- **K01** 1,3–2,8 s: ekranda pasport seriya-raqami ko'rinadi → maydon
-  xiralashtiriladi.
-- **K09-alt-inspektor-kompyuterda**: monitordagi jadval (deklaratsiyalar
-  ro'yxati) → monitor xiralashtiriladi.
-- **K09b-imei-royxatga-olish**, **K09-alt-inspektor-kioskda**: yo'lovchining
-  yuzi yon tomondan ko'rinadi → yuz xiralashtiriladi.
-- K03, K04, K07 va K10 dagi uzoqdagi odamlar juda kichik, ular
-  xiralashtirilmaydi.
+## Maxfiylik
 
-## Xodim ovozi (Jahongir)
+Montajdan oldin ekran yozuvida xiralashtiriladi (`tools/edit.py`, `MASKS`):
+- pasport seriya-raqami va klaviaturadagi taklif;
+- Face ID'dagi yuz;
+- IMEI raqamlari;
+- ro'yxatga olish raqami, haqiqiy QR-kod va skrinshot nusxasi.
 
-Bitta yozuvdagi oltita gap ajratildi. Har bir Flow klipida xodim taxminan
-shuncha vaqt gapirishi kerak:
+Kadrlarda:
+- K09-kompyuterda: monitor (deklaratsiyalar ro'yxati) xiralashtiriladi.
+- K09-kioskda: yo'lovchining yuzi ko'rinmaydigan qismi olinadi.
 
-| Klip | Gap | Uzunligi |
-| --- | --- | --- |
-| AI01 | Imey kodini bilish oson… | 6,6 s |
-| AI02 | Ikki SIM-kartali telefonda… | 4,0 s |
-| AI03 | Assalomu alaykum!… Marhamat, xush kelibsiz! | 7,2 s |
-| AI04 | Telefoningiz qiymati me'yordan oshgan… | 5,4 s |
-| AI05 | To'lovdan so'ng be-ka-o'ni… | 3,2 s |
-| AI06 | To'lov qabul qilindi… | 5,6 s |
+Ishlatilmaganlar:
+- yo'lak belgilari (K07-alt);
+- valyuta ayirboshlash (K08-alt);
+- ma'lumot peshtaxtasi (K09);
+- K01 va K05-alt — ularning o'rnini ekran yozuvi egalladi.
 
 ## Hali kerak
 
-1. **V01 · Diktor ovozi** — [`VOICEOVER.md`](VOICEOVER.md) dagi diktor matni,
-   bitta yozuvda. Montaj vaqtlari shu ovozga qarab belgilanadi. Ovoz xodimning
-   ovozidan (Jahongir) aniq farq qilsin.
-2. **E01 · ybdweb ekran yozuvi** — butun jarayon: pasport → Face ID → "Mobil
-   qurilmani deklaratsiyalash" → IMEI va narx → QR-kod.
-3. **AI01–AI06 · Flow'dagi xodim kliplari** — xodim ovozi tayyor, uni
-   kliplarga o'zim qo'yaman.
-4. **Musiqa** — [`MUSIC-PROMPT.md`](MUSIC-PROMPT.md) dagi Suno prompti bilan.
-5. Ixtiyoriy:
-   - **E02** — to'lov ilovasidagi to'lov (bo'lmasa, brendsiz grafika chizaman);
-   - **E03** — uzimei.uz yoki Birda'da ro'yxatdan o'tish.
+1. **AI04, AI05, AI06** — Flow'dagi xodim kliplari. Ovozi tayyor:
+   AI04 5,4 s, AI05 3,2 s, AI06 5,6 s.
+2. **Musiqa** — [`MUSIC-PROMPT.md`](MUSIC-PROMPT.md). Video 2:33 bo'ldi,
+   musiqani bo'limlarini takrorlab uzaytiraman.
+3. Ixtiyoriy: to'lov ilovasining ekran yozuvi (hozir brendsiz grafika).
+
+## Qayta yig'ish
+
+```
+export TEL_MEDIA=/kadrlar/papkasi TEL_WORK=/ish/papkasi
+python3 tools/edit.py cues      # vaqtlar -> cues.js
+python3 tools/edit.py clean     # ekran yozuvini xiralashtirish
+python3 tools/edit.py video     # kadrlar -> base.mp4
+python3 tools/edit.py audio     # diktor, xodim, fon, effektlar -> voice-mix.wav
+npm install && node tools/render-overlay.mjs --out $TEL_WORK/overlay
+python3 tools/edit.py final --out telefon-deklaratsiya.mp4
+```
+
+[`overlay.html`](overlay.html) ni brauzerda ochsangiz, yozuvlar va grafikani
+vaqt bo'yicha ko'rish mumkin.

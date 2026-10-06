@@ -1,0 +1,15 @@
+{
+  "name": "hand-drawn-canvas-render",
+  "private": true,
+  "type": "module",
+  "description": "Renders the overlay layer of the phone declaration video to transparent PNG frames.",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
