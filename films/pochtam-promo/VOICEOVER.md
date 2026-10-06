@@ -84,47 +84,51 @@ Ular o'qilmaydi. Butun matnni bitta qilib qo'yish ham, har satrni alohida
 yaratish ham mumkin.
 
 ```
-[excited] Taxmin qiling!... [curious] Uyingizgacha qanchaga tushadi?
+[excited] Taxmin qiling! [chuckles] [curious] Uyingizgacha qanchaga tushadi?
 
-[playful] Uch... ikki... bir...
+[whispers] Uch... ikki... bir...
 
-[confident] Javob — bitta skrinshotda.
+[confident] Javob — bitta skrinshotda!
 
-[excited] Bu — Pochtam!
+[proud] Bu — Pochtam!
 
 [friendly] Rasmini yuklang — sun'iy intellekt tovarni topadi.
 
-[upbeat] Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor.
+[upbeat] Narxni skrinshot qiling — [confident] jami summa boj, kargo va kurs bilan tayyor.
 
-[impressed] Oyiga ikki yuz dollargacha — bojsiz!
+[excited] Oyiga ikki yuz dollargacha — [impressed] bojsiz!
 
-[playful] Butun savatni ham — bitta skrinshotda.
+[playful] Butun savatni ham — bitta skrinshotda!
 
-[warm] Eng arzon kuryer — u siz uchun sotib oladi.
+[warm] Eng arzon kuryer — [friendly] u siz uchun sotib oladi.
 
 [reassuring] Qo'llanma va jo'natmani kuzatish.
 
-[energetic] Qirq uch do'kon... Yigirma kuryer... Uch til.
+[energetic] Qirq uch do'kon... Yigirma kuryer... Uch til!
 
-[confident] Hammasi — bitta ilovada.
+[proud] Hammasi — bitta ilovada.
 
-[warm] Orzuingiz — eshigingiz oldida.
+[warm] Orzuingiz — [happy] eshigingiz oldida!
 
-[excited] Hoziroq sinab ko'ring — Pochtam nuqta uz!
+[excited] Hoziroq sinab ko'ring — [cheerful] Pochtam nuqta uz!
 ```
 
 Har bir teg nima qiladi:
 
-| Teg | Satr | Qanday aytiladi |
+| Teg | Qayerda | Qanday aytiladi |
 | --- | --- | --- |
-| `[excited]` | Taxmin qiling! · Bu — Pochtam! · Hoziroq sinab ko'ring | Quvnoq, ko'tarinki, e'tiborni tortadi |
+| `[excited]` | Taxmin qiling! · Oyiga ikki yuz dollargacha · Hoziroq sinab ko'ring | Quvnoq, ko'tarinki, e'tiborni tortadi |
+| `[chuckles]` | "Taxmin qiling!" dan keyin | Qisqa kulimsirash. U pauzani to'ldiradi, shunda "Uyingizgacha" ~2 s ga tushadi |
 | `[curious]` | Uyingizgacha qanchaga tushadi? | Savol ohangida, qiziqtirib |
-| `[playful]` | Uch… ikki… bir… · Butun savatni ham… | O'ynoqi, viktorinadagidek |
-| `[confident]` | Javob — bitta skrinshotda · Hammasi — bitta ilovada | Ishonch bilan, aniq |
+| `[whispers]` | Uch… ikki… bir… | Shivirlab, sirli sanoq |
+| `[confident]` | Javob — bitta skrinshotda · jami summa… | Ishonch bilan, aniq |
+| `[proud]` | Bu — Pochtam! · Hammasi — bitta ilovada | G'urur bilan, brendni ta'kidlab |
 | `[friendly]` `[upbeat]` | Rasmini yuklang… · Narxni skrinshot qiling… | Do'stona, tushuntirib, shoshmasdan |
-| `[impressed]` | Oyiga ikki yuz dollargacha — bojsiz! | Hayratlanib, yaxshi xabar sifatida |
+| `[impressed]` | bojsiz! | Hayratlanib, yaxshi xabar sifatida |
+| `[playful]` | Butun savatni ham… | O'ynoqi |
 | `[warm]` `[reassuring]` | Eng arzon kuryer… · Qo'llanma… · Orzuingiz… | Iliq, xotirjam qiladi |
 | `[energetic]` | Qirq uch do'kon… | Tez, har raqam alohida urg'u bilan |
+| `[happy]` `[cheerful]` | eshigingiz oldida! · Pochtam nuqta uz! | Jilmayib, quvonch bilan |
 
 - Teglar **Creative** yoki **Natural** rejimida yaxshi ishlaydi. Agar ohang
   haddan oshib ketsa, o'sha satrdan tegni olib tashlang.
