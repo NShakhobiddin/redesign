@@ -231,25 +231,47 @@ Vertical 9:16, medium shot, static camera. Same officer at the customs desk. A p
 Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
 ```
 
-### 4-klip · Qiymat oshganda (11-sahna, 1-qism) — ~6 s
+### 4–6-kliplar (yangilangan): AI03 bilan bir xil xodim
 
+Bu uchta klip AI03 dagi xodim va peshtaxtaning davomi. Shuning uchun ularni
+**Frames to Video** bilan, AI03 dan olingan boshlang'ich kadrdan yarating:
+- AI04 va AI05 uchun — `flow-boshlangich-kadr-AI04-AI05.jpg`;
+- AI06 uchun — `flow-boshlangich-kadr-AI06.jpg`.
+
+Rasmlar chatda yuborilgan.
+
+Sozlamalar:
+- format — 9:16;
+- Veo 3.1 Quality;
+- 2–4 variant yarating va yuzi AI01/AI03 ga eng o'xshaganini tanlang;
+- yuklab olishda **1080p** ni tanlang.
+
+Klipdagi ovozni Jahongir ovozi bilan almashtiraman. Shuning uchun
+talaffuz muhim emas. Muhimi:
+- xodim birinchi soniyadan gapira boshlasin;
+- taxminan ko'rsatilgan vaqt gapirsin.
+
+Boshida uzoq jim tursa, qayta yarating.
+
+**AI04 · Qiymat oshganda — gapi ~5,4 s**
 ```
-Vertical 9:16, medium shot, static camera. Same officer at the customs desk looks at a tablet, then at the camera, and explains politely and calmly in Uzbek with open-hand gestures: "Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi." Reassuring expression. Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
-Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+Vertical 9:16, medium shot from the chest up, eye level, static camera. The same young customs officer from the start frame, in the dark green uniform with gold buttons, green shirt and dark green tie, stands behind the white customs counter in the bright airport hall. He glances down at a small screen on the counter for half a second, then looks straight into the camera and, starting within the first second, explains calmly and politely in Uzbek with one open-hand gesture: "Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi." He speaks steadily for about five seconds, then stops and waits with a kind, reassuring expression. Serious but friendly, no frowning. Soft daylight, quiet airport ambience, realistic skin, the same face and uniform throughout.
+No subtitles, no on-screen text, no readable text on screens or paper, no music.
+Avoid: a different face or uniform, extra fingers, distorted hands, emblems with writing, cartoon look, camera shake, zoom.
 ```
 
-### 5-klip · Qiymat oshganda (11-sahna, 2-qism) — ~3 s
-
+**AI05 · To'lovdan keyin BKO — gapi ~3,2 s**
 ```
-Vertical 9:16, medium shot, static camera. Same officer, same place, continuing with a reassuring smile and a small nod, says in Uzbek: "To'lovdan so'ng be-ka-o'ni rasmiylashtirib beraman." Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
-Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+Vertical 9:16, medium shot from the chest up, eye level, static camera. The same officer at the same white counter looks into the camera with a reassuring smile and, starting right away, says in Uzbek: "To'lovdan so'ng be-ka-o'ni rasmiylashtirib beraman." He speaks for about three seconds, then gives a small confident nod and keeps a calm smile until the end. Soft daylight, quiet airport ambience, realistic, the same face and uniform throughout.
+No subtitles, no on-screen text, no music.
+Avoid: a different face or uniform, extra fingers, distorted hands, emblems with writing, cartoon look, camera shake, zoom.
 ```
 
-### 6-klip · BKO (13-sahna) — ~7 s
-
+**AI06 · BKO berildi — gapi ~5,6 s**
 ```
-Vertical 9:16, medium shot, static camera. Same officer at the customs desk takes a printed receipt form from a small desktop printer, hands it across the desk toward the camera, nods and says warmly in Uzbek: "To'lov qabul qilindi. Mana, bojxona kirim orderingiz — be-ka-o. Telefoningiz rasmiylashtirildi." Quiet printer sound, airport ambience, soft daylight, realistic. The printed form shows no readable text. No subtitles, no on-screen text.
-Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+Vertical 9:16, medium shot from the chest up, eye level, static camera. The same officer at the same white counter. In the first second he takes a printed receipt from a small printer on the counter, then holds it out across the counter toward the camera, looks into the camera, smiles warmly and says in Uzbek: "To'lov qabul qilindi. Mana, bojxona kirim orderingiz — be-ka-o. Telefoningiz rasmiylashtirildi." He speaks for about five and a half seconds and ends with a friendly nod. The paper shows only soft grey lines, no readable text. A short printer sound, quiet airport ambience, soft daylight, realistic, the same face and uniform throughout.
+No subtitles, no on-screen text, no music.
+Avoid: a different face or uniform, extra fingers, distorted hands, readable text on the paper, emblems with writing, cartoon look, camera shake, zoom.
 ```
 
 ### Samolyot qo'nishi (2-sahna) — o'z kadringiz bo'lmasa, ~8 s

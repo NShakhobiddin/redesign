@@ -22,12 +22,14 @@ FPS, W, H, SR = 30, 1080, 1920, 48000
 CLIPS = {
     'WINDOW': 'Airplane_landing_from_passenger', 'LANDING': 'Aircraft_landing_at_airport',
     'AI01': 'Customs_officer_showing_smartpho', 'AI03': 'Officer_scanning_passenger_QR',
+    'AI04': 'Customs_officer_explaining_phone', 'AI05': 'Officer_speaking_at_counter', 'AI06': 'Officer_holding_receipt',
     'K01': 'K01-telefon-qolda', 'K03': 'K03-terminalga-kirish',
     'K04': 'K04-bagaj-lentasi.mp4', 'K04ALT': 'K04-alt-bagaj-lentasi-odamlar',
     'K05': 'K05-telefonga-qarash', 'K05ALT': 'K05-alt-telefon-lenta-yaqin',
     'K06': 'K06-chamadon-olish', 'K07': 'K07-bojxona-nazorati', 'K08': 'K08-bank-kassasi',
     'K09KOMP': 'K09-alt-inspektor-kompyuterda', 'K09KIOSK': 'K09-alt-inspektor-kioskda',
     'K09PULLIK': 'K09-alt-uzimei-pullik-xizmat', 'K10': 'K10-chiqish',
+    'K09PESH': 'K09-alt-uzimei-peshtaxtalar', 'K09B': 'K09b-imei-royxatga-olish',
     # ybdweb screen recording (six parts), used after tools/edit.py clean has masked personal data
     **{f'E{i}': f'@clean/E{i}.mp4' for i in range(1, 7)},
 }
@@ -56,42 +58,65 @@ TAKES = {'full': '07_32_33_Bekzod', 'redo': '10_32_51_Bekzod', 'off': 'Jahongir'
 # 'full' is the whole narrator text; 'redo' re-records steps 5a-5e; 'off' is the officer.
 # The officer's IMEI tip (O1, O2) sits between step 5d and 5e, where IMEI is entered.
 VO = [
-    ('N1', 'full', 0.04, 7.30, 0.30, 1, [0.14, 2.88, 4.23, 5.43]),
-    ('N2', 'full', 7.42, 13.75, 0.45, 1, [7.52, 8.72]),
-    ('N3', 'full', 13.92, 20.80, 0.45, 1, [14.03, 15.96, 17.98, 19.30]),
-    ('N4', 'full', 20.95, 27.95, 0.45, 1, [21.05, 21.95, 24.43, 25.77]),
-    ('S1', 'redo', 0.00, 2.68, 0.50, 1, [0.10]),
-    ('S2', 'redo', 2.92, 6.15, 0.35, 1, [3.02]),
-    ('S3', 'redo', 6.36, 9.33, 0.35, 1, [6.46]),
-    ('S4', 'redo', 9.49, 13.52, 0.35, 1, [9.59]),
-    ('O1', 'off', 0.04, 6.62, 0.50, 1.08, [0.14, 2.80, 3.70, 4.44, 4.70, 5.12, 5.80]),
-    ('O2', 'off', 6.86, 10.90, 0.35, 1, [6.96, 9.75]),
-    ('S5', 'redo', 13.62, 18.13, 5.10, 1, [13.72, 14.61, 17.05]),
-    ('N10', 'full', 46.28, 54.25, 0.55, 1, [46.38, 47.24, 48.10, 49.40, 50.55, 51.55, 52.28]),
-    ('N11', 'full', 54.35, 59.40, 0.50, 1, [54.45, 56.10]),
-    ('N12', 'full', 59.49, 65.42, 0.50, 1, [59.60, 60.42, 62.22, 63.95]),
-    ('O3', 'off', 11.17, 18.37, None, 1.08, [11.27, 12.52, 14.46, 16.65]),
-    ('O4', 'off', 18.57, 23.92, 0.45, 1, [18.67, 21.17]),
-    ('O5', 'off', 24.10, 27.30, 0.30, 1, [24.20]),
-    ('N13', 'full', 65.53, 73.08, 0.45, 1, [65.64, 67.54, 69.28, 70.72]),
-    ('O6', 'off', 27.54, 33.15, 0.45, 1, [27.64, 29.05, 29.52, 31.31]),
-    ('N14', 'full', 73.18, 85.55, 0.50, 1, [73.28, 74.32, 75.29, 76.97, 79.96, 81.79, 84.00]),
-    ('N15', 'full', 85.59, 97.95, 2.40, 1, [85.69, 86.66, 89.12, 91.31, 92.88, 94.17, 96.00, 96.81]),
-    ('N16', 'full', 98.07, 102.84, 0.60, 1, [98.17, 99.36, 101.85]),
+    ('N1', 'full', 0.04, 7.30, 0.25, 1, [0.14, 2.88, 4.23, 5.43]),
+    ('N2', 'full', 7.42, 13.75, 0.90, 1, [7.52, 8.72]),
+    ('N3', 'full', 13.92, 20.80, 0.35, 1, [14.03, 15.96, 17.98, 19.30]),
+    ('N4', 'full', 20.95, 27.95, 0.35, 1, [21.05, 21.95, 24.43, 25.77]),
+    ('S1', 'redo', 0.00, 2.68, 0.40, 1, [0.10]),
+    ('S2', 'redo', 2.92, 6.15, 0.30, 1, [3.02]),
+    ('S3', 'redo', 6.36, 9.33, 0.30, 1, [6.46]),
+    ('S4', 'redo', 9.49, 13.52, 0.30, 1, [9.59]),
+    ('O1', 'off', 0.10, 6.58, 0.55, 1, [0.14, 2.80, 3.70, 4.44, 4.70, 5.12, 5.80]),
+    ('O2', 'off', 6.86, 10.90, 0.30, 1, [6.96, 9.75]),
+    ('S5', 'redo', 13.62, 18.13, 3.05, 1, [13.72, 14.61, 17.05]),
+    ('N10', 'full', 46.28, 54.25, 0.45, 1, [46.38, 47.24, 48.10, 49.40, 50.55, 51.55, 52.28]),
+    ('N11', 'full', 54.35, 59.40, 0.35, 1, [54.45, 56.10]),
+    ('N12', 'full', 59.49, 65.42, 0.45, 1, [59.60, 60.42, 62.22, 63.95]),
+    ('O3a', 'off', 11.20, 14.00, None, 1, [11.27, 12.52]),
+    ('O3b', 'off', 14.40, 18.30, 0.35, 1, [14.46, 16.65]),
+    ('O4', 'off', 18.57, 23.92, 0.60, 1, [18.67, 21.17]),
+    ('O5', 'off', 24.10, 27.30, 0.55, 1, [24.20]),
+    ('N13', 'full', 65.53, 73.08, 0.40, 1, [65.64, 67.54, 69.28, 70.72]),
+    ('O6', 'off', 27.54, 33.15, 1.20, 1, [27.64, 29.05, 29.52, 31.31]),
+    ('N14', 'full', 73.18, 85.55, 0.45, 1, [73.28, 74.32, 75.29, 76.97, 79.96, 81.79, 84.00]),
+    ('N15', 'full', 85.59, 97.95, 1.20, 1, [85.69, 86.66, 89.12, 91.31, 92.88, 94.17, 96.00, 96.81]),
+    ('N16', 'full', 98.07, 102.84, 0.50, 1, [98.17, 99.36, 101.85]),
 ]
-AI03_RATE, AI03_LIPS = 1 / 1.12, 4.45   # AI03 plays slower; the officer starts talking at 4.45 s
-AI03_LEAD = -1.6                       # the scan starts as the narrator says "QR-kod"
-AI01_RATE, AI01_LIPS, AI01_IN = 1 / 1.1, 1.29, 0.8
+# Lip sync: the officer's phrases are laid onto the phrases the Veo officer speaks.
+# item: (clip, clip source at its first frame, [(take in, take out, lips from, lips to), ...]) in source seconds.
+SYNC = {
+    'O1': ('AI01', 0.8, [(0.10, 1.50, 1.29, 2.50), (1.85, 3.58, 2.76, 4.16), (3.66, 4.38, 4.44, 4.98), (4.40, 6.58, 5.16, 6.70)]),
+    'O3a': ('AI03', 1.4, [(11.20, 14.00, 4.83, 7.84)]),
+    'O4': ('AI04', 1.1, [(18.62, 20.80, 1.65, 3.92), (21.12, 23.70, 4.55, 7.06)]),
+    'O5': ('AI05', 0.2, [(24.14, 27.12, 0.71, 3.46)]),
+    'O6': ('AI06', 0.3, [(27.58, 28.78, 2.15, 3.17), (29.00, 29.38, 3.73, 3.98), (29.48, 30.95, 4.46, 6.38),
+                         (31.25, 32.03, 6.59, 7.18), (32.03, 32.98, 7.75, 9.25)], 1.1),
+}
+TEMPO = (0.88, 1.18)   # how far a phrase may be squeezed or stretched to meet the lips
 
 
 def timeline():
     T, t = {}, 0.0
     for vid, take, a, b, gap, tempo, ph in VO:
-        if gap is None:   # O3 follows the officer's lips in AI03
-            clip0 = T['N12']['end'] + AI03_LEAD
-            at = clip0 + AI03_LIPS / AI03_RATE - (ph[0] - a) / tempo
-        else:
-            at = t + gap
+        if vid in SYNC:
+            clip, src0, chunks, rate = (*SYNC[vid], 1)[:4]
+            if gap is None:   # AI03 starts as the narrator says "QR-kod"; O3a follows its lips
+                start = T['N12']['p'][3] - 0.3
+            else:             # the first phrase starts after the gap
+                start = t + gap - (chunks[0][2] - src0) / rate
+            placed, prev = [], -1e9
+            for j0, j1, v0, v1 in chunks:
+                tt = max(start + (v0 - src0) / rate, prev + 0.03)
+                k = min(max((j1 - j0) / ((v1 - v0) / rate), TEMPO[0]), TEMPO[1])
+                placed.append((j0, j1, round(tt, 3), round(k, 4))); prev = tt + (j1 - j0) / k
+            def at_take(x, placed=placed):
+                for j0, j1, tt, k in placed:
+                    if x <= j1: return tt + (max(x, j0) - j0) / k
+                j0, j1, tt, k = placed[-1]; return tt + (j1 - j0) / k
+            T[vid] = {'take': take, 'in': a, 'out': b, 'tempo': 1, 'at': placed[0][2], 'end': round(prev, 3),
+                      'clip': round(start, 3), 'chunks': placed, 'p': [round(at_take(x), 3) for x in ph]}
+            t = prev; continue
+        at = t + gap
         end = at + (b - a) / tempo
         T[vid] = {'take': take, 'in': a, 'out': b, 'tempo': tempo, 'at': round(at, 3), 'end': round(end, 3),
                   'p': [round(at + (p - a) / tempo, 3) for p in ph]}
@@ -102,40 +127,48 @@ def timeline():
 def segments(T):
     v = lambda k: T[k]
     p = lambda k, i: T[k]['p'][i]
-    ai03 = v('N12')['end'] + AI03_LEAD
-    ai01 = v('O1')['p'][0] - (AI01_LIPS - AI01_IN) / AI01_RATE
+    tz = p('N1', 3) - 0.05   # teaser: four flashes of what is coming
     S = [  # id, clip, source in, timeline start, rate, effects
-        ('hook', 'WINDOW', 0.0, 0.0, 1, {}),
-        ('landing', 'LANDING', 1.2, v('N1')['end'] + 0.15, 1, {'gain': -6}),
-        ('terminal', 'K03', 0.0, p('N2', 1) + 2.4, 1, {}),
-        ('belt', 'K04', 0.0, v('N3')['at'] - 0.25, 1, {}),
-        ('hall', 'K04ALT', 3.7, p('N3', 1) - 0.15, 1, {}),
-        ('phone', 'K05', 0.0, p('N3', 3) - 0.2, 1, {}),
-        ('site', 'K05', 3.2, v('N4')['at'] - 0.25, 0.6, {'dim': 0.25}),
-        ('s1', 'E1', 0.0, v('S1')['at'] - 0.15, None, {'to': 9.3, 'oy': 100}),
-        ('s2', 'E1', 11.0, v('S2')['at'] - 0.15, None, {'to': 16.0, 'oy': 100}),
+        ('hook', 'WINDOW', 0.5, 0.0, 1, {}),
+        ('hook2', 'K05', 3.4, p('N1', 1) - 0.1, 1, {}),
+        ('tz1', 'E3', 6.6, tz, 1, {'oy': 100}),
+        ('tz2', 'AI03', 9.0, tz + 0.45, 1, {'mute': 1}),
+        ('tz3', 'E6', 9.3, tz + 0.9, 1, {'oy': 250}),
+        ('tz4', 'K10', 6.2, tz + 1.35, 1, {'mute': 1}),
+        ('landing', 'LANDING', 3.3 - (p('N2', 0) - v('N1')['end'] - 0.05), v('N1')['end'] + 0.05, 1, {'gain': -3}),
+        ('terminal', 'K03', 0.0, p('N2', 1) + 1.6, 1, {}),
+        ('belt', 'K04', 0.0, v('N3')['at'] - 0.2, 1, {}),
+        ('hall', 'K04ALT', 3.7, p('N3', 1) - 0.1, 1, {}),
+        ('phone', 'K05', 0.0, p('N3', 3) - 0.1, 1, {}),
+        ('site', 'K05', 0, v('N4')['at'] - 0.15, 0.8, {'dim': 0.25, 'cont': 1}),
+        ('site2', 'E1', 0.0, p('N4', 3) - 0.1, 0.4, {'oy': 100}),
+        ('s1', 'E1', 0, v('S1')['at'] - 0.12, None, {'to': 9.3, 'oy': 100, 'cont': 1}),
+        ('s2', 'E1', 11.0, v('S2')['at'] - 0.12, None, {'to': 16.0, 'oy': 100}),
         ('s2b', 'E3', 4.3, v('S2')['at'] + 1.85, None, {'to': 6.0, 'oy': 100}),
-        ('s3', 'E3', 6.0, v('S3')['at'] - 0.15, None, {'to': 9.3, 'oy': 100}),
-        ('s4', 'E3', 10.3, v('S4')['at'] - 0.15, None, {'to': 16.5, 'oy': 100}),
+        ('s3', 'E3', 6.0, v('S3')['at'] - 0.12, None, {'to': 9.3, 'oy': 100}),
+        ('s4', 'E3', 10.3, v('S4')['at'] - 0.12, None, {'to': 16.5, 'oy': 100}),
         ('s4b', 'E4', 2.5, v('S4')['at'] + 1.85, None, {'to': 10.2, 'oy': 100}),
-        ('ai01', 'AI01', AI01_IN, ai01, AI01_RATE, {'mute': 1}),
+        ('ai01', 'AI01', SYNC['O1'][1], v('O1')['clip'], 1, {'mute': 1}),
         ('imei', 'AI01', 0, v('O2')['at'] - 0.15, 1, {'bg': 1, 'mute': 1, 'cont': 1}),
-        ('m1', 'E4', 10.7, v('O2')['end'] + 0.3, None, {'to': 16.0, 'oy': 100}),
-        ('m2', 'E5', 0.0, v('O2')['end'] + 1.9, None, {'to': 3.0, 'oy': 100}),
-        ('m3', 'E6', 5.5, v('O2')['end'] + 3.5, None, {'to': 8.4, 'oy': 100}),
-        ('qr', 'E6', 8.4, v('S5')['at'] - 0.15, 1, {'oy': 250}),
-        ('value', None, 0, v('N10')['at'] - 0.2, 1, {}),
-        ('except', None, 0, v('N11')['at'] - 0.2, 1, {}),
+        ('m1', 'E4', 10.7, v('O2')['end'] + 0.2, None, {'to': 16.0, 'oy': 100}),
+        ('m2', 'E5', 0.0, v('O2')['end'] + 1.1, None, {'to': 3.0, 'oy': 100}),
+        ('m3', 'E6', 5.5, v('O2')['end'] + 2.0, None, {'to': 8.4, 'oy': 100}),
+        ('qr', 'E6', 8.4, v('S5')['at'] - 0.12, 1, {'oy': 250}),
+        ('value', 'K04ALT', 0.0, v('N10')['at'] - 0.2, 0.6, {'bg': 1, 'mute': 1}),
+        ('except', 'K04', 0.0, v('N11')['at'] - 0.2, 0.6, {'bg': 1, 'mute': 1}),
         ('suitcase', 'K06', 0.0, v('N12')['at'] - 0.2, 1, {}),
-        ('control', 'K07', 1.5, p('N12', 1) + 1.3, 1, {}),
-        ('ai03', 'AI03', 0.0, ai03, AI03_RATE, {'mute_after': AI03_LIPS - 0.15, 'gain': -4}),
-        ('over', 'AI03', 9.9, v('O4')['at'] - 0.15, 1, {'bg': 1, 'mute': 1}),   # AI04/AI05 to come
-        ('cashier', 'K08', 1.5, v('N13')['at'] - 0.2, 1, {}),
-        ('pay', 'K08', 7.9, p('N13', 2) - 0.1, 1, {'bg': 1, 'mute': 1}),
-        ('bko', 'K09KOMP', 0.3, v('O6')['at'] - 0.15, 1, {'blurtop': 1040}),     # AI06 to come
-        ('uzimei', None, 0, v('N14')['at'] - 0.2, 1, {}),
-        ('servis', 'K09PULLIK', 0.2, p('N14', 6) + 0.6, 1, {}),
-        ('kiosk', 'K09KIOSK', 4.7, v('N14')['end'] + 0.9, 1, {}),
+        ('control', 'K07', 1.5, p('N12', 1) + 0.9, 1, {}),
+        ('ai03', 'AI03', SYNC['O3a'][1], v('O3a')['clip'], 1, {'mute_after': 4.7, 'gain': -4}),
+        ('pass', 'K07', 4.5, v('O3a')['end'] + 0.2, 0.9, {}),
+        ('ai04', 'AI04', SYNC['O4'][1], v('O4')['clip'], 1, {'mute': 1}),
+        ('ai05', 'AI05', SYNC['O5'][1], v('O5')['clip'], 1, {'mute': 1}),
+        ('cashier', 'K08', 2.5, v('N13')['at'] - 0.2, 1, {}),
+        ('pay', 'K08', 0, p('N13', 2) - 0.1, 1, {'bg': 1, 'mute': 1, 'cont': 1}),
+        ('ai06', 'AI06', SYNC['O6'][1], v('O6')['clip'], 1.1, {'mute': 1}),
+        ('uz1', 'K09PESH', 0.0, v('N14')['at'] - 0.2, 0.6, {'bg': 1, 'mute': 1}),
+        ('uzk', 'K09B', 3.0, p('N14', 3) - 0.1, 1, {}),
+        ('uz2', 'K09PESH', 2.4, p('N14', 4) - 0.1, 0.6, {'bg': 1, 'mute': 1}),
+        ('servis', 'K09PULLIK', 0.2, p('N14', 6) - 0.05, 1, {}),
         ('exit', 'K10', 1.5, v('N15')['at'] - 0.25, 1, {}),
         ('recap', 'K10', 0, p('N15', 1) - 0.35, 0.33, {'bg': 1, 'mute': 1, 'cont': 1}),
     ]
@@ -143,10 +176,11 @@ def segments(T):
     out = []
     for i, (sid, clip, src, start, rate, fx) in enumerate(S):
         stop = S[i + 1][3] if i + 1 < len(S) else end
-        if fx.get('cont'):   # the same shot goes on behind a graphic
+        if fx.get('cont'):   # the same shot goes on
             q = out[-1]; src = q['src'] + (q['e'] - q['s']) * q['rate']
         if rate is None:     # play the source range [src, to] in the segment's time
             rate = (fx['to'] - src) / (stop - start)
+        if stop - start < 0.2: raise SystemExit(f'segment {sid} too short: {stop - start:.2f} s')
         out.append({'id': sid, 'clip': clip, 'src': round(src, 3), 's': round(start, 3), 'e': round(stop, 3),
                     'rate': rate, 'fx': fx})
     return out, end
@@ -164,7 +198,7 @@ def events(T):
         'dualBoth': p('O2', 1), 'step5': p('S5', 0), 'qrShown': p('S5', 1), 'save': p('S5', 2),
         'value': p('N10', 0), 'norm': p('N10', 3), 'free': p('N10', 4), 'over': p('N10', 5),
         'overPart': p('N10', 6), 'except': p('N11', 0), 'exceptTick': p('N11', 1),
-        'control': p('N12', 1), 'showQr': p('N12', 3), 'inNorm': p('O3', 2),
+        'control': p('N12', 1), 'showQr': p('N12', 3), 'inNorm': p('O3b', 0), 'welcomeIn': p('O3b', 1),
         'overNorm': p('O4', 0), 'ybt': p('O4', 1), 'bkoAfter': p('O5', 0),
         'cash': p('N13', 0), 'online': p('N13', 2), 'paid': p('N13', 3) + 1.2,
         'bko': p('O6', 2), 'bkoDone': p('O6', 3),
@@ -280,8 +314,9 @@ def sfx(kind):
 
 
 def sfx_list(T):
-    e = events(T)
+    e = events(T); segs, _ = segments(T)
     L = [('stamp', e['stamp']), ('pop', e['hookTitle']), ('tick', e['url']), ('pop', e['noApp'])]
+    L += [('tick', s['s']) for s in segs if s['id'] in ('tz1', 'tz2', 'tz3', 'tz4', 'm1', 'm2', 'm3')]
     L += [('tick', e[f'step{i}']) for i in range(1, 6)]
     L += [('key', k) for k in e['keys']] + [('pop', e['dual']), ('ding', e['qrShown'])]
     L += [('thud', e['norm']), ('ding', e['free']), ('thud', e['overPart']), ('pop', e['exceptTick'])]
@@ -297,12 +332,16 @@ def build_audio():
     n = int((end + 0.5) * SR)
     vo, amb, fx = np.zeros(n, np.float32), np.zeros(n, np.float32), np.zeros(n, np.float32)
     takes = {k: decode(find(v, '.mp3')) for k, v in TAKES.items()}
+    def stretch(x, k, name):
+        if abs(k - 1) < 1e-3: return x
+        tmp = os.path.join(WORK, f'_{name}.wav'); write_wav(tmp, x)
+        return decode(tmp, af=f'rubberband=tempo={k}:pitchq=quality')
     for vid, it in T.items():
-        x = takes[it['take']][int(it['in'] * SR):int(it['out'] * SR)]
-        if it['tempo'] != 1:
-            tmp = os.path.join(WORK, f'_{vid}.wav'); write_wav(tmp, x)
-            x = decode(tmp, af=f"rubberband=tempo={it['tempo']}:pitchq=quality")
-        place(vo, fade(x, 0.01, 0.06), it['at'])
+        take = takes[it['take']]
+        parts = it.get('chunks') or [(it['in'], it['out'], it['at'], it['tempo'])]
+        for n, (j0, j1, at, k) in enumerate(parts):
+            x = stretch(take[int(j0 * SR):int(j1 * SR)], k, f'{vid}-{n}')
+            place(vo, fade(x, 0.01, 0.05), at)
     # Ambience: the clips' own sound, low under the voice.
     for s in segs:
         if not s['clip'] or s['fx'].get('mute') or s['clip'].startswith('E'): continue
@@ -359,17 +398,18 @@ def seg_filter(s, dur):
 def build_video():
     T = timeline(); segs, end = segments(T)
     d = os.path.join(WORK, 'segs'); os.makedirs(d, exist_ok=True)
-    lst = []
-    for i, s in enumerate(segs):
+    from concurrent.futures import ThreadPoolExecutor
+    def render(i, s):
         dur = s['e'] - s['s']; out = os.path.join(d, f'{i:02d}-{s["id"]}.mp4')
-        enc = ['-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '16', '-pix_fmt', 'yuv420p', '-r', str(FPS)]
+        enc = ['-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '15', '-pix_fmt', 'yuv420p', '-r', str(FPS), '-threads', '2']
         if s['clip'] is None:
             ff('-f', 'lavfi', '-i', f'color=c=0x06281e:s={W}x{H}:r={FPS}:d={dur:.4f}', *enc, out)
         else:
-            src = find(CLIPS[s['clip']])
-            ff('-ss', f"{s['src']:.3f}", '-i', src, '-filter_complex', seg_filter(s, dur), *enc, out)
-        lst.append(f"file '{out}'")
-        print(f'  {i:02d} {s["id"]:9s} {dur:5.2f} s')
+            ff('-ss', f"{s['src']:.3f}", '-i', find(CLIPS[s['clip']]), '-filter_complex', seg_filter(s, dur), *enc, out)
+        print(f'  {i:02d} {s["id"]:9s} {dur:5.2f} s', flush=True)
+        return f"file '{out}'"
+    with ThreadPoolExecutor(int(opt('--jobs', 3))) as pool:
+        lst = list(pool.map(lambda a: render(*a), enumerate(segs)))
     with open(os.path.join(d, 'list.txt'), 'w') as f: f.write('\n'.join(lst) + '\n')
     ff('-f', 'concat', '-safe', '0', '-i', os.path.join(d, 'list.txt'), '-c', 'copy', os.path.join(WORK, 'base.mp4'))
     print(f'video: {WORK}/base.mp4 ({end:.2f} s)')

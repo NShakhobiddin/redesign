@@ -203,7 +203,7 @@ function panelBg(t, a0, a1, {from = 'right'} = {}) {
   if (t < a0 || t > a1) return 0;
   const p = io(k(t, a0, .45)), q = io(k(a1 - t, 0, .35));
   const off = (1 - p) * W * (from === 'right' ? 1 : -1);
-  g.save(); g.globalAlpha = Math.min(1, q * 1.5);
+  g.save(); g.globalAlpha = Math.min(1, q * 1.5) * .88;
   const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#0d6a4f'); gr.addColorStop(1, '#052219');
   g.fillStyle = gr; g.fillRect(off, 0, W, H);
   // faint grid
@@ -215,14 +215,15 @@ function panelBg(t, a0, a1, {from = 'right'} = {}) {
 
 // ---------------------------------------------------------------- scenes
 function hook(t) {
-  const [a0, a1] = SG.hook; if (t > a1 + .3) return;
-  scrim(true, life(t, 0, a1, .2, .3));
-  const p = k(t, E.hookTitle, .45), a = life(t, E.hookTitle, a1, .2, .25);
+  const a1 = SG.tz1[0], end = SG.tz4[1];
+  if (t > end + .3) return;
+  scrim(true, life(t, 0, a1, .2, .15));
+  const p = k(t, E.hookTitle, .45), a = life(t, E.hookTitle, a1, .2, .15);
   if (a > 0) {
     g.save(); g.globalAlpha = a; g.translate(W / 2, 470); const s = .6 + .4 * eb(p); g.scale(s, s);
     shadow(true, 30, 6, .5); text(uz('Yangi telefon?'), 0, 0, 124, {w: 800}); shadow(false); g.restore();
   }
-  const ps = k(t, E.stamp, .2), as = life(t, E.stamp, a1, .05, .25);
+  const ps = k(t, E.stamp, .2), as = life(t, E.stamp, a1, .05, .15);
   if (as > 0) {
     g.save(); g.globalAlpha = as; g.translate(W / 2, 760); g.rotate(-.07); const s = 1 + 1.3 * (1 - eo(ps)); g.scale(s, s);
     g.strokeStyle = COL.red; g.lineWidth = 12; rr(-400, -120, 800, 240, 28); g.fillStyle = 'rgba(255,255,255,0.92)'; g.fill(); g.stroke();
@@ -230,7 +231,14 @@ function hook(t) {
     text('DEKLARATSIYA', 0, -38, 76, {w: 800, col: COL.red}); text('MAJBURIY!', 0, 50, 84, {w: 800, col: COL.red});
     g.restore();
   }
-  chip(t, E.how, a1 - .1, "Qanday? Hozir ko'rsatamiz", {y: 1420, size: 46});
+  // teaser: four quick flashes of what is coming, under one line of text
+  for (const id of ['tz1', 'tz2', 'tz3', 'tz4']) {
+    const f = k(t, SG[id][0], .12); if (f > 0 && f < 1) { g.fillStyle = `rgba(255,255,255,${.55 * (1 - f)})`; g.fillRect(0, 0, W, H); }
+  }
+  if (t >= a1 - .05) {
+    g.save(); g.globalAlpha = life(t, a1 - .05, end, .12, .2); g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(0, 760, W, 400); g.restore();
+    chip(t, a1 - .05, end, "Qanday? Hozir ko'rsatamiz", {y: 960, size: 58});
+  }
 }
 function arrival(t) {
   const a1 = SG.terminal[1] - .1;
@@ -242,26 +250,29 @@ function baggage(t) {
   card(t, E.here, a1, 'Deklaratsiya — shu yerda, telefoningizdan', {sub: "Aeroportning o'zida, bagaj kutayotganda"});
 }
 function site(t) {
-  const [a0, a1] = SG.site; if (t < a0 || t > a1) return;
-  scrim(true, life(t, a0, a1)); scrim(false, life(t, a0, a1));
-  // the address being typed
-  const a = life(t, E.url - .3, a1, .3, .3), url = 'ybdweb.customs.uz';
-  if (a > 0) {
-    const n = Math.round(clamp((t - E.url) / (E.urlDone - .25 - E.url)) * url.length), y = 380;
-    g.save(); g.globalAlpha = a; shadow(true); rr(70, y - 75, 940, 150, 75); g.fillStyle = '#fff'; g.fill(); shadow(false);
-    lock(150, y, 22); const s = url.slice(0, n);
-    text(s, 200, y + 3, 64, {w: 700, col: COL.ink, align: 'left'});
-    if (n < url.length || (t * 2 % 1) < .5) { g.font = FONT(700, 64); const cw = g.measureText(s).width; g.fillStyle = COL.green; g.fillRect(206 + cw, y - 36, 6, 72); }
-    g.restore();
+  const [a0, a1] = SG.site;
+  if (t >= a0 && t <= a1) {
+    scrim(true, life(t, a0, a1)); scrim(false, life(t, a0, a1));
+    // the address being typed
+    const a = life(t, E.url - .3, a1, .3, .25), url = 'ybdweb.customs.uz';
+    if (a > 0) {
+      const n = Math.round(clamp((t - E.url) / (E.urlDone - .25 - E.url)) * url.length), y = 380;
+      g.save(); g.globalAlpha = a; shadow(true); rr(70, y - 75, 940, 150, 75); g.fillStyle = '#fff'; g.fill(); shadow(false);
+      lock(150, y, 22); const s = url.slice(0, n);
+      text(s, 200, y + 3, 64, {w: 700, col: COL.ink, align: 'left'});
+      if (n < url.length || (t * 2 % 1) < .5) { g.font = FONT(700, 64); const cw = g.measureText(s).width; g.fillStyle = COL.green; g.fillRect(206 + cw, y - 36, 6, 72); }
+      g.restore();
+    }
+    // QR to the site
+    const aq = life(t, E.urlDone, a1, .4, .25);
+    if (aq > 0) {
+      g.save(); g.globalAlpha = aq; const s = .8 + .2 * eb(k(t, E.urlDone, .45)); g.translate(W / 2, 830); g.scale(s, s);
+      shadow(true); rr(-210, -250, 420, 500, 40); g.fillStyle = '#fff'; g.fill(); shadow(false);
+      qr(-170, -210, 340, C.qrSite); text('Skanerlang', 0, 196, 42, {w: 700, col: COL.green}); g.restore();
+    }
   }
-  // QR to the site
-  const aq = life(t, E.urlDone, a1, .4, .3);
-  if (aq > 0) {
-    g.save(); g.globalAlpha = aq; const s = .8 + .2 * eb(k(t, E.urlDone, .45)); g.translate(W / 2, 800); g.scale(s, s);
-    shadow(true); rr(-210, -250, 420, 500, 40); g.fillStyle = '#fff'; g.fill(); shadow(false);
-    qr(-170, -210, 340, C.qrSite); text('Skanerlang', 0, 196, 42, {w: 700, col: COL.green}); g.restore();
-  }
-  chip(t, E.noApp, a1 - .1, "Ilova o'rnatish shart emas", {y: 1420, size: 48, icon: iconCheck});
+  // the real site opens: no app needed
+  chip(t, Math.max(E.noApp, SG.site2[0] + .1), SG.site2[1] - .05, "Ilova o'rnatish shart emas", {y: 1480, size: 52, icon: iconCheck});
 }
 const STEPS = ["Pasport ma'lumotlari", 'Face ID — yuz orqali tasdiqlash', '«Mobil qurilmani deklaratsiyalash»',
   'IMEI kodlar va narxi', 'QR-kod tayyor'];
@@ -331,10 +342,11 @@ function valueScene(t) {
   const [a0, a1] = SG.value; if (t < a0 || t > a1) return;
   const a = panelBg(t, a0, a1); if (a <= 0) return;
   g.save(); g.globalAlpha = Math.min(1, a * 1.4);
-  const at = life(t, E.value, a1, .3, .2);
-  g.globalAlpha = at; text(uz('Eng muhimi — qiymat'), W / 2, 300, 72, {w: 800, col: COL.gold}); g.globalAlpha = 1;
+  // the title opens big in the middle, then makes room for the norm
+  const at = life(t, E.value, a1, .3, .2), up = io(k(t, E.norm - 1.0, .5));
+  g.globalAlpha = at; text(uz('Eng muhimi — qiymat'), W / 2, 820 - 520 * up, 96 - 24 * up, {w: 800, col: COL.gold}); g.globalAlpha = 1;
   // the norm
-  const an = life(t, E.value + .9, a1, .3, .2);
+  const an = life(t, E.norm - .7, a1, .3, .2);
   if (an > 0) {
     g.save(); g.globalAlpha = an; const y = 640; shadow(true); rr(90, y - 210, 900, 420, 48); g.fillStyle = '#fff'; g.fill(); shadow(false);
     text(uz("Bojsiz me'yor · havo yo'li"), W / 2, y - 130, 40, {w: 600, col: '#5d6d66'});
@@ -389,23 +401,14 @@ function exceptScene(t) {
   card(t, E.except - .1, a1, "Deklaratsiya qilinmaydi", {y: 1230, sub: "O'zbekistonda sotib olingan va UZIMEI'da ro'yxatdan o'tgan telefon", accent: COL.mint});
 }
 function control(t) {
-  const a0 = E.control - .2, a1 = SG.ai03[0] + 1.2;
+  const a0 = E.control - .2, a1 = SG.ai03[0] + 1.4;
   card(t, a0, a1, 'Bojxona nazorati', {sub: E.showQr <= t ? "Xodimga QR-kodni ko'rsating" : "Bagajni olgach — nazoratga", accent: COL.gold});
-  card(t, E.inNorm - .1, SG.ai03[1] - .1, "Me'yor ichida — to'lovsiz", {y: 1450, tick: E.inNorm + .2, accent: COL.mint});
+  card(t, E.inNorm - .1, SG.pass[1] - .1, "Me'yor ichida — to'lovsiz", {sub: t >= E.welcomeIn ? 'Marhamat, xush kelibsiz!' : '',
+    y: 1450, tick: E.inNorm + .2, accent: COL.mint});
 }
 function overNorm(t) {
-  const [a0, a1] = SG.over; if (t < a0 || t > a1) return;
-  tag(t, a0, a1, 'Flow kliplari kutilmoqda: AI04, AI05');
-  const a = life(t, a0, a1, .4, .3);
-  g.save(); g.globalAlpha = a;
-  text(uz("Qiymat $1 000 dan oshsa"), W / 2, 520, 66, {w: 800, col: '#fff'});
-  arrow(W / 2, 600, W / 2, 760, COL.gold, 12);
-  const s = .8 + .2 * eb(k(t, E.ybt, .45)), on = t >= E.ybt;
-  g.save(); g.translate(W / 2, 880); g.scale(on ? s : .8, on ? s : .8); g.globalAlpha = a * (on ? 1 : .35);
-  shadow(true); rr(-420, -90, 840, 180, 44); g.fillStyle = '#fff'; g.fill(); shadow(false);
-  text(uz("Yagona bojxona to'lovi"), 0, 3, 62, {w: 800, col: COL.green}); g.restore();
-  g.restore();
-  card(t, E.bkoAfter - .1, a1, "To'lovdan keyin — BKO", {y: 1300, sub: 'Bojxona xodimi rasmiylashtirib beradi', accent: COL.gold});
+  card(t, E.overNorm - .1, SG.ai04[1] - .05, "Yagona bojxona to'lovi", {label: "QIYMAT $1 000 DAN OSHSA", sub: E.ybt <= t ? "faqat oshgan qismiga" : '', accent: COL.red});
+  card(t, E.bkoAfter - .1, SG.ai05[1] - .05, "To'lovdan keyin — BKO", {sub: 'Bojxona xodimi rasmiylashtirib beradi', accent: COL.gold});
 }
 function payment(t) {
   card(t, E.cash - .1, SG.cashier[1] - .05, 'Bank kassasi — terminalda', {badge: '1', accent: COL.gold});
@@ -427,44 +430,54 @@ function payment(t) {
   card(t, E.online - .1, a1, "Istalgan to'lov tizimi — onlayn", {badge: '2', y: 1500, accent: COL.gold});
 }
 function bko(t) {
-  const [a0, a1] = SG.bko; if (t < a0 || t > a1 + .3) return;
-  tag(t, a0, a1, 'Flow klipi kutilmoqda: AI06');
-  card(t, E.bko - .1, a1, "BKO — bojxona kirim orderi", {sub: E.bkoDone <= t ? 'Telefon rasmiylashtirildi' : "To'lovdan keyin beriladi", tick: E.bkoDone, accent: COL.gold});
+  card(t, E.bko - .1, SG.ai06[1] - .05, "BKO — bojxona kirim orderi", {y: 1620, sub: E.bkoDone <= t ? 'Telefon rasmiylashtirildi' : "To'lovdan keyin beriladi", tick: E.bkoDone, accent: COL.gold});
 }
 function uzimei(t) {
-  const [a0, a1] = SG.uzimei; if (t < a0 || t > a1) return;
-  const a = panelBg(t, a0, a1); if (a <= 0) return;
-  g.save(); g.globalAlpha = life(t, E.last - .2, a1, .3, .2);
-  text(uz('Oxirgi qadam'), W / 2, 250, 72, {w: 800, col: COL.gold});
-  const ah = life(t, E.all - .1, a1, .3, .2); g.globalAlpha = ah;
-  text(uz("hamma uchun — me'yor ichida bo'lsa ham"), W / 2, 335, 40, {w: 600, col: '#fff'});
-  // two paths join
-  const pj = eo(k(t, E.all, .8)), cx = W / 2, ny = 640;
-  g.globalAlpha = life(t, E.all - .2, a1, .3, .2);
-  const pill = (x, y, s, ok) => { rr(x - 210, y - 50, 420, 100, 50); g.fillStyle = 'rgba(255,255,255,0.95)'; g.fill();
-    text(uz(s), x - 20, y + 3, 36, {w: 700, col: COL.ink}); check(x + 165, y, 26, COL.white, COL.mint); };
-  pill(270, 470, "Me'yor ichida", true); pill(810, 470, "To'lov + BKO", true);
-  g.strokeStyle = COL.mint; g.lineWidth = 8; g.lineCap = 'round';
-  for (const sx of [270, 810]) { g.beginPath(); g.moveTo(sx, 525); const mx = sx + (cx - sx) * pj, my = 525 + (ny - 60 - 525) * pj; g.quadraticCurveTo(sx, (525 + my) / 2 + 20, mx, my); g.stroke(); }
-  // IMEI -> UZIMEI
-  const pu = k(t, E.imeiUz - .1, .45);
-  if (pu > 0) {
-    g.save(); g.globalAlpha = eo(pu); const s = .7 + .3 * eb(pu); g.translate(cx, ny + 120); g.scale(s, s);
-    shadow(true); rr(-400, -110, 800, 220, 50); g.fillStyle = '#fff'; g.fill(); shadow(false);
-    text('IMEI', -220, 3, 80, {w: 800, col: COL.ink}); arrow(-110, 0, 60, 0, COL.gold, 12); text('UZIMEI', 220, 3, 80, {w: 800, col: COL.green});
+  const cx = W / 2;
+  // 1 · the last step is for everyone: both paths meet
+  const [a0, a1] = SG.uz1;
+  if (t >= a0 && t <= a1 && panelBg(t, a0, a1) > 0) {
+    g.save(); g.globalAlpha = life(t, E.last - .2, a1, .3, .15);
+    text(uz('Oxirgi qadam'), cx, 420, 96, {w: 800, col: COL.gold});
+    g.globalAlpha = life(t, E.all - .1, a1, .3, .15);
+    text(uz('hamma uchun'), cx, 530, 60, {w: 700, col: '#fff'});
+    const pj = eo(k(t, E.evenNorm - .2, .8)), ny = 1150;
+    g.globalAlpha = life(t, E.evenNorm - .3, a1, .3, .15);
+    const pill = (x, y, s) => { rr(x - 220, y - 55, 440, 110, 55); g.fillStyle = 'rgba(255,255,255,0.96)'; g.fill();
+      text(uz(s), x - 24, y + 3, 40, {w: 700, col: COL.ink}); check(x + 170, y, 28, COL.white, COL.mint); };
+    pill(280, 760, "Me'yor ichida"); pill(800, 760, "To'lov + BKO");
+    g.strokeStyle = COL.mint; g.lineWidth = 10; g.lineCap = 'round';
+    for (const sx of [280, 800]) { g.beginPath(); g.moveTo(sx, 820); const mx = sx + (cx - sx) * pj, my = 820 + (ny - 80 - 820) * pj; g.quadraticCurveTo(sx, (820 + my) / 2 + 30, mx, my); g.stroke(); }
+    if (pj > .9) { g.fillStyle = COL.gold; g.beginPath(); g.arc(cx, ny - 40, 34 * eb(k(t, E.evenNorm + .5, .35)), 0, Math.PI * 2); g.fill(); }
     g.restore();
   }
-  // three ways
-  const ways = [[E.way1, 'uzimei.uz', 'sayt', 'web'], [E.way2, 'Birda', 'ilova', 'app'], [E.way3, 'Bojxona servis', "aeroportning o'zida", 'desk']];
-  ways.forEach(([t0, s, sub, ic], i) => {
-    const p = k(t, t0 - .1, .4); if (p <= 0) return;
-    const y = 1060 + i * 175, x = 110 + (1 - eo(p)) * 80;
-    g.save(); g.globalAlpha = eo(p); rr(x, y, 860, 145, 36); g.fillStyle = 'rgba(255,255,255,0.96)'; g.fill();
-    g.fillStyle = COL.green; g.beginPath(); g.arc(x + 85, y + 72, 46, 0, Math.PI * 2); g.fill(); wayIcon(ic, x + 85, y + 72);
-    text(uz(s), x + 160, y + 58, 50, {w: 800, col: COL.ink, align: 'left'}); text(uz(sub), x + 160, y + 108, 32, {w: 500, col: '#5d6d66', align: 'left'});
+  // 2 · IMEI -> UZIMEI over the kiosk where it is done
+  const [b0, b1] = SG.uzk;
+  if (t >= b0 && t <= b1 + .2) {
+    scrim(true, life(t, b0, b1, .2, .2));
+    const pu = k(t, b0 + .05, .45);
+    g.save(); g.globalAlpha = life(t, b0, b1, .25, .2); const s = .7 + .3 * eb(pu); g.translate(cx, 380); g.scale(s, s);
+    shadow(true); rr(-420, -110, 840, 220, 50); g.fillStyle = '#fff'; g.fill(); shadow(false);
+    text('IMEI', -230, 3, 84, {w: 800, col: COL.ink}); arrow(-110, 0, 70, 0, COL.gold, 12); text('UZIMEI', 230, 3, 84, {w: 800, col: COL.green});
     g.restore();
-  });
-  g.restore();
+    card(t, b0 + .3, b1, "Ro'yxatdan o'tkazing", {sub: "har bir telefon — me'yor ichida bo'lsa ham", y: 1480, accent: COL.gold});
+  }
+  // 3 · three ways
+  const [c0, c1] = SG.uz2;
+  if (t >= c0 && t <= c1 && panelBg(t, c0, c1, {from: 'left'}) > 0) {
+    g.save(); g.globalAlpha = life(t, c0, c1, .3, .15);
+    text(uz('Qayerda?'), cx, 420, 84, {w: 800, col: COL.gold});
+    const ways = [[E.way1, 'uzimei.uz', 'sayt', 'web'], [E.way2, 'Birda', 'ilova', 'app'], [E.way2 + 1.2, 'Bojxona servis', "aeroportning o'zida", 'desk']];
+    ways.forEach(([t0, s, sub, ic], i) => {
+      const p = k(t, t0 - .1, .4); if (p <= 0) return;
+      const y = 620 + i * 230, x = 90 + (1 - eo(p)) * 80;
+      g.save(); g.globalAlpha *= eo(p); shadow(true, 30, 10, .3); rr(x, y, 900, 190, 44); g.fillStyle = 'rgba(255,255,255,0.97)'; g.fill(); shadow(false);
+      g.fillStyle = COL.green; g.beginPath(); g.arc(x + 100, y + 95, 58, 0, Math.PI * 2); g.fill(); g.save(); g.translate(x + 100, y + 95); g.scale(1.3, 1.3); wayIcon(ic, 0, 0); g.restore();
+      text(uz(s), x + 190, y + 76, 60, {w: 800, col: COL.ink, align: 'left'}); text(uz(sub), x + 190, y + 136, 38, {w: 500, col: '#5d6d66', align: 'left'});
+      g.restore();
+    });
+    g.restore();
+  }
 }
 function wayIcon(kind, x, y) {
   g.save(); g.strokeStyle = g.fillStyle = '#fff'; g.lineWidth = 5;
@@ -474,7 +487,7 @@ function wayIcon(kind, x, y) {
   g.restore();
 }
 function servis(t) {
-  card(t, SG.servis[0] + .1, SG.kiosk[1] - .1, 'Bojxona servis', {sub: "Aeroportning o'zida — IMEI ro'yxatdan o'tkaziladi", accent: COL.gold});
+  card(t, SG.servis[0] + .1, SG.servis[1] - .1, 'Bojxona servis', {sub: "Aeroportning o'zida — IMEI ro'yxatdan o'tkaziladi", accent: COL.gold});
 }
 const RECAP = [['r1', 'Bagaj kutganda', 'ybdweb.customs.uz'], ['r2', 'Nazoratda', 'QR-kod'],
   ['r3', 'Qiymat $1 000 dan oshsa', "yagona bojxona to'lovi"], ['r4', "To'lovdan keyin", 'BKO'],
