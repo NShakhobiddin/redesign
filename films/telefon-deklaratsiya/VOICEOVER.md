@@ -16,6 +16,7 @@ Ekrandagi yozuvlar asl holida qoladi.
 | IMEI | imey |
 | UZIMEI · uzimei.uz | uzimey · uzimey nuqta uz |
 | QR-kod | kyu-ar kod |
+| Face ID | feys-ay-di |
 | BKO | be-ka-o |
 | «Toshkent-AERO» | Toshkent-Aero |
 
@@ -36,13 +37,13 @@ birini o'z sahnasiga o'zim qo'yaman.
 
 [calm] Avval pasport ma'lumotlaringizni kiriting.
 
-[calm] Reys raqamini va qaysi davlatdan uchib kelganingizni belgilang.
+[calm] So'ng feys-ay-di orqali shaxsingizni tasdiqlang.
 
-[calm] Tovarlar bo'limida "Mobil telefon"ni tanlang.
+[calm] "Mobil qurilmani deklaratsiyalash" bo'limini tanlang.
 
-[clear] Har bir telefonning imey kodini, modelini va narxini yozing.
+[clear] Har bir telefonning imey kodlarini va narxini kiriting.
 
-[satisfied] Tekshirib, yuboring. Ekranda kyu-ar kod chiqadi — uni saqlab qo'ying.
+[satisfied] Tayyor! Ekranda kyu-ar kod shakllanadi — uni saqlab qo'ying.
 
 [clear] Eng muhimi — qiymat. Havo yo'li bilan jami ming dollargacha — bojsiz. [serious] Oshsa — oshgan qismi uchun to'lov olinadi.
 
@@ -67,7 +68,7 @@ Qaysi gap qaysi sahnaga tushadi:
 | Xush kelibsiz!… | 2 · Qo'nish |
 | Bagaj kelguncha… | 3 · Bagaj zali |
 | Brauzerda ye-be-de-veb… | 4 · Saytni ochish |
-| Avval pasport… · Reys raqamini… · Tovarlar bo'limida… · Har bir telefonning… · Tekshirib, yuboring… | 5 · To'ldirish (5 qadam) |
+| Avval pasport… · So'ng feys-ay-di… · "Mobil qurilmani…" · Har bir telefonning… · Tayyor!… | 5 · To'ldirish (5 qadam) |
 | Eng muhimi — qiymat… | 7 · Qiymat |
 | O'zbekistonda sotib olinib… | 8 · Istisno |
 | Bagajni olgach… | 9 · Bojxona nazorati |
@@ -152,6 +153,7 @@ biri yengilroq.
 
 v2 kvadrat qavsdagi teglarni tushunmaydi, ularni olib tashlang.
 
-**Tekshirish uchun:** avval diktor matnidagi 4-, 8- va 14-gaplarni yaratib,
-talaffuzni tinglang. Ularda "ye-be-de-veb", "imey" va "uzimey" so'zlari bor. Biror so'z yoqmasa,
+**Tekshirish uchun:** avval diktor matnidagi 4-, 6-, 8- va 14-gaplarni yaratib,
+talaffuzni tinglang. Ularda "ye-be-de-veb", "feys-ay-di", "imey" va "uzimey"
+so'zlari bor. Biror so'z yoqmasa,
 uni boshqacha yozib ko'ring, masalan "imey" o'rniga "ay-em-i-ay".

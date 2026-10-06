@@ -1,4 +1,4 @@
-# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (7-qoralama)
+# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (8-qoralama)
 
 «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi uchun.
 
@@ -44,6 +44,7 @@ o'qilmaydi. `[?]` — hali ochiq qolgan joylar.
 | Deklaratsiya qilingan **har bir** telefonning IMEI'si **UZIMEI** tizimida ro'yxatdan o'tkaziladi — **me'yor ichida bo'lsa ham**, me'yordan oshganda esa to'lovdan keyin. Yo'llari: **uzimei.uz**, **Birda ilovasi** yoki aeroportdagi **Bojxona servis** | siz tasdiqladingiz |
 | Ikki SIM-kartali telefonda **ikkala IMEI** ham yoziladi | siz tasdiqladingiz |
 | YBD web **aeroportda, uchib kelgandan keyin** to'ldiriladi | siz tasdiqladingiz |
+| YBD web qadamlari: pasport ma'lumotlari → **Face ID** → "Mobil qurilmani deklaratsiyalash" → IMEI kodlar va narxi → QR-kod shakllanadi | siz tasdiqladingiz |
 | O'zbekistonda sotib olingan va UZIMEI'da ro'yxatdan o'tgan telefon deklaratsiya qilinmaydi | qo'llanma: AV-2606 |
 
 Videoda YBT stavkasi (hozir 30%, kamida $3/kg) **ko'rsatilmaydi**: PF-174 bo'yicha
@@ -86,15 +87,18 @@ nazoratiga o'ting" deb yo'naltiriladi.
 ### 5. Deklaratsiyani to'ldirish — 20–38 s
 - **Kadr:** [E] Ekran yozuvi yaqinlashtirilgan, har qadamda kerakli maydon salat rangli ramka bilan belgilanadi. Tepada qadam raqami turadi.
 - **Tovush:** har qadamda yengil "tik".
-- **Muhim:** maydon nomlari va qadamlar soni sizning ekran yozuvingizga qarab aniqlashtiriladi.
+- **Qadamlar** siz aytgan tartibda. Ekrandagi aniq yozuvlar ekran yozuvingizdan olinadi.
 
 | Qadam | Ekranda | 🎙 Diktor |
 | --- | --- | --- |
-| 5a | 1 · Shaxsiy ma'lumotlar | [calm] Avval pasport ma'lumotlaringizni kiriting. |
-| 5b | 2 · Reys | Reys raqamini va qaysi davlatdan uchib kelganingizni belgilang. |
-| 5c | 3 · Tovarlar → "Mobil telefon" | Tovarlar bo'limida "Mobil telefon"ni tanlang. |
-| 5d | 4 · IMEI, model, **narx** | Har bir telefonning IMEI kodini, modelini va narxini yozing. |
-| 5e | 5 · Yuborish → QR-kod ✓ | [satisfied] Tekshirib, yuboring. Ekranda QR-kod chiqadi — uni saqlab qo'ying. |
+| 5a | 1 · Pasport ma'lumotlari | [calm] Avval pasport ma'lumotlaringizni kiriting. |
+| 5b | 2 · **Face ID** — yuz orqali tasdiqlash | [calm] So'ng Face ID orqali shaxsingizni tasdiqlang. |
+| 5c | 3 · "Mobil qurilmani deklaratsiyalash" | [calm] "Mobil qurilmani deklaratsiyalash" bo'limini tanlang. |
+| 5d | 4 · IMEI kodlar va **narxi** | [clear] Har bir telefonning IMEI kodlarini va narxini kiriting. |
+| 5e | 5 · QR-kod shakllandi ✓ | [satisfied] Tayyor! Ekranda QR-kod shakllanadi — uni saqlab qo'ying. |
+
+Face ID qadamida yuz ko'rinadigan bo'lsa, uni xiralashtiraman yoki o'rniga
+grafik belgi (yuz ramkasi) qo'yaman.
 
 ### 6. Maslahat: IMEI — 38–44 s
 - **Kadr:** [AI] Xodim bojxona postida, kameraga qarab, qo'lida telefon, ekranini ko'rsatadi. Yonida [G] **\*#06#** va ikki qator IMEI chiqadi: "IMEI 1 · IMEI 2".
