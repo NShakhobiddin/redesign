@@ -1,26 +1,25 @@
 # Mobil telefon deklaratsiyasi — musiqa uchun Suno prompti
 
-Video ~2 daqiqa davom etadi va deyarli butunlay diktor va xodim gapidan iborat. Shuning
-uchun musiqa **fon** vazifasini bajaradi: xotirjam, zamonaviy, ishonch
-uyg'otadigan, sayohat va aeroport kayfiyatida. U gapni bosib ketmaydi,
-faqat muhim joylarda yengil urg'u beradi.
+Bu prompt 3-versiya montajiga (2:29) mos yozilgan. Video deyarli butunlay diktor
+va xodim gapidan iborat, shuning uchun musiqa **fon** vazifasini bajaradi:
+- kayfiyati xotirjam, zamonaviy, ishonch uyg'otadigan, sayohatga xos;
+- gapni bosib ketmaydi;
+- urg'u faqat videodagi muhim lahzalarga tushadi.
 
-**Temp — 120 BPM, lekin "half-time" ritmda.** Ritm sekin his qilinadi, lekin
-takt aniq 2 soniya bo'ladi. Shunda trekni montajda takt chegarasidan oson
-kesib, cho'zib yoki qisqartirib, videoga moslay olaman (Pochtam
-videosidagidek).
+**Temp — 120 BPM, "half-time" ritmda.** Ritm sekin his qilinadi, lekin takt aniq
+2 soniya bo'ladi. Shunda trekni takt chegarasidan kesib, cho'zib yoki
+qisqartirib, videoga aniq moslay olaman.
 
-Vaqtlar taxminiy. Diktor ovozi va kadrlar kelgach, montaj aniqlashadi va
-musiqani o'zim moslayman.
+Tovush toza bo'lsin: shovqin, shitirlash yoki "shuvillash" bo'lmasin. Shuning
+uchun quyida shovqinli cholg'u va effektlar taqiqlangan.
 
-## 1. Styles (Suno'dagi "Styles" maydoni)
+## 1. Styles
 
 ```
-instrumental background music for a 2-minute public information video about airport customs, calm modern corporate electronic with a warm travel feel, 120 BPM half-time groove, D major, soft felt piano, warm airy pads, light marimba and plucky synth arpeggios, gentle sub bass, soft kick and finger snaps, clean and uncluttered, leaves space for a narrator, reassuring and optimistic, short attention-grabbing hit at the start, subtle lift in the middle, warm uplifting recap near the end, gentle final chord, no vocals
+instrumental background score for a 2.5-minute public information video about airport customs, calm modern corporate pop with a warm travel feel, 120 BPM half-time groove, D major, soft felt piano, warm airy pads, light marimba and bell plucks, gentle round sub bass, soft kick, finger snaps and light claps, clean dry mix, sparse high melody that leaves the voice range free for a narrator, reassuring and optimistic, one firm low stamp-like hit near the start, short tonal build before the arrival, subtle lift in the middle, warm confident recap near the end, gentle final chord, no vocals
 ```
 
-**Mahalliy ohang qo'shmoqchi bo'lsangiz** (ixtiyoriy) — yuqoridagi matn oxiriga
-qo'shing:
+**Mahalliy ohang** (ixtiyoriy) — yuqoridagi matn oxiriga qo'shing:
 
 ```
 , subtle Uzbek dutar plucks as a light accent
@@ -29,53 +28,78 @@ qo'shing:
 ## 2. Exclude styles
 
 ```
-vocals, singing, lyrics, spoken word, choir, vocal chops, white noise, hiss, noisy hi-hats, shakers, risers with noise, vinyl crackle, lo-fi, heavy drums, aggressive bass, EDM drop, dubstep, rock guitar, dark or tense mood, sad minor mood, long fade-in
+vocals, singing, humming, choir, spoken word, vocal chops, white noise, hiss, noise sweeps, risers with noise, cymbal swells, crash cymbals, noisy hi-hats, shakers, vinyl crackle, lo-fi, tape saturation, distorted guitar, heavy drums, trap hi-hats, EDM drop, dubstep, aggressive bass, dark or tense mood, sad minor mood, long fade-in
 ```
 
 ## 3. Lyrics (faqat teglar, so'zsiz)
 
+Vaqtlar videodagi lahzalarga to'g'ri keladi (3-versiya).
+
 ```
 [Instrumental]
 
-[Intro Hit: 0:00-0:04, one bright attention-grabbing hit with a soft stamp-like accent, then settle]
+[Intro: 0:00-0:04, soft piano pulse over a warm pad, curious and light]
 
-[Arrival: 0:04-0:20, warm airy pads, soft piano, gentle travel mood, no drums yet]
+[Stamp Hit: 0:04, one firm low stamp-like hit with a short bright accent, then a brief pause]
 
-[Steps: 0:20-0:44, light half-time pulse starts, soft kick and finger snaps, plucky marimba arpeggio, calm tutorial feel, leaves space for the narrator]
+[Build: 0:05-0:08, quick tonal build of rising plucks and snaps, no noise, stop sharply on the bar line]
 
-[Key Info: 0:44-0:58, slightly more focus, a subtle lift with a warm bass note, still calm]
+[Arrival: 0:08-0:22, the plane lands on the downbeat, warm open pads, soft piano, airy travel feel, no drums]
 
-[Customs Control: 0:58-1:30, minimal and reassuring, drums softer, piano and pads, room for dialogue]
+[Steps: 0:22-0:54, half-time pulse starts, soft kick and finger snaps, light marimba arpeggio, steady and simple, calm tutorial feel, plenty of space for the narrator]
 
-[Last Step: 1:30-1:44, gentle build, arpeggio returns, soft brightness]
+[Check: 0:54-0:58, two-bar lift, snaps double, the arpeggio climbs]
 
-[Recap: 1:44-1:52, warm uplifting full sound, positive and confident]
+[Done: 0:58, small bright bell accent, then settle]
 
-[Outro: 1:52-1:57, final warm D major chord with a soft bell, ring out]
+[Key Info: 0:58-1:16, slightly more focused, warm bass line, gentle lift, still calm]
+
+[Customs Control: 1:16-1:40, minimal and reassuring, piano and pads only, drums almost out, room for dialogue]
+
+[Payment: 1:40-1:56, soft kick returns, gentle forward motion, light plucks]
+
+[Last Step: 1:56-2:10, gradual build, arpeggio and bells return, brighter chords]
+
+[Recap: 2:10-2:22, warm uplifting full sound, confident and friendly, light claps on two and four]
+
+[Outro: 2:22-2:32, final warm D major chord with a soft bell, ring out and end cleanly]
 
 [End]
 ```
 
 ## 4. Suno sozlamalari (Advanced)
 
-- **Instrumental** tugmasi bo'lsa — o'chiq qoldiring, chunki Lyrics maydonida
-  faqat teglar bor (so'z yo'q).
+- **Instrumental** tugmasi bo'lsa, o'chiq qoldiring: Lyrics maydonida faqat teglar
+  bor.
 - **Vocal Gender** — tanlamang.
-- **Duration** — **Custom → 2:00**.
-- **Weirdness** — **20%** (oldindan aytib bo'lmaydigan narsalar kam bo'lsin).
-- **Style Influence** — **75–80%** (uslubga qattiq amal qilsin).
+- **Duration** — **Custom → 2:40**.
+- **Weirdness** — **15–20%**.
+- **Style Influence** — **75–80%**.
 - **Variety** — Normal.
-- Pastdagi tayyor tugmachalarni ("nostalgic vibes" va hokazo) va sehrli
-  tayoqchani bosmang.
+- Tayyor uslub tugmachalari va sehrli tayoqchani bosmang.
 
-## 5. Videoga moslash
+## 5. Tanlash va videoga moslash
 
-- Suno bergan ikkala variantni tinglang. Eng tinchi va bir tekisi yaxshi:
-  diktor ostida keskin o'zgarishlar bo'lmasin.
-- Tanlangan trekni menga yuboring. Tempini o'lchab, bo'limlarini takt
-  chegaralaridan kesib, videoga moslayman:
-  - hook zarbasi birinchi kadrga;
-  - "Eng muhimi — qiymat" sahnasida yengil ko'tarilish;
-  - eslatma va yakunda iliq final.
-- Diktor gapirganda musiqa avtomatik pasayadi (−10…−12 dB). Yakuniy
-  balandlik −14 LUFS bo'ladi.
+Suno bergan variantlardan quyidagi talablarga eng yaxshi javob berganini oling:
+- boshida aniq urg'u ("muhr") bor;
+- o'rtasida keskin o'zgarish yo'q;
+- oxiri iliq akkord bilan tugaydi;
+- shovqin va shitirlash yo'q.
+
+Uzunligi 2:40 dan farq qilsa ham bo'ladi.
+
+Trekni menga yuboring. Tempini o'lchab, uni takt chegaralaridan kesib, quyidagi
+lahzalarga moslayman:
+
+| Videoda | Vaqt | Musiqada |
+| --- | --- | --- |
+| "Deklaratsiya — majburiy!" muhri | 0:04 | past, qattiq zarb |
+| Samolyot yerga tegadi, "Xush kelibsiz!" | 0:08 | yangi bo'lim boshlanadi |
+| Tekshiruv kadrlari | 0:54 | ikki taktlik ko'tarilish |
+| "Tayyor!" — QR-kod | 0:58 | yorqin qo'ng'iroq |
+| Bojxona nazorati, xodim gapiradi | 1:16 | musiqa siyraklashadi |
+| "Oxirgi qadam" | 1:56 | asta ko'tarilish |
+| "Eslab qoling" | 2:10 | to'liq, iliq ovoz |
+| "Xayrli yo'l!" | 2:26 | yakuniy akkord |
+
+Diktor gapirganda musiqa avtomatik pasayadi. Yakuniy balandlik −14 LUFS.
