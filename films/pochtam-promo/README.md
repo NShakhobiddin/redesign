@@ -94,6 +94,16 @@ tahlili bilan topildi. Natijada 1068 kadr, 44,5 s, −14,0 LUFS, eng baland
 nuqta −1,4 dBFS. Trek foydalanuvchiniki, shuning uchun u ham, u qo'yilgan
 video (`out/pochtam-promo-music.mp4`) ham ochiq repozitoriyga qo'yilmagan.
 
+Namuna musiqadan Suno'da yaratilgan cover trek ("pochtam-promo-score")
+tuzilmani saqladi, lekin 121,6 BPM da chiqdi. U 120 BPM ga cho'zildi (ohang
+balandligi o'zgarmaydi) va uch bo'lakda joylandi:
+- beat 8 s ga tushishi uchun 0,35 s kech boshlanadi;
+- qaytish 38 s ga tushishi uchun tinch pastlash ichida 60 ms ga suriladi;
+- trekning katta yakuniy zarbasi 41 s dagi logotipga qo'yiladi.
+
+Zarbalar butun trek davomida video to'ridan ±25 ms ichida. Buyruq:
+`--bpm 121.6 --edl "0.35,35.6,0;35.6,40.96,35.19;40.96,44.5,42.52"`.
+
 ```bash
 python3 tools/fit-music.py trek.mp3 /tmp/fitted.wav
 ffmpeg -i out/pochtam-promo-silent.mp4 -i /tmp/fitted.wav -map 0:v -map 1:a \
