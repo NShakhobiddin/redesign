@@ -165,65 +165,12 @@ nazoratiga o'ting" deb yo'naltiriladi.
 - **Kadr:** [G] Logotipsiz, faqat yozuv: **«Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi**, ostida **ybdweb.customs.uz** · **uzimei.uz**.
 - 🎙 **Diktor:** [warm] «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi. Xayrli yo'l!
 
-## ElevenLabs uchun matnlar (nusxalash uchun)
+## ElevenLabs uchun matnlar
 
-**🎙 Diktor** — butun matn, Eleven v3. Har satrni alohida yaratsangiz, montajda
-joylash oson bo'ladi.
-
-```
-[excited] Chet eldan yangi telefon olib keldingizmi? [serious] Uni deklaratsiya qilish — majburiy! [friendly] Qanday qilishni hozir ko'rsatamiz.
-
-[warm] Xush kelibsiz! Bojxonadan tez va muammosiz o'tish uchun bor-yo'g'i bir necha oddiy qadam qoldi.
-
-[friendly] Bagaj kelguncha vaqtingiz bor. Deklaratsiya aynan shu yerda — aeroportning o'zida, telefoningizdan to'ldiriladi.
-
-[clear] Brauzerda ybdweb nuqta customs nuqta uz saytini oching. Hech qanday ilova o'rnatish shart emas.
-
-[calm] Avval pasport ma'lumotlaringizni kiriting.
-
-Reys raqamini va qaysi davlatdan uchib kelganingizni belgilang.
-
-Tovarlar bo'limida "Mobil telefon"ni tanlang.
-
-Har bir telefonning IMEI kodini, modelini va narxini yozing.
-
-[satisfied] Tekshirib, yuboring. Ekranda QR-kod chiqadi — uni saqlab qo'ying.
-
-[clear] Eng muhimi — qiymat. Havo yo'li bilan jami ming dollargacha — bojsiz. [serious] Oshsa — oshgan qismi uchun to'lov olinadi.
-
-[reassuring] O'zbekistonda sotib olinib, UZIMEI'da ro'yxatdan o'tgan telefon esa deklaratsiya qilinmaydi.
-
-[confident] Bagajni olgach, bojxona nazoratiga o'ting va xodimga deklaratsiyangizning QR-kodini ko'rsating.
-
-[reassuring] To'lovni terminalning o'zidagi bank kassasida qilishingiz mumkin — [upbeat] yoki telefoningizdan, istalgan to'lov tizimi orqali onlayn.
-
-[serious] Oxirgi qadam — hamma uchun, me'yor ichida bo'lsa ham: IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazing — [friendly] uzimei nuqta uz saytida, Birda ilovasida yoki aeroportdagi Bojxona servis'da.
-
-[confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov va BKO. Oxirida esa, har doim — UZIMEI. [happy] Bor-yo'g'i shu!
-
-[warm] «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi. Xayrli yo'l!
-```
-
-**👮 Xodim** — har bir klip alohida yaratiladi:
-
-```
-[friendly] IMEI kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering. Ikki SIM-kartali telefonda ikkita kod chiqadi — ikkalasini ham yozing.
-```
-```
-[warm] Assalomu alaykum! Deklaratsiyangiz tayyor ekan. Me'yor ichida — to'lov yo'q. Marhamat, xush kelibsiz!
-```
-```
-[calm] Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi. [reassuring] To'lovdan so'ng BKO'ni rasmiylashtirib beraman.
-```
-```
-[warm] To'lov qabul qilindi. Mana, bojxona kirim orderingiz — BKO. Telefoningiz rasmiylashtirildi.
-```
-
-**🧳 Yo'lovchi** (ixtiyoriy):
-
-```
-[curious] Telefonimni deklaratsiya qilishim kerakmi? Qayerda qilaman?
-```
+Diktor, xodim va yo'lovchi gaplarining tayyor matni alohida faylda:
+[`VOICEOVER.md`](VOICEOVER.md). U yerda gaplar ohang teglari bilan, talaffuzga
+moslab yozilgan ("imey", "kyu-ar kod", "be-ka-o", "ye-be-de-veb nuqta kastoms
+nuqta uz"). Ovoz tavsiflari va sozlamalar ham shu faylda.
 
 ## Google Flow (Veo) uchun promptlar — AI bojxona xodimi
 
@@ -248,7 +195,8 @@ Har bir telefonning IMEI kodini, modelini va narxini yozing.
      yuqorini oladi, shuning uchun lab harakatidagi kichik farq sezilmaydi.
 
 Promptlar inglizcha yozilgan, chunki Veo inglizcha tavsifni yaxshiroq
-tushunadi. Gaplar esa o'zbekcha qoladi.
+tushunadi. Gaplar esa o'zbekcha qoladi. Qisqartmalar ("imey", "be-ka-o") qanday
+o'qilishiga qarab yozilgan.
 
 ### Asosiy rasm (rasm yaratish uchun)
 
@@ -261,7 +209,7 @@ Ayol xodim kerak bo'lsa: `a man in his early thirties with neat short dark hair,
 ### 1-klip · IMEI maslahati (6-sahna, 1-qism) — ~7 s
 
 ```
-Vertical 9:16, medium shot, static camera. The same customs officer from the reference image stands at the customs desk in the Tashkent airport arrival hall. He raises a smartphone, turns its screen toward the camera, and says calmly and kindly in Uzbek: "IMEI kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering." Friendly small nod at the end. Soft daylight, quiet airport ambience, realistic. No subtitles, no on-screen text.
+Vertical 9:16, medium shot, static camera. The same customs officer from the reference image stands at the customs desk in the Tashkent airport arrival hall. He raises a smartphone, turns its screen toward the camera, and says calmly and kindly in Uzbek: "Imey kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering." Friendly small nod at the end. Soft daylight, quiet airport ambience, realistic. No subtitles, no on-screen text.
 Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
 ```
 
@@ -289,14 +237,14 @@ Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look,
 ### 5-klip · Qiymat oshganda (11-sahna, 2-qism) — ~3 s
 
 ```
-Vertical 9:16, medium shot, static camera. Same officer, same place, continuing with a reassuring smile and a small nod, says in Uzbek: "To'lovdan so'ng BKO'ni rasmiylashtirib beraman." Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
+Vertical 9:16, medium shot, static camera. Same officer, same place, continuing with a reassuring smile and a small nod, says in Uzbek: "To'lovdan so'ng be-ka-o'ni rasmiylashtirib beraman." Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
 Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
 ```
 
 ### 6-klip · BKO (13-sahna) — ~7 s
 
 ```
-Vertical 9:16, medium shot, static camera. Same officer at the customs desk takes a printed receipt form from a small desktop printer, hands it across the desk toward the camera, nods and says warmly in Uzbek: "To'lov qabul qilindi. Mana, bojxona kirim orderingiz — BKO. Telefoningiz rasmiylashtirildi." Quiet printer sound, airport ambience, soft daylight, realistic. The printed form shows no readable text. No subtitles, no on-screen text.
+Vertical 9:16, medium shot, static camera. Same officer at the customs desk takes a printed receipt form from a small desktop printer, hands it across the desk toward the camera, nods and says warmly in Uzbek: "To'lov qabul qilindi. Mana, bojxona kirim orderingiz — be-ka-o. Telefoningiz rasmiylashtirildi." Quiet printer sound, airport ambience, soft daylight, realistic. The printed form shows no readable text. No subtitles, no on-screen text.
 Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
 ```
 
