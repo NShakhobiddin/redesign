@@ -1,4 +1,4 @@
-# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (5-qoralama)
+# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (6-qoralama)
 
 «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi uchun.
 
@@ -19,7 +19,7 @@ Video yo'lovchining yo'lini boshidan oxirigacha ko'rsatadi:
 **Kadr manbalari:**
 - **[K]** — sizning kadrlaringiz;
 - **[E]** — ybdweb ekran yozuvi;
-- **[AI]** — AI'da generatsiya qilinadigan bojxona xodimi;
+- **[AI]** — Google Flow (Veo) da generatsiya qilinadigan bojxona xodimi;
 - **[G]** — men chizadigan grafika (yozuvlar, kartochkalar, sxema, QR).
 
 **Ovozlar:**
@@ -48,9 +48,10 @@ o'qilmaydi. `[?]` — hali ochiq qolgan joylar.
 Videoda YBT stavkasi (hozir 30%, kamida $3/kg) **ko'rsatilmaydi**: PF-174 bo'yicha
 u 2027-yil 1-yanvardan 20% / $2 bo'ladi va video tez eskirib qoladi.
 
-Hali ochiq savollar `[?]`:
-- UZIMEI'da ro'yxatdan o'tkazish me'yor ichidagi telefonlar uchun ham kerakmi?
-- Yakuniy kadr uchun logotip va ishonch telefoni.
+Hali ochiq savol `[?]`: UZIMEI'da ro'yxatdan o'tkazish me'yor ichidagi telefonlar
+uchun ham kerakmi? Hozircha videoda bu qadam "to'lovdan keyin" deb aytilgan.
+
+Logotip ishlatilmaydi.
 
 Yo'lak yoki post nomi videoda ko'rsatilmaydi: yo'lovchi shunchaki "bojxona
 nazoratiga o'ting" deb yo'naltiriladi.
@@ -161,7 +162,7 @@ nazoratiga o'ting" deb yo'naltiriladi.
 - 🎙 **Diktor:** [confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov, keyin BKO va UZIMEI. [happy] Bor-yo'g'i shu!
 
 ### 16. Yakun — 109–114 s
-- **Kadr:** [G] Logotip, ostida **«Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi**, sayt **ybdweb.customs.uz**, `[?]` ishonch telefoni.
+- **Kadr:** [G] Logotipsiz, faqat yozuv: **«Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi**, ostida **ybdweb.customs.uz** · **uzimei.uz**.
 - 🎙 **Diktor:** [warm] «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi. Xayrli yo'l!
 
 ## ElevenLabs uchun matnlar (nusxalash uchun)
@@ -224,29 +225,92 @@ Har bir telefonning IMEI kodini, modelini va narxini yozing.
 [curious] Telefonimni deklaratsiya qilishim kerakmi? Qayerda qilaman?
 ```
 
-## AI bojxona xodimi — prompt qoralamasi
+## Google Flow (Veo) uchun promptlar — AI bojxona xodimi
 
-Hamma klipda **bitta personaj** bo'ladi: bir xil yuz, forma va joy. Avval bitta
-"asosiy kadr" (rasm) yaratiladi, qolgan kliplar shu rasmdan (image-to-video)
-qilinadi. Shunda yuz o'zgarmaydi.
+**Ish tartibi:**
+1. **Asosiy rasm.** Avval xodimning bitta rasmini yarating (Flow'dagi rasm
+   yaratish yoki boshqa vosita). Agar haqiqiy forma rasmi bo'lsa, uni ham
+   namuna sifatida bering, shunda forma to'g'ri chiqadi.
+2. **Kliplar.** Har bir klipni shu rasmdan yarating: rasmni boshlang'ich kadr
+   (Frames to Video) yoki ingredient (Ingredients to Video) qilib bering. Shunda
+   barcha kliplarda yuz, forma va joy bir xil bo'ladi.
+3. **Format.** 9:16 (vertikal) tanlang. Bu format bo'lmasa, 16:9 da yarating:
+   xodim kadr markazida turgani uchun men uni vertikalga qirqib olaman.
+4. **Uzunlik.** Bitta klip ko'pi bilan 8 soniya. Uzunroq gaplar ikkiga
+   bo'lingan. Davomini Flow'dagi "Extend" bilan yoki shu rasmdan yangi klip
+   qilib yaratsangiz bo'ladi.
+5. **Ovoz — ikki yo'l:**
+   - **A — Veo o'zi gapirtiradi.** Promptdagi o'zbekcha gapni Veo aytadi, lab
+     harakati mos chiqadi. Lekin o'zbek talaffuzi noto'g'ri chiqishi mumkin,
+     avval 1-klipda sinab ko'ring.
+   - **B — ElevenLabs ovozi.** Talaffuz yoqmasa, klipdagi ovozni men
+     ElevenLabs'dagi xodim ovozi bilan almashtiraman. Kamera ko'krakdan
+     yuqorini oladi, shuning uchun lab harakatidagi kichik farq sezilmaydi.
 
-Asosiy kadr uchun prompt — forma rasmini olgach, `[forma]` aniqlashtiriladi:
+Promptlar inglizcha yozilgan, chunki Veo inglizcha tavsifni yaxshiroq
+tushunadi. Gaplar esa o'zbekcha qoladi.
+
+### Asosiy rasm (rasm yaratish uchun)
 
 ```
-Vertical 9:16 photo, medium shot of a friendly Uzbek customs officer, [man/woman, around 30-35], wearing [uniform as in the reference photo], standing at a customs control booth in the arrival hall of Tashkent International Airport, modern terminal with soft daylight and blurred passengers in the background, looking at the camera with a calm, polite smile, natural skin, realistic, documentary style, sharp focus, no text
+Photorealistic vertical 9:16 portrait, medium shot of a friendly Uzbek customs officer, a man in his early thirties with neat short dark hair, clean-shaven, wearing an official customs uniform (as in the reference photo if provided), standing behind a customs control desk in the bright modern arrival hall of Tashkent International Airport. Soft daylight from large windows, softly blurred passengers with suitcases in the background. He looks straight at the camera with a calm, polite smile. Natural skin texture, documentary realism, sharp focus. No text, no logos, no emblems, no badges with writing.
 ```
 
-Har bir klip uchun harakat (image-to-video, 4–6 s):
-1. **IMEI (6-sahna):** `The officer raises a smartphone, turns the screen to the camera and speaks calmly, small friendly nod, subtle hand gesture, static camera`
-2. **Me'yor ichida (10-sahna):** `The officer scans a QR code on a passenger's phone with a handheld scanner, glances at the screen, then looks at the camera and smiles warmly while speaking, static camera`
-3. **Qiymat oshganda (11-sahna):** `The officer looks at the declaration on a tablet, then at the camera, and explains politely with calm open-hand gestures, static camera`
-4. **BKO (13-sahna):** `The officer takes a printed receipt form from a small printer, hands it toward the camera, nods with a warm smile, static camera`
+Ayol xodim kerak bo'lsa: `a man in his early thirties with neat short dark hair, clean-shaven` o'rniga `a woman in her early thirties with neatly tied dark hair` yozing.
 
-Umumiy taqiqlar (negative prompt):
+### 1-klip · IMEI maslahati (6-sahna, 1-qism) — ~7 s
+
 ```
-distorted face, extra fingers, unreadable fake text, fake emblems, cartoon, over-smoothed skin, shaky camera
+Vertical 9:16, medium shot, static camera. The same customs officer from the reference image stands at the customs desk in the Tashkent airport arrival hall. He raises a smartphone, turns its screen toward the camera, and says calmly and kindly in Uzbek: "IMEI kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering." Friendly small nod at the end. Soft daylight, quiet airport ambience, realistic. No subtitles, no on-screen text.
+Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+```
+
+### 2-klip · IMEI maslahati (6-sahna, 2-qism) — ~5 s
+
+```
+Vertical 9:16, medium shot, static camera. Same officer, same place, continuing. He holds up two fingers, then points at the phone screen, and says in Uzbek with a helpful tone: "Ikki SIM-kartali telefonda ikkita kod chiqadi — ikkalasini ham yozing." Soft daylight, quiet airport ambience, realistic. No subtitles, no on-screen text.
+Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+```
+
+### 3-klip · Me'yor ichida (10-sahna) — ~7 s
+
+```
+Vertical 9:16, medium shot, static camera. Same officer at the customs desk. A passenger's hand holds out a phone with a QR code; the officer scans it with a handheld scanner, glances at a small screen on the desk, then looks at the camera, smiles warmly and says in Uzbek: "Assalomu alaykum! Deklaratsiyangiz tayyor ekan. Me'yor ichida — to'lov yo'q. Marhamat, xush kelibsiz!" A short scanner beep. Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
+Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+```
+
+### 4-klip · Qiymat oshganda (11-sahna, 1-qism) — ~6 s
+
+```
+Vertical 9:16, medium shot, static camera. Same officer at the customs desk looks at a tablet, then at the camera, and explains politely and calmly in Uzbek with open-hand gestures: "Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi." Reassuring expression. Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
+Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+```
+
+### 5-klip · Qiymat oshganda (11-sahna, 2-qism) — ~3 s
+
+```
+Vertical 9:16, medium shot, static camera. Same officer, same place, continuing with a reassuring smile and a small nod, says in Uzbek: "To'lovdan so'ng BKO'ni rasmiylashtirib beraman." Soft daylight, airport ambience, realistic. No subtitles, no on-screen text.
+Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+```
+
+### 6-klip · BKO (13-sahna) — ~7 s
+
+```
+Vertical 9:16, medium shot, static camera. Same officer at the customs desk takes a printed receipt form from a small desktop printer, hands it across the desk toward the camera, nods and says warmly in Uzbek: "To'lov qabul qilindi. Mana, bojxona kirim orderingiz — BKO. Telefoningiz rasmiylashtirildi." Quiet printer sound, airport ambience, soft daylight, realistic. The printed form shows no readable text. No subtitles, no on-screen text.
+Avoid: distorted face, extra fingers, readable fake text, emblems, cartoon look, shaky camera, background music.
+```
+
+### Qo'shimcha kadr (ixtiyoriy) · BKO uzatilishi, yaqin plan — ~4 s
+
+```
+Vertical 9:16, close-up, static camera. Over a customs desk, an officer's hand passes a printed receipt form to a passenger's hand. Shallow depth of field, soft daylight, airport ambience, realistic. The paper shows no readable text. No faces, no on-screen text.
 ```
 
 **Eslatmalar:**
-- Davlat ramzlari (gerb, nishon, unvon belgilari) AI'da noto'g'ri chizilishi mumkin. Ular kadrda aniq ko'rinmasin, kerak bo'lsa montajda xiralashtiraman.
-- Xodim gaplari ElevenLabs'da yaratilib, lip-sync qilinadi yoki klip ovozsiz qoladi — qaysi AI vositadan foydalanishingizga qarab tanlaymiz.
+- Davlat ramzlari (gerb, nishon, unvon belgilari) AI'da noto'g'ri chizilishi
+  mumkin, shuning uchun promptlarda ular yo'q. Kadrda shunday belgi chiqib
+  qolsa, montajda xiralashtiraman.
+- Har klipdan 2–4 variant yarating va eng tabiiyini tanlang: yuz, qo'llar va
+  lab harakatiga e'tibor bering.
+- Tayyor kliplarni shu chatga yuklang. Ularni montajga o'zim qo'yaman: 2-ovoz
+  yo'lini tanlasangiz, ElevenLabs ovozini ham men ulayman.
