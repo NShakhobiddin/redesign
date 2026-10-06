@@ -278,6 +278,29 @@ Ikkalasini ham yaratib ko'rsangiz bo'ladi: A — 2-sahna boshiga, B — 1-sahna
 - Eng ishonchli yo'l — aeroportda haqiqiy Uzbekistan Airways samolyotini
   o'zingiz suratga olish: rasmiy videoda logotip aniq va to'g'ri chiqadi.
 
+### Terminalga kirish (2-sahna) — o'z kadringiz bo'lmasa, ~8 s
+
+Yo'lovchi orqasidan ko'rsatiladi: keyingi sahnalarda sizning kadrlaringizdagi
+haqiqiy yo'lovchi chiqadi, yuz ko'rinmasa farq sezilmaydi. Belgilardagi
+yozuvlar xira bo'ladi. "Kelish / Arrivals" yozuvini montajda grafika qilib
+o'zim qo'shaman.
+
+**A variant — teleskopik trap (samolyotdan terminalga):**
+```
+Vertical 9:16, steady gimbal shot following from behind at shoulder height. A traveler with a small backpack, holding a smartphone in one hand, walks through an airport jet bridge toward the bright terminal entrance, a few other passengers ahead. Soft daylight through the jet bridge windows, clean modern interior, realistic, documentary style. Sound: footsteps, light rolling suitcase wheels, distant airport ambience. No readable text, no logos, no faces toward the camera.
+Avoid: readable fake text, garbled signs, distorted bodies, extra limbs, cartoon look, camera shake.
+```
+
+**B variant — kelish zali, umumiy plan:**
+```
+Vertical 9:16, slow push-in from behind at eye level. Travelers with suitcases walk into a spacious, bright modern arrivals hall of Tashkent International Airport: high ceilings, large glass walls with daylight, polished floor, overhead direction signs softly out of focus. One traveler in the center, seen from behind, glances at a smartphone while walking. Calm, welcoming atmosphere, realistic, documentary style, natural colors. Sound: soft airport ambience, footsteps, rolling suitcase wheels. No readable text, no logos, no faces toward the camera.
+Avoid: readable fake text, garbled signs, distorted bodies, extra limbs, crowded chaos, cartoon look, camera shake.
+```
+
+A variant samolyot qo'nishidan keyin to'g'ridan-to'g'ri ulanadi, B variant
+esa bagaj zaliga o'tishdan oldin turadi. Ikkalasini ketma-ket qo'yish ham
+mumkin (2-sahna ~5 s, har biridan 2–3 s olinadi).
+
 ### Qo'shimcha kadr (ixtiyoriy) · BKO uzatilishi, yaqin plan — ~4 s
 
 ```
