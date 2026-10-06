@@ -1,8 +1,8 @@
-# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (6-qoralama)
+# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (7-qoralama)
 
 «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi uchun.
 
-Video vertikal (9:16), ~114 soniya davom etadi. Yakuniy vaqtlar diktor ovozi
+Video vertikal (9:16), ~117 soniya davom etadi. Yakuniy vaqtlar diktor ovozi
 yozilgandan keyin aniqlashadi. Keyinchalik undan 30–45 soniyalik qisqa versiya
 ham qilinadi.
 
@@ -13,7 +13,8 @@ Video yo'lovchining yo'lini boshidan oxirigacha ko'rsatadi:
 4. **qiymat** me'yordan oshsa — yagona bojxona to'lovi (bank kassasi yoki
    istalgan to'lov tizimi);
 5. to'lovdan keyin BKO;
-6. IMEI UZIMEI'da ro'yxatdan o'tkaziladi;
+6. har bir telefonning IMEI'si UZIMEI'da ro'yxatdan o'tkaziladi — me'yor
+   ichida bo'lsa ham;
 7. chiqish.
 
 **Kadr manbalari:**
@@ -40,7 +41,7 @@ o'qilmaydi. `[?]` — hali ochiq qolgan joylar.
 | Me'yordan oshgan qism uchun **yagona bojxona to'lovi** | siz tasdiqladingiz; qo'llanma: PQ-4508 |
 | To'lov: terminaldagi bank kassasi yoki **istalgan to'lov tizimi** | siz tasdiqladingiz |
 | **To'lovdan keyin** bojxona xodimi **BKO** rasmiylashtirib beradi | siz tasdiqladingiz |
-| To'lovdan keyin yo'lovchi IMEI'ni **UZIMEI** tizimida ro'yxatdan o'tkazadi: **UZIMEI sayti**, **Birda ilovasi** yoki aeroportdagi **Bojxona servis** orqali | siz tasdiqladingiz |
+| Deklaratsiya qilingan **har bir** telefonning IMEI'si **UZIMEI** tizimida ro'yxatdan o'tkaziladi — **me'yor ichida bo'lsa ham**, me'yordan oshganda esa to'lovdan keyin. Yo'llari: **uzimei.uz**, **Birda ilovasi** yoki aeroportdagi **Bojxona servis** | siz tasdiqladingiz |
 | Ikki SIM-kartali telefonda **ikkala IMEI** ham yoziladi | siz tasdiqladingiz |
 | YBD web **aeroportda, uchib kelgandan keyin** to'ldiriladi | siz tasdiqladingiz |
 | O'zbekistonda sotib olingan va UZIMEI'da ro'yxatdan o'tgan telefon deklaratsiya qilinmaydi | qo'llanma: AV-2606 |
@@ -48,8 +49,7 @@ o'qilmaydi. `[?]` — hali ochiq qolgan joylar.
 Videoda YBT stavkasi (hozir 30%, kamida $3/kg) **ko'rsatilmaydi**: PF-174 bo'yicha
 u 2027-yil 1-yanvardan 20% / $2 bo'ladi va video tez eskirib qoladi.
 
-Hali ochiq savol `[?]`: UZIMEI'da ro'yxatdan o'tkazish me'yor ichidagi telefonlar
-uchun ham kerakmi? Hozircha videoda bu qadam "to'lovdan keyin" deb aytilgan.
+Ochiq savollar qolmadi.
 
 Logotip ishlatilmaydi.
 
@@ -140,28 +140,28 @@ nazoratiga o'ting" deb yo'naltiriladi.
 - **Tovush:** printer ovozi.
 - 👮 **Xodim:** [warm] To'lov qabul qilindi. Mana, bojxona kirim orderingiz — BKO. Telefoningiz rasmiylashtirildi.
 
-### 14. UZIMEI — 92–101 s
-- **Kadr:** [G] Telefon ekranida IMEI kodi chiqadi, keyin uchta yo'l bittadan paydo bo'ladi:
+### 14. UZIMEI — hamma uchun — 92–104 s
+- **Kadr:** [G] Ikki yo'l bitta nuqtaga birlashadi: "Me'yor ichida ✓" va "To'lov + BKO ✓" → **"IMEI → UZIMEI"**. Keyin telefon ekranida IMEI kodi chiqadi va uchta yo'l bittadan paydo bo'ladi:
   - 🌐 **uzimei.uz**
   - 📱 **Birda ilovasi**
   - 🏢 **Bojxona servis** — aeroportning o'zida
 
   So'ng "Ro'yxatdan o'tdi ✓" chiqadi. Ro'yxatdan o'tish ekranining yozuvi (sayt yoki Birda) bo'lsa, o'shani ko'rsatamiz. Oxirida [K] yo'lovchi chiqish eshiklaridan chiqadi.
-- **Ekranda:** **"Oxirgi qadam: IMEI → UZIMEI"**.
-- **Tovush:** har bir yo'l chiqqanda yengil "pop", oxirida tasdiq "ding"i.
-- 🎙 **Diktor:** [serious] Oxirgi qadam — IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazish: [friendly] uzimei nuqta uz saytida, Birda ilovasida yoki aeroportning o'zidagi Bojxona servis'da.
+- **Ekranda:** **"Oxirgi qadam — hamma uchun: IMEI → UZIMEI"**, ostida "me'yor ichida bo'lsa ham".
+- **Tovush:** ikki yo'l birlashganda "tuk", har bir usul chiqqanda yengil "pop", oxirida tasdiq "ding"i.
+- 🎙 **Diktor:** [serious] Oxirgi qadam — hamma uchun, me'yor ichida bo'lsa ham: IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazing — [friendly] uzimei nuqta uz saytida, Birda ilovasida yoki aeroportdagi Bojxona servis'da.
 
-### 15. Eslatma — 101–109 s
+### 15. Eslatma — 104–112 s
 - **Kadr:** [G] Animatsiyali ro'yxat, har qadam diktor aytganda belgilanadi.
 - **Ekranda:**
   1. Bagaj kutganda — ybdweb.customs.uz
   2. Nazoratda — QR-kod
   3. Qiymat $1 000 dan oshsa — yagona bojxona to'lovi
   4. To'lovdan keyin — BKO
-  5. IMEI — UZIMEI'da ro'yxatdan o'tkazish (uzimei.uz · Birda · Bojxona servis)
-- 🎙 **Diktor:** [confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov, keyin BKO va UZIMEI. [happy] Bor-yo'g'i shu!
+  5. Hamma uchun — IMEI'ni UZIMEI'da ro'yxatdan o'tkazish (uzimei.uz · Birda · Bojxona servis)
+- 🎙 **Diktor:** [confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov va BKO. Oxirida esa, har doim — UZIMEI. [happy] Bor-yo'g'i shu!
 
-### 16. Yakun — 109–114 s
+### 16. Yakun — 112–117 s
 - **Kadr:** [G] Logotipsiz, faqat yozuv: **«Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi**, ostida **ybdweb.customs.uz** · **uzimei.uz**.
 - 🎙 **Diktor:** [warm] «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi. Xayrli yo'l!
 
@@ -197,9 +197,9 @@ Har bir telefonning IMEI kodini, modelini va narxini yozing.
 
 [reassuring] To'lovni terminalning o'zidagi bank kassasida qilishingiz mumkin — [upbeat] yoki telefoningizdan, istalgan to'lov tizimi orqali onlayn.
 
-[serious] Oxirgi qadam — IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazish: [friendly] uzimei nuqta uz saytida, Birda ilovasida yoki aeroportning o'zidagi Bojxona servis'da.
+[serious] Oxirgi qadam — hamma uchun, me'yor ichida bo'lsa ham: IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazing — [friendly] uzimei nuqta uz saytida, Birda ilovasida yoki aeroportdagi Bojxona servis'da.
 
-[confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov, keyin BKO va UZIMEI. [happy] Bor-yo'g'i shu!
+[confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov va BKO. Oxirida esa, har doim — UZIMEI. [happy] Bor-yo'g'i shu!
 
 [warm] «Toshkent-AERO» ixtisoslashtirilgan bojxona kompleksi. Xayrli yo'l!
 ```
