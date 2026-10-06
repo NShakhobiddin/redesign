@@ -304,38 +304,45 @@ function checks(t) {
   chip(t, E.check, a1, E.checkDone <= t ? 'Bojxona tekshiruvi: 100%' : 'Bojxona tekshiruvi', {y: 1500, size: 46, icon: E.checkDone <= t ? iconCheck : iconClock});
 }
 function imeiTip(t) {
-  const [a0, a1] = SG.ai01; if (t < a0 || t > a1 + .2) return;
-  chip(t, E.tip, a1, 'Maslahat · IMEI', {y: 250, size: 44, icon: iconInfo});
-  const a = life(t, E.keys[0] - .25, a1, .25, .3); if (a <= 0) return;
-  scrim(false, a);
-  g.save(); g.globalAlpha = a; const y = 1420; shadow(true); rr(150, y - 110, 780, 220, 44); g.fillStyle = 'rgba(6,42,31,0.92)'; g.fill(); shadow(false);
-  const keys = ['*', '#', '0', '6', '#'];
-  keys.forEach((c, i) => {
-    const p = k(t, E.keys[i], .3); if (p <= 0) return;
-    const x = 290 + i * 125, s = .5 + .5 * eb(p);
-    g.save(); g.translate(x, y); g.scale(s, s); rr(-52, -62, 104, 124, 22); g.fillStyle = '#fff'; g.fill();
-    text(c, 0, c === '*' ? 14 : 4, 84, {w: 800, col: COL.ink}); g.restore();
-  });
-  g.restore();
+  const [a0, a1] = SG.ai01; if (t < a0 || t > SG.imei[1]) return;
+  chip(t, E.tip, SG.imei[1] - .1, 'Maslahat · IMEI', {y: 250, size: 44, icon: iconInfo});
 }
+// The officer's tip as a phone: *#06# is dialled key by key as he says it, then two IMEIs appear.
 function imeiDual(t) {
   const [a0, a1] = SG.imei; if (t < a0 || t > a1) return;
-  const a = life(t, a0, a1, .4, .3);
-  phone(W / 2, 830 + (1 - eo(k(t, a0, .5))) * 120, 520, 980, a, (sx, sy, sw, sh) => {
+  const a = life(t, a0, a1, .3, .3), keys = ['*', '#', '0', '6', '#'];
+  phone(W / 2, 900 + (1 - eo(k(t, a0, .4))) * 100, 540, 1060, a, (sx, sy, sw, sh) => {
     g.fillStyle = '#ffffff'; g.fillRect(sx, sy, sw, sh);
-    text('*#06#', sx + sw / 2, sy + 190, 64, {w: 800, col: COL.ink});
-    text(uz("Qurilma ma'lumoti"), sx + sw / 2, sy + 290, 30, {w: 600, col: '#6b7b74'});
-    const rows = [['IMEI 1', '35 123456 789012 3'], ['IMEI 2', '35 123456 789013 0']];
-    rows.forEach(([l, v], i) => {
-      const y = sy + 360 + i * 170, on = i === 0 ? t >= E.dual : t >= E.dual + .5;
-      rr(sx + 30, y, sw - 60, 140, 22); g.fillStyle = on ? '#fff4d6' : '#f1f4f2'; g.fill();
-      if (on) { g.strokeStyle = COL.gold; g.lineWidth = 5; g.stroke(); }
-      text(l, sx + 60, y + 44, 28, {w: 700, col: '#5d6d66', align: 'left'});
-      text(v, sx + 60, y + 96, 34, {w: 700, col: COL.ink, align: 'left'});
-      if (t >= E.dualBoth) check(sx + sw - 70, y + 70, 30, COL.white, COL.mint, eo(k(t, E.dualBoth + i * .2, .3)));
-    });
+    const typed = keys.filter((c, i) => t >= E.keys[i]).join('');
+    text(typed, sx + sw / 2, sy + 190, 72, {w: 800, col: COL.ink});
+    const res = k(t, E.dual - .35, .35);
+    if (res < 1) {   // keypad
+      g.save(); g.globalAlpha *= 1 - res;
+      const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
+      pad.forEach((c, i) => {
+        const x = sx + sw / 2 + ((i % 3) - 1) * 150, y = sy + 360 + Math.floor(i / 3) * 140;
+        const hit = keys.map((q, j) => q === c ? E.keys[j] : null).filter(v => v !== null && t >= v && t < v + .25).length > 0;
+        g.fillStyle = hit ? COL.gold : '#eef2f0'; g.beginPath(); g.arc(x, y, 58, 0, Math.PI * 2); g.fill();
+        text(c, x, y + (c === '*' ? 12 : 3), 52, {w: 700, col: COL.ink});
+      });
+      g.restore();
+    }
+    if (res > 0) {   // result
+      g.save(); g.globalAlpha *= res;
+      text(uz("Qurilma ma'lumoti"), sx + sw / 2, sy + 290, 30, {w: 600, col: '#6b7b74'});
+      const rows = [['IMEI 1', '35 123456 789012 3'], ['IMEI 2', '35 123456 789013 0']];
+      rows.forEach(([l, v], i) => {
+        const y = sy + 360 + i * 180, on = i === 0 ? t >= E.dual : t >= E.dual + .6;
+        rr(sx + 30, y, sw - 60, 150, 22); g.fillStyle = on ? '#fff4d6' : '#f1f4f2'; g.fill();
+        if (on) { g.strokeStyle = COL.gold; g.lineWidth = 5; g.stroke(); }
+        text(l, sx + 60, y + 48, 30, {w: 700, col: '#5d6d66', align: 'left'});
+        text(v, sx + 60, y + 104, 36, {w: 700, col: COL.ink, align: 'left'});
+        if (t >= E.dualBoth) check(sx + sw - 70, y + 75, 30, COL.white, COL.mint, eo(k(t, E.dualBoth + i * .2, .3)));
+      });
+      g.restore();
+    }
   });
-  card(t, E.dual, a1, 'Ikki SIM — ikkala IMEI ham yoziladi', {y: 1500, accent: COL.gold});
+  card(t, E.dual, a1, 'Ikki SIM — ikkala IMEI ham yoziladi', {y: 1560, accent: COL.gold});
 }
 function money(v) { return '$' + Math.round(v).toLocaleString('en-US').replace(/,/g, ' '); }
 function valueScene(t) {
@@ -430,7 +437,7 @@ function payment(t) {
   card(t, E.online - .1, a1, "Istalgan to'lov tizimi — onlayn", {badge: '2', y: 1500, accent: COL.gold});
 }
 function bko(t) {
-  card(t, E.bko - .1, SG.ai06[1] - .05, "BKO — bojxona kirim orderi", {y: 1620, sub: E.bkoDone <= t ? 'Telefon rasmiylashtirildi' : "To'lovdan keyin beriladi", tick: E.bkoDone, accent: COL.gold});
+  card(t, E.bko - .1, SG.bko[1] - .05, "BKO — bojxona kirim orderi", {y: 1620, sub: E.bkoDone <= t ? 'Telefon rasmiylashtirildi' : "To'lovdan keyin beriladi", tick: E.bkoDone, accent: COL.gold});
 }
 function uzimei(t) {
   const cx = W / 2;

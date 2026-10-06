@@ -5,7 +5,7 @@ Videoni montaj qiluvchi kod shu papkada. Kadrlar, ovozlar va tayyor video
 ularni `--media` papkasidan nomi bo'yicha topadi, oraliq va tayyor fayllarni
 `--work` papkasiga yozadi. Sahnalar: [`SSENARIY.md`](SSENARIY.md).
 
-## 2-versiya — 2:29
+## 3-versiya — 2:29
 
 Video 1080×1920, 30 fps. Ovoz balandligi −14 LUFS. Hamma vaqtlar diktor
 ovoziga qarab qo'yilgan.
@@ -17,7 +17,7 @@ ovoziga qarab qo'yilgan.
 | 0:15 | 3 · Bagaj zali | K04 → K04-alt → K05 | "Bagaj kutyapsizmi?" |
 | 0:22 | 4 · Sayt | K05 → saytning o'zi (ekran yozuvi) | manzil yoziladi, saytga QR-kod, "Ilova o'rnatish shart emas" |
 | 0:30 | 5 · To'ldirish | ybdweb ekran yozuvi | 1–4-qadam, "Mobil qurilmani deklaratsiyalash" tugmasi belgilanadi |
-| 0:44 | 6 · IMEI maslahati | AI01 → *#06# grafikasi | `*#06#`, IMEI 1 · IMEI 2 |
+| 0:44 | 6 · IMEI maslahati | AI01 → telefonda *#06# teriladi (grafika) | `*#06#` tugmalari, IMEI 1 · IMEI 2 |
 | 0:54 | 5 · Tekshiruv | ekran yozuvi, 3 ta tez kadr | shakllantirish → joylashuv → bojxona tekshiruvi 100% |
 | 0:57 | 5 · QR-kod | ekran yozuvi | 5-qadam, QR-kod va "Yuklab olish" belgilanadi |
 | 1:02 | 7 · Qiymat | grafika, orqada xiralashgan zal | $1 000 me'yor, $1 300 misolida +$300 |
@@ -25,10 +25,41 @@ ovoziga qarab qo'yilgan.
 | 1:16 | 9–10 · Nazorat | K06 → K07 → AI03 → K07 (yo'lovchi o'tib ketadi) | "Bojxona nazorati", "Me'yor ichida — to'lovsiz" |
 | 1:31 | 11 · Oshganda | AI04 → AI05 | yagona bojxona to'lovi, to'lovdan keyin BKO |
 | 1:40 | 12 · To'lov | K08 → to'lov grafikasi | 1 · bank kassasi, 2 · istalgan to'lov tizimi |
-| 1:48 | 13 · BKO | AI06 (chekni uzatadi) | "BKO — bojxona kirim orderi" |
+| 1:48 | 13 · BKO | AI06 (chekni uzatadi) → K09-kompyuterda | "BKO — bojxona kirim orderi" |
 | 1:56 | 14 · UZIMEI | grafika → K09b (IMEI kioski) → grafika → K09-pullik-xizmat | "Oxirgi qadam — hamma uchun", IMEI → UZIMEI, uzimei.uz · Birda · Bojxona servis |
 | 2:10 | 15 · Eslatma | K10 → xiralashtirilgan | 5 band |
 | 2:23 | 16 · Yakun | K10, xiralashtirilgan | «Toshkent-AERO», ybdweb.customs.uz, uzimei.uz |
+
+3-versiyada ovoz tuzatildi:
+- **Ovoz yo'lagidagi uzilishlar.** 1- va 2-versiyalarda ovoz balandligini
+  tekislaydigan `loudnorm` filtri tayyor faylda ~3 soniyalik uzilishlar
+  qoldirgan. 2-versiyada 2:29 lik videoga atigi 1:56 lik ovoz to'g'ri kelgan:
+  ovoz tasvirdan tobora oldinga ketgan. Endi:
+  - balandlik o'lchanadi, so'ng bitta doimiy kuchaytirish va cheklovchi
+    (limiter) qo'llanadi;
+  - ovoz va tasvir alohida kodlanib, keyin birlashtiriladi;
+  - har yig'ishda `check_av` ovozda uzilish yo'qligini va uzunligi tasvirga
+    tengligini tekshiradi.
+- **Xodim gaplari** endi butun jumla bo'lib, tabiiy ohangda turadi
+  (tezligi ±6–8 % dan oshmaydi). Og'iz harakati jumlaga to'g'ri kelmaydigan
+  joylarda tasvir boshqa kadrga o'tadi:
+  - AI01 → telefonda *#06# terilishi;
+  - AI06 → K09-kompyuterda.
+- **Xodim ovozi zalda turgandek eshitiladi:** ozgina EQ va kichik xona
+  aks-sadosi.
+- **Butun video ostida bir tekis aeroport shovqini.** Har kadrda yo'qolib,
+  qaytib chiqmaydi: ovozsiz kliplardan yig'ilgan, past chastotali, ovoz ostida
+  pasayadi. Faqat kadrning o'z tovushi qoldirilgan:
+  - samolyot;
+  - chamadon;
+  - skaner;
+  - printer.
+- **Effektlar kamaytirildi:**
+  - muhr;
+  - *#06# tugmalari;
+  - uchta yengil "ding".
+- **Kadrlar uzunligi kadrma-kadr aniq.** Kesimlar ovozdan 17 ms dan ortiq
+  siljimaydi; avval 0,15 s gacha siljigan edi.
 
 1-versiyadan farqlar:
 - **Lab harakati.** Xodimning har bir gapi bo'laklarga bo'lingan va
