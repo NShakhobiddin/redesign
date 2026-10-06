@@ -1,12 +1,18 @@
-# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (2-qoralama)
+# Mobil telefonni bojxonada deklaratsiya qilish — ssenariy (3-qoralama)
 
-Video vertikal (9:16), ~95 soniya davom etadi. Keyinchalik undan 30–45
-soniyalik qisqa versiya ham qilinadi.
+Video vertikal (9:16), ~110 soniya davom etadi. Yakuniy vaqtlar diktor ovozi
+yozilgandan keyin aniqlashadi. Keyinchalik undan 30–45 soniyalik qisqa versiya
+ham qilinadi.
 
-Video yo'lovchining yo'lini boshidan oxirigacha ko'rsatadi: samolyot
-qo'nishi → bagaj kutish → ybdweb.customs.uz da deklaratsiya → bojxona
-nazorati → me'yordan oshsa BKO → to'lov (bank kassasi yoki onlayn) →
-chiqish.
+Video yo'lovchining yo'lini boshidan oxirigacha ko'rsatadi:
+1. samolyot qo'nadi;
+2. bagaj kutayotganda ybdweb.customs.uz da deklaratsiya to'ldiriladi;
+3. bojxona nazorati;
+4. **qiymat** me'yordan oshsa — yagona bojxona to'lovi (bank kassasi yoki
+   istalgan to'lov tizimi);
+5. to'lovdan keyin BKO;
+6. IMEI UZIMEI'da ro'yxatdan o'tkaziladi;
+7. chiqish.
 
 **Kadr manbalari:**
 - **[K]** — sizning kadrlaringiz;
@@ -20,37 +26,41 @@ chiqish.
 - 🧳 **Yo'lovchi** — kadr ortidan eshitiladigan, qiziquvchan yosh ovoz (ixtiyoriy).
 
 Kvadrat qavsdagi teglar ElevenLabs v3 uchun. Ular ohangni bildiradi va
-o'qilmaydi.
-
-`[?]` — tasdiqlanishi kerak bo'lgan joylar. Videoga faqat tasdiqlangan qoida
-va raqam kiradi.
+o'qilmaydi. `[?]` — hali ochiq qolgan joylar.
 
 ## Qoidalar (ssenariy shularga tayanadi)
 
-| Qoida | Holat | Manba |
-| --- | --- | --- |
-| Chet eldan olib kelingan mobil telefon **har doim** YBDda ko'rsatiladi | qo'llanmada bor | AV-2606, VM-463 |
-| Havo yo'li bilan **har kelishda 2 dona** telefon bojsiz | qo'llanmada bor | VM-463 |
-| O'zbekistonda sotib olingan va **UZIMEI**'da ro'yxatdan o'tgan telefon deklaratsiya qilinmaydi | qo'llanmada bor | AV-2606 |
-| YBDni 16 yoshdan katta shaxs to'ldiradi | qo'llanmada bor | AV-2606 |
-| 3-telefondan boshlab boj qancha (stavka / summa) | `[?]` | — |
-| "Limit" nimani anglatadi: telefonlar soni, qiymati yoki ikkalasi | `[?]` | — |
-| BKO qachon va qayerda rasmiylashtiriladi | `[?]` | — |
-| Terminaldagi bank kassasi (nomi, ish vaqti), qabul qilinadigan onlayn tizimlar | `[?]` | — |
-| Ikki SIM-kartali telefonda ikkala IMEI ham yoziladimi | `[?]` | — |
-| To'lovdan keyin IMEI ro'yxatga olinishi: avtomatikmi yoki yo'lovchi o'zi qiladimi | `[?]` | — |
-| Bojxona nazoratida qaysi yo'lak yoki post | `[?]` | — |
+| Qoida | Manba |
+| --- | --- |
+| Chet eldan olib kelingan mobil telefon **har doim** YBDda ko'rsatiladi | qo'llanma: AV-2606, VM-463 |
+| Havo yo'li bilan bojsiz me'yor **$1 000** (2025-yil 1-maydan); yo'lovchi xorijda **kamida 3 kun** bo'lgan bo'lishi kerak | qo'llanma: VM-244 |
+| Me'yor soni va qiymati bo'yicha, videoda **asosiy urg'u qiymatga**. Telefonlar soni (2 dona) faqat mayda yozuvda | siz tasdiqladingiz; qo'llanma: VM-463 |
+| Me'yordan oshgan qism uchun **yagona bojxona to'lovi** | siz tasdiqladingiz; qo'llanma: PQ-4508 |
+| To'lov: terminaldagi bank kassasi yoki **istalgan to'lov tizimi** | siz tasdiqladingiz |
+| **To'lovdan keyin** bojxona xodimi **BKO** rasmiylashtirib beradi | siz tasdiqladingiz |
+| To'lovdan keyin yo'lovchi IMEI'ni **UZIMEI** tizimida ro'yxatdan o'tkazadi | siz tasdiqladingiz |
+| Ikki SIM-kartali telefonda **ikkala IMEI** ham yoziladi | siz tasdiqladingiz |
+| YBD web **aeroportda, uchib kelgandan keyin** to'ldiriladi | siz tasdiqladingiz |
+| O'zbekistonda sotib olingan va UZIMEI'da ro'yxatdan o'tgan telefon deklaratsiya qilinmaydi | qo'llanma: AV-2606 |
+
+Videoda YBT stavkasi (hozir 30%, kamida $3/kg) **ko'rsatilmaydi**: PF-174 bo'yicha
+u 2027-yil 1-yanvardan 20% / $2 bo'ladi va video tez eskirib qoladi.
+
+Hali ochiq savollar `[?]`:
+- UZIMEI'da ro'yxatdan o'tkazish qayerda va qanday qilinadi (sayt, ilova yoki boshqa yo'l)? Bu faqat to'lov qilinganda kerakmi yoki me'yor ichidagi telefonlar uchun ham?
+- Nazoratda qaysi yo'lak yoki postga boriladi?
+- Yakuniy kadr uchun tashkilot nomi, logotip, ishonch telefoni.
 
 ## Sahnalar
 
 ### 1. Hook — 0–4 s
 - **Kadr:** [K] Yo'lovchining qo'lida yangi telefon, qutisidan endi chiqarilgan. Kamera tez yaqinlashadi.
-- **Ekranda:** [G] **"2 ta telefon — bojsiz"**, ostidan qizil muhr bilan **"Lekin deklaratsiyasiz emas!"** urilib tushadi.
+- **Ekranda:** [G] **"Yangi telefon?"**, ostidan qizil muhr bilan **"Deklaratsiya — majburiy!"** urilib tushadi.
 - **Tovush:** zarba, muhr ovozi.
-- 🎙 **Diktor:** [excited] Chet eldan yangi telefon olib keldingizmi? [confident] Ikki donagacha — bojsiz. [serious] Lekin deklaratsiya — majburiy!
+- 🎙 **Diktor:** [excited] Chet eldan yangi telefon olib keldingizmi? [serious] Uni deklaratsiya qilish — majburiy! [friendly] Qanday qilishni hozir ko'rsatamiz.
 
 ### 2. Qo'nish — 4–9 s
-- **Kadr:** [K] Samolyot uchish-qo'nish yo'lagiga qo'nadi → yo'lovchilar teleskopik trapdan terminalga kiradi → "Kelish / Arrivals" belgisi.
+- **Kadr:** [K] Samolyot qo'nadi → yo'lovchilar teleskopik trapdan terminalga kiradi → "Kelish / Arrivals" belgisi.
 - **Ekranda:** Toshkent xalqaro aeroporti · Kelish.
 - **Tovush:** samolyot shovqini, terminal fon ovozi.
 - 🎙 **Diktor:** [warm] Xush kelibsiz! Bojxonadan tez va muammosiz o'tish uchun bor-yo'g'i bir necha oddiy qadam qoldi.
@@ -60,75 +70,87 @@ va raqam kiradi.
 - **Ekranda:** "Bagaj kutyapsizmi? ⏱ Vaqtdan foydalaning".
 - **Tovush:** lenta g'ichirlashi.
 - 🧳 **Yo'lovchi** (kadr ortidan): [curious] Telefonimni deklaratsiya qilishim kerakmi? Qayerda qilaman?
-- 🎙 **Diktor:** [friendly] Bagaj kelguncha vaqtingiz bor. Deklaratsiyani aynan shu yerda, telefoningizdan to'ldiring.
+- 🎙 **Diktor:** [friendly] Bagaj kelguncha vaqtingiz bor. Deklaratsiya aynan shu yerda — aeroportning o'zida, telefoningizdan to'ldiriladi.
 
 ### 4. Saytni ochish — 15–20 s
-- **Kadr:** [E] Brauzer, manzil satriga ybdweb.customs.uz yoziladi, sayt ochiladi. [G] Burchakda saytga olib boradigan QR-kod.
+- **Kadr:** [E] Brauzerda ybdweb.customs.uz yoziladi, sayt ochiladi. [G] Burchakda saytga olib boradigan QR-kod.
 - **Ekranda:** **ybdweb.customs.uz**.
 - **Tovush:** klaviatura chertishlari.
 - 🎙 **Diktor:** [clear] Brauzerda ybdweb nuqta customs nuqta uz saytini oching. Hech qanday ilova o'rnatish shart emas.
 
-### 5. Deklaratsiyani to'ldirish — 20–40 s
+### 5. Deklaratsiyani to'ldirish — 20–38 s
 - **Kadr:** [E] Ekran yozuvi yaqinlashtirilgan, har qadamda kerakli maydon salat rangli ramka bilan belgilanadi. Tepada qadam raqami turadi.
 - **Tovush:** har qadamda yengil "tik".
 - **Muhim:** maydon nomlari va qadamlar soni sizning ekran yozuvingizga qarab aniqlashtiriladi.
 
 | Qadam | Ekranda | 🎙 Diktor |
 | --- | --- | --- |
-| 5a · 20–24 s | 1 · Shaxsiy ma'lumotlar | [calm] Avval pasport ma'lumotlaringizni kiriting. |
-| 5b · 24–28 s | 2 · Reys | Reys raqamini va qaysi davlatdan uchib kelganingizni belgilang. |
-| 5c · 28–32 s | 3 · Tovarlar → "Mobil telefon" | Tovarlar bo'limida "Mobil telefon"ni tanlang. |
-| 5d · 32–36 s | 4 · IMEI, model, narx | Har bir telefonning IMEI kodini, modelini va narxini yozing. |
-| 5e · 36–40 s | 5 · Yuborish → QR-kod ✓ | [satisfied] Tekshirib, yuboring. Ekranda QR-kod chiqadi — uni saqlab qo'ying. |
+| 5a | 1 · Shaxsiy ma'lumotlar | [calm] Avval pasport ma'lumotlaringizni kiriting. |
+| 5b | 2 · Reys | Reys raqamini va qaysi davlatdan uchib kelganingizni belgilang. |
+| 5c | 3 · Tovarlar → "Mobil telefon" | Tovarlar bo'limida "Mobil telefon"ni tanlang. |
+| 5d | 4 · IMEI, model, **narx** | Har bir telefonning IMEI kodini, modelini va narxini yozing. |
+| 5e | 5 · Yuborish → QR-kod ✓ | [satisfied] Tekshirib, yuboring. Ekranda QR-kod chiqadi — uni saqlab qo'ying. |
 
-### 6. Maslahat: IMEI — 40–45 s
-- **Kadr:** [AI] Xodim bojxona postida, kameraga qarab, qo'lida telefon, ekranini ko'rsatadi. Yonida [G] **\*#06#** yozuvi chiqadi.
-- 👮 **Xodim:** [friendly] IMEI kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering. Ikki SIM-kartali telefonda ikkita kod chiqadi — ikkalasini ham yozing. `[?]`
+### 6. Maslahat: IMEI — 38–44 s
+- **Kadr:** [AI] Xodim bojxona postida, kameraga qarab, qo'lida telefon, ekranini ko'rsatadi. Yonida [G] **\*#06#** va ikki qator IMEI chiqadi: "IMEI 1 · IMEI 2".
+- 👮 **Xodim:** [friendly] IMEI kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering. Ikki SIM-kartali telefonda ikkita kod chiqadi — ikkalasini ham yozing.
 
-### 7. Istisno — 45–50 s
-- **Kadr:** [G] Kartochka: O'zbekiston bayrog'i rangidagi belgi va telefon; ostida "UZIMEI ✓".
+### 7. Asosiysi — qiymat — 44–52 s
+- **Kadr:** [G] Katta raqam, keyin misol.
+  - Kartochka: **"Bojsiz me'yor (havo yo'li): jami $1 000 gacha"**. Pastida mayda yozuv: "telefonlar — 2 donagacha · xorijda kamida 3 kun bo'lganda".
+  - Misol (animatsiya): telefon narxi **$1 300** → $1 000 me'yor chizig'i → oshgan qism **$300** qizil rangda ajraladi → "to'lov shu qismga hisoblanadi".
+- **Tovush:** narx sanalib boradi, chiziqdan o'tganda "tuk".
+- 🎙 **Diktor:** [clear] Eng muhimi — qiymat. Havo yo'li bilan jami ming dollargacha — bojsiz. [serious] Oshsa — oshgan qismi uchun to'lov olinadi.
+
+### 8. Istisno — 52–58 s
+- **Kadr:** [G] Kartochka: telefon va **"UZIMEI ✓"** belgisi.
 - **Ekranda:** **"Deklaratsiya qilinmaydi:** O'zbekistonda sotib olingan va UZIMEI'da ro'yxatdan o'tgan telefon".
-- 🎙 **Diktor:** [reassuring] Telefoningiz O'zbekistonda sotib olingan va UZIMEI tizimida ro'yxatdan o'tgan bo'lsa — uni deklaratsiya qilish shart emas.
+- 🎙 **Diktor:** [reassuring] O'zbekistonda sotib olinib, UZIMEI'da ro'yxatdan o'tgan telefon esa deklaratsiya qilinmaydi.
 
-### 8. Bojxona nazorati — 50–56 s
+### 9. Bojxona nazorati — 58–64 s
 - **Kadr:** [K] Yo'lovchi chamadonni lentadan oladi → "Bojxona nazorati" belgisi → post. [G] Yo'l sxemasi: Bagaj zali → `[?]` yo'lak → post.
 - **Tovush:** g'ildirakli chamadon ovozi.
 - 🎙 **Diktor:** [confident] Bagajni olgach, bojxona nazoratiga o'ting va xodimga deklaratsiyangizning QR-kodini ko'rsating.
 
-### 9. Me'yor ichida — 56–61 s
+### 10. Me'yor ichida — 64–69 s
 - **Kadr:** [AI] Xodim QR-kodni skaner yoki planshet bilan o'qiydi, ekranga qaraydi, jilmayadi.
-- **Ekranda:** **"2 donagacha — to'lovsiz ✓"**.
+- **Ekranda:** **"Me'yor ichida — to'lovsiz ✓"**.
 - **Tovush:** skaner "pip"i.
-- 👮 **Xodim:** [warm] Assalomu alaykum! Deklaratsiyangiz tayyor ekan. Ikki donagacha telefon — bojsiz. Marhamat, xush kelibsiz!
+- 👮 **Xodim:** [warm] Assalomu alaykum! Deklaratsiyangiz tayyor ekan. Me'yor ichida — to'lov yo'q. Marhamat, xush kelibsiz!
 
-### 10. Me'yordan oshganda — BKO — 61–70 s
-- **Kadr:** [AI] Xodim tushuntiradi, printerdan hujjat chiqadi. Yonida [G] BKO namunasi (shaxsiy ma'lumotlarsiz), summa joyi belgilangan.
-- **Ekranda:** **"Me'yordan oshsa — BKO joyida rasmiylashtiriladi"** · boj: `[?]`.
-- **Tovush:** printer ovozi.
-- 👮 **Xodim:** [calm] Sizda uchta telefon ekan. Ikkitasi — bojsiz, uchinchisi uchun boj to'lanadi. Hozir bojxona kirim orderini — BKO'ni rasmiylashtiraman. [reassuring] To'lov summasi mana shu yerda ko'rsatilgan.
+### 11. Qiymat me'yordan oshganda — 69–78 s
+- **Kadr:** [AI] Xodim planshetdagi deklaratsiyaga qarab xotirjam tushuntiradi.
+- **Ekranda:** **"Qiymat $1 000 dan oshsa → yagona bojxona to'lovi"**.
+- 👮 **Xodim:** [calm] Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi. [reassuring] To'lovdan so'ng BKO'ni rasmiylashtirib beraman.
 
-### 11. To'lov — 70–80 s
-- **Kadr:** [K] Terminaldagi bank kassasi, yo'lovchi BKO'ni uzatadi → [K/E] telefonda onlayn to'lov ilovasi, to'lov tugmasi bosiladi, "To'landi ✓".
-- **Ekranda:** **1 · Bank kassasi — terminalda** `[?]` · **2 · Onlayn** — `[?]` (tizimlar logotiplari).
+### 12. To'lov — 78–87 s
+- **Kadr:** [K] Terminaldagi bank kassasi, yo'lovchi to'laydi → [K/E] telefonda to'lov ilovasi, to'lov tugmasi bosiladi, "To'landi ✓".
+- **Ekranda:** **1 · Bank kassasi — terminalda** · **2 · Istalgan to'lov tizimi orqali — onlayn**.
 - **Tovush:** kassa "pip"i, ilovadagi to'lov ovozi.
-- 🎙 **Diktor:** [reassuring] To'lovni ikki xil yo'l bilan qilishingiz mumkin: terminalning o'zidagi bank kassasida — [upbeat] yoki telefoningizdan, onlayn to'lov tizimlari orqali.
+- 🎙 **Diktor:** [reassuring] To'lovni terminalning o'zidagi bank kassasida qilishingiz mumkin — [upbeat] yoki telefoningizdan, istalgan to'lov tizimi orqali onlayn.
 
-### 12. Rasmiylashtirildi — 80–84 s
-- **Kadr:** [AI] Xodim hujjatni qaytaradi va bosh irg'aydi → [K] yo'lovchi chiqish eshiklaridan chiqadi.
-- **Ekranda:** "To'lov qabul qilindi ✓".
-- 👮 **Xodim:** [warm] To'lov qabul qilindi, telefonlaringiz rasmiylashtirildi. Xayrli yo'l!
-- IMEI ro'yxatga olish bo'yicha yo'lovchi biror amal qilishi kerak bo'lsa, shu yerga qisqa sahna qo'shiladi. `[?]`
+### 13. BKO — 87–92 s
+- **Kadr:** [AI] Xodim printerdan BKO'ni oladi va yo'lovchiga uzatadi, bosh irg'aydi. [G] BKO namunasi (shaxsiy ma'lumotlarsiz).
+- **Ekranda:** **"To'lovdan keyin — BKO ✓"**.
+- **Tovush:** printer ovozi.
+- 👮 **Xodim:** [warm] To'lov qabul qilindi. Mana, bojxona kirim orderingiz — BKO. Telefoningiz rasmiylashtirildi.
 
-### 13. Eslatma — 84–92 s
+### 14. UZIMEI — 92–98 s
+- **Kadr:** [G] Telefon ekranida IMEI kodi → "UZIMEI" ga o'tadi → "Ro'yxatdan o'tdi ✓". `[?]` ro'yxatdan o'tkazish ekrani bo'lsa, o'shani ko'rsatamiz. Oxirida [K] yo'lovchi chiqish eshiklaridan chiqadi.
+- **Ekranda:** **"Oxirgi qadam: IMEI → UZIMEI"**.
+- 🎙 **Diktor:** [serious] Va oxirgi qadam: to'lovdan keyin telefoningiz IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazing.
+
+### 15. Eslatma — 98–106 s
 - **Kadr:** [G] Animatsiyali ro'yxat, har qadam diktor aytganda belgilanadi.
 - **Ekranda:**
   1. Bagaj kutganda — ybdweb.customs.uz
   2. Nazoratda — QR-kod
-  3. Me'yordan oshsa — BKO
-  4. To'lov — kassa yoki onlayn
-- 🎙 **Diktor:** [confident] Eslab qoling: bagaj kutayotganda — ybdweb'da deklaratsiya. Nazoratda — QR-kod. Me'yordan oshsa — BKO va to'lov. [happy] Bor-yo'g'i shu!
+  3. Qiymat $1 000 dan oshsa — yagona bojxona to'lovi
+  4. To'lovdan keyin — BKO
+  5. IMEI — UZIMEI'da ro'yxatdan o'tkazish
+- 🎙 **Diktor:** [confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov, keyin BKO va UZIMEI. [happy] Bor-yo'g'i shu!
 
-### 14. Yakun — 92–95 s
+### 16. Yakun — 106–109 s
 - **Kadr:** [G] Logotip, sayt, `[?]` ishonch telefoni.
 - 🎙 **Diktor:** [warm] Bojxona — siz uchun. Xayrli yo'l!
 
@@ -138,11 +160,11 @@ va raqam kiradi.
 joylash oson bo'ladi.
 
 ```
-[excited] Chet eldan yangi telefon olib keldingizmi? [confident] Ikki donagacha — bojsiz. [serious] Lekin deklaratsiya — majburiy!
+[excited] Chet eldan yangi telefon olib keldingizmi? [serious] Uni deklaratsiya qilish — majburiy! [friendly] Qanday qilishni hozir ko'rsatamiz.
 
 [warm] Xush kelibsiz! Bojxonadan tez va muammosiz o'tish uchun bor-yo'g'i bir necha oddiy qadam qoldi.
 
-[friendly] Bagaj kelguncha vaqtingiz bor. Deklaratsiyani aynan shu yerda, telefoningizdan to'ldiring.
+[friendly] Bagaj kelguncha vaqtingiz bor. Deklaratsiya aynan shu yerda — aeroportning o'zida, telefoningizdan to'ldiriladi.
 
 [clear] Brauzerda ybdweb nuqta customs nuqta uz saytini oching. Hech qanday ilova o'rnatish shart emas.
 
@@ -156,13 +178,17 @@ Har bir telefonning IMEI kodini, modelini va narxini yozing.
 
 [satisfied] Tekshirib, yuboring. Ekranda QR-kod chiqadi — uni saqlab qo'ying.
 
-[reassuring] Telefoningiz O'zbekistonda sotib olingan va UZIMEI tizimida ro'yxatdan o'tgan bo'lsa — uni deklaratsiya qilish shart emas.
+[clear] Eng muhimi — qiymat. Havo yo'li bilan jami ming dollargacha — bojsiz. [serious] Oshsa — oshgan qismi uchun to'lov olinadi.
+
+[reassuring] O'zbekistonda sotib olinib, UZIMEI'da ro'yxatdan o'tgan telefon esa deklaratsiya qilinmaydi.
 
 [confident] Bagajni olgach, bojxona nazoratiga o'ting va xodimga deklaratsiyangizning QR-kodini ko'rsating.
 
-[reassuring] To'lovni ikki xil yo'l bilan qilishingiz mumkin: terminalning o'zidagi bank kassasida — [upbeat] yoki telefoningizdan, onlayn to'lov tizimlari orqali.
+[reassuring] To'lovni terminalning o'zidagi bank kassasida qilishingiz mumkin — [upbeat] yoki telefoningizdan, istalgan to'lov tizimi orqali onlayn.
 
-[confident] Eslab qoling: bagaj kutayotganda — ybdweb'da deklaratsiya. Nazoratda — QR-kod. Me'yordan oshsa — BKO va to'lov. [happy] Bor-yo'g'i shu!
+[serious] Va oxirgi qadam: to'lovdan keyin telefoningiz IMEI kodini UZIMEI tizimida ro'yxatdan o'tkazing.
+
+[confident] Eslab qoling: bagaj kutayotganda — deklaratsiya. Nazoratda — QR-kod. Qiymat oshsa — to'lov, keyin BKO va UZIMEI. [happy] Bor-yo'g'i shu!
 
 [warm] Bojxona — siz uchun. Xayrli yo'l!
 ```
@@ -173,13 +199,13 @@ Har bir telefonning IMEI kodini, modelini va narxini yozing.
 [friendly] IMEI kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering. Ikki SIM-kartali telefonda ikkita kod chiqadi — ikkalasini ham yozing.
 ```
 ```
-[warm] Assalomu alaykum! Deklaratsiyangiz tayyor ekan. Ikki donagacha telefon — bojsiz. Marhamat, xush kelibsiz!
+[warm] Assalomu alaykum! Deklaratsiyangiz tayyor ekan. Me'yor ichida — to'lov yo'q. Marhamat, xush kelibsiz!
 ```
 ```
-[calm] Sizda uchta telefon ekan. Ikkitasi — bojsiz, uchinchisi uchun boj to'lanadi. Hozir bojxona kirim orderini — BKO'ni rasmiylashtiraman. [reassuring] To'lov summasi mana shu yerda ko'rsatilgan.
+[calm] Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi. [reassuring] To'lovdan so'ng BKO'ni rasmiylashtirib beraman.
 ```
 ```
-[warm] To'lov qabul qilindi, telefonlaringiz rasmiylashtirildi. Xayrli yo'l!
+[warm] To'lov qabul qilindi. Mana, bojxona kirim orderingiz — BKO. Telefoningiz rasmiylashtirildi.
 ```
 
 **🧳 Yo'lovchi** (ixtiyoriy):
@@ -200,18 +226,17 @@ Asosiy kadr uchun prompt — forma rasmini olgach, `[forma]` aniqlashtiriladi:
 Vertical 9:16 photo, medium shot of a friendly Uzbek customs officer, [man/woman, around 30-35], wearing [uniform as in the reference photo], standing at a customs control booth in the arrival hall of Tashkent International Airport, modern terminal with soft daylight and blurred passengers in the background, looking at the camera with a calm, polite smile, natural skin, realistic, documentary style, sharp focus, no text
 ```
 
-Har bir klip uchun harakat (image-to-video, 4–5 s):
+Har bir klip uchun harakat (image-to-video, 4–6 s):
 1. **IMEI (6-sahna):** `The officer raises a smartphone, turns the screen to the camera and speaks calmly, small friendly nod, subtle hand gesture, static camera`
-2. **Me'yor ichida (9-sahna):** `The officer scans a QR code on a passenger's phone with a handheld scanner, glances at the screen, then looks at the camera and smiles warmly while speaking, static camera`
-3. **BKO (10-sahna):** `The officer explains politely while taking a printed form from a small printer and pointing at the amount line, calm gestures, static camera`
-4. **Yakun (12-sahna):** `The officer hands the document back, nods and says goodbye with a warm smile, static camera`
+2. **Me'yor ichida (10-sahna):** `The officer scans a QR code on a passenger's phone with a handheld scanner, glances at the screen, then looks at the camera and smiles warmly while speaking, static camera`
+3. **Qiymat oshganda (11-sahna):** `The officer looks at the declaration on a tablet, then at the camera, and explains politely with calm open-hand gestures, static camera`
+4. **BKO (13-sahna):** `The officer takes a printed receipt form from a small printer, hands it toward the camera, nods with a warm smile, static camera`
 
 Umumiy taqiqlar (negative prompt):
 ```
 distorted face, extra fingers, unreadable fake text, fake emblems, cartoon, over-smoothed skin, shaky camera
 ```
 
-**Eslatma:** davlat ramzlari (gerb, nishon, unvon belgilari) AI'da noto'g'ri
-chizilishi mumkin. Ular kadrda aniq ko'rinmasin, kerak bo'lsa montajda
-xiralashtiraman. Xodim gaplari ElevenLabs'da yaratilib, lip-sync qilinadi yoki
-klip ovozsiz qoladi — qaysi AI vositadan foydalanishingizga qarab tanlaymiz.
+**Eslatmalar:**
+- Davlat ramzlari (gerb, nishon, unvon belgilari) AI'da noto'g'ri chizilishi mumkin. Ular kadrda aniq ko'rinmasin, kerak bo'lsa montajda xiralashtiraman.
+- Xodim gaplari ElevenLabs'da yaratilib, lip-sync qilinadi yoki klip ovozsiz qoladi — qaysi AI vositadan foydalanishingizga qarab tanlaymiz.
