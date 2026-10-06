@@ -77,6 +77,37 @@ Qaysi gap qaysi sahnaga tushadi:
 | Eslab qoling… | 15 · Eslatma |
 | Toshkent-Aero… | 16 · Yakun |
 
+## 🎙 Qo'shimcha gaplar (4-versiya)
+
+Bular videoga qo'shilgan yangi sahnalar uchun:
+- yo'nalish xaritasi;
+- 3 kunlik shart;
+- "bir oyda 2 martadan ko'p" holati;
+- kassa va Bojxona servis qayerdaligi.
+
+Diktor ovozi bilan (Bekzod), **bitta yozuvda** yarating. Bo'sh qatorlar pauza
+beradi. Gaplarni o'zim ajratib, joyiga qo'yaman.
+
+```
+[clear] Yo'lingiz shunday: bagaj zali — bojxona nazorati — kelish zali. [friendly] To'lovlar kassasi va Bojxona servis kelish zalida, chiqishdan oldin.
+
+[serious] Lekin bojsiz me'yorning sharti bor: [clear] xorijda kamida uch kun bo'lgan bo'lishingiz kerak.
+
+[serious] Safar uch kundan qisqa bo'lsa yoki bir oyda ikki martadan ko'p kelsangiz — me'yor qo'llanmaydi. [clear] To'lov telefonning to'liq qiymatiga hisoblanadi.
+
+[clear] To'lovlar kassasi — nazoratdan o'tgach, kelish zalida.
+
+[friendly] Bojxona servis ham kelish zalida — uz imey belgisini qidiring.
+```
+
+| Gap | Sahna |
+| --- | --- |
+| Yo'lingiz shunday… | 2 · Qo'nishdan keyin, 3D yo'nalish xaritasi |
+| Lekin bojsiz me'yorning sharti bor… | 7 · Qiymatdan keyin, 3D "3 kun" sahifalari |
+| Safar uch kundan qisqa bo'lsa… | 7 · 3D oy kalendari, "me'yor qo'llanmaydi" |
+| To'lovlar kassasi — nazoratdan o'tgach… | 12 · To'lovdan keyin, xaritada kassa |
+| Bojxona servis ham kelish zalida… | 14 · UZIMEI, xaritada Bojxona servis, "UZ IMEI" belgisi |
+
 ## 👮 Bojxona xodimi
 
 Bu matnlar ikki holatda kerak:

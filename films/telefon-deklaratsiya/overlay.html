@@ -17,8 +17,8 @@
 <div class="bar"><button id="play">▶</button><input id="t" type="range" min="0" step="0.0333"><span id="lab"></span></div>
 <script src="fonts.js"></script>
 <script src="cues.js"></script>
-<script>
-'use strict';
+<script type="module">
+import * as S3 from './scene3d.js';
 // The overlay layer of the video: titles, cards and the full-screen graphic scenes, drawn
 // over the footage on a transparent canvas. All times come from cues.js (tools/edit.py).
 const C = window.CUES, E = C.ev, V = C.vo, SG = C.seg, FPS = C.fps, W = C.w, H = C.h;
@@ -535,14 +535,145 @@ function ending(t) {
   g.restore();
 }
 
-const SCENES = [hook, arrival, baggage, site, highlights, steps, checks, imeiDual, imeiTip, valueScene, exceptScene,
-  control, overNorm, payment, bko, uzimei, servis, recap, ending];
+
+// ---------------------------------------------------------------- v4: 3D scenes, rules, places
+const D3 = C.s3d;
+let GL = null;   // the WebGL canvas of scene3d.js
+function title3d(t, a0, a1, big, sub, {y = 250, col = COL.gold} = {}) {
+  const a = life(t, a0, a1, .35, .2); if (a <= 0) return;
+  g.save(); g.globalAlpha = a; const dy = (1 - eo(k(t, a0, .5))) * 40;
+  text(uz(big), W / 2, y + dy, 80, {w: 800, col, max: 980});
+  if (sub) text(uz(sub), W / 2, y + 86 + dy, 44, {w: 600, col: 'rgba(255,255,255,0.88)', max: 980});
+  g.restore();
+}
+function draw3d(t, seg, fn, ev) {
+  const [a0, a1] = SG[seg]; if (t < a0 || t > a1) return false;
+  const a = panelBg(t, a0, a1); if (a <= 0 || !GL) return false;
+  fn(t, ev); g.save(); g.globalAlpha = Math.min(1, a * 1.3); g.drawImage(GL, 0, 0); g.restore(); return true;
+}
+// Labels over the 3D map: number badges on the stations passed, a full label on the current one.
+function stationLabels(t, focus, a) {
+  const st = S3.proj.st; if (!st.length) return;
+  g.save(); g.globalAlpha = a;
+  st.forEach((q, i) => {
+    if (!q.on || (q.at >= 0 && t < q.at - .35) || i === focus || !q.n) return;
+    g.fillStyle = 'rgba(255,255,255,0.95)'; g.beginPath(); g.arc(q.x, q.y - 30, 30, 0, Math.PI * 2); g.fill();
+    text(q.n, q.x, q.y - 28, 34, {w: 800, col: COL.green});
+  });
+  const q = st[focus];
+  if (q && q.on) {
+    const p = k(t, q.at >= 0 ? q.at - .35 : SG.kassapin[0], .4), sc = .7 + .3 * eb(p);
+    g.font = FONT(800, 50); const tw = Math.max(g.measureText(uz(q.t)).width, q.sub ? (g.font = FONT(600, 34), g.measureText(uz(q.sub)).width) : 0);
+    const w = tw + (q.n ? 190 : 110), h = q.sub ? 150 : 110;
+    const x = Math.min(Math.max(q.x, 60 + w / 2), W - 60 - w / 2), y = Math.max(q.y - 120, 420);
+    g.globalAlpha = a * clamp(p * 2); g.translate(x, y); g.scale(sc, sc); g.translate(-x, -y);
+    shadow(true, 30, 10, .35); rr(x - w / 2, y - h / 2, w, h, 40); g.fillStyle = '#fff'; g.fill(); shadow(false);
+    g.fillStyle = COL.green; g.beginPath(); g.moveTo(Math.min(Math.max(q.x, x - w / 2 + 40), x + w / 2 - 40) - 18, y + h / 2 - 2);
+    g.lineTo(Math.min(Math.max(q.x, x - w / 2 + 40), x + w / 2 - 40) + 18, y + h / 2 - 2); g.lineTo(Math.min(Math.max(q.x, x - w / 2 + 40), x + w / 2 - 40), y + h / 2 + 22); g.fill();
+    let tx = x - w / 2 + 50;
+    if (q.n) { g.fillStyle = COL.green; g.beginPath(); g.arc(x - w / 2 + 80, y, 44, 0, Math.PI * 2); g.fill(); text(q.n, x - w / 2 + 80, y + 2, 52, {w: 800}); tx = x - w / 2 + 145; }
+    text(uz(q.t), tx, q.sub ? y - 22 : y + 3, 50, {w: 800, col: COL.ink, align: 'left'});
+    if (q.sub) text(uz(q.sub), tx, y + 36, 34, {w: 600, col: '#5d6d66', align: 'left'});
+  }
+  g.restore();
+}
+function routeScene(t) {
+  if (!draw3d(t, 'route', S3.route, D3.route)) return;
+  const [a0, a1] = SG.route, at = D3.route.at;
+  let cur = 0; at.forEach((x, i) => { if (t >= x - .35) cur = i + 1; });
+  stationLabels(t, cur, life(t, a0, a1, .4, .25));
+  const h = S3.proj.hall;
+  if (h && h.on && t >= at[2] - .5) chip(t, at[2] - .5, a1, 'Kelish zali', {x: h.x, y: h.y, size: 40, bg: 'rgba(245,183,49,0.95)', col: COL.ink});
+  title3d(t, a0 + .1, a1, 'Qayerga borasiz?', "Yo'lingiz — 5 bekat", {y: 230});
+}
+function daysScene(t) {
+  if (!draw3d(t, 'days', S3.days, D3.days)) return;
+  const [a0, a1] = SG.days, d = D3.days;
+  title3d(t, a0 + .1, a1, 'Muhim shart', '', {y: 230});
+  const a = life(t, d.pages[0] - .2, a1, .3, .2);
+  if (a > 0) { g.save(); g.globalAlpha = a; text(uz('Xorijda kamida 3 kun'), W / 2, 340, 72, {w: 800, col: '#fff'});
+    text(uz("havo yo'li bilan"), W / 2, 412, 42, {w: 600, col: 'rgba(255,255,255,0.8)'}); g.restore(); }
+  chip(t, d.ok, a1, "Bojsiz me'yor qo'llanadi", {y: 1600, size: 50, icon: iconCheck});
+}
+function monthScene(t) {
+  if (!draw3d(t, 'month', S3.month, D3.month)) return;
+  const [a0, a1] = SG.month, d = D3.month;
+  title3d(t, a0 + .05, a1, "Me'yor qo'llanmaydi, agar:", '', {y: 230, col: '#fff'});
+  const cond = (t0, txt, y) => { const p = k(t, t0 - .1, .35); if (p <= 0) return;
+    g.save(); g.globalAlpha = eo(p) * life(t, a0, a1, .2, .2); const x = 90 + (1 - eo(p)) * 60;
+    rr(x, y - 52, 900, 104, 52); g.fillStyle = 'rgba(255,255,255,0.97)'; g.fill();
+    g.fillStyle = COL.red; g.beginPath(); g.arc(x + 60, y, 34, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round'; g.beginPath(); g.moveTo(x + 47, y - 13); g.lineTo(x + 73, y + 13); g.moveTo(x + 73, y - 13); g.lineTo(x + 47, y + 13); g.stroke();
+    text(uz(txt), x + 115, y + 3, 46, {w: 700, col: COL.ink, align: 'left', max: 760}); g.restore(); };
+  (S3.proj.flags || []).forEach((f, i) => { if (!f.on || t < f.at + .15) return;
+    chip(t, f.at + .15, a1, `${i + 1}-kelish`, {x: f.x, y: f.y - 20, size: 38, bg: i === 2 ? 'rgba(229,72,77,0.95)' : 'rgba(11,90,67,0.95)'}); });
+  cond(d.short, 'safar 3 kundan qisqa bo\'lsa', 370);
+  cond(d.flags[0], 'bir oyda 2 martadan ko\'p kelsangiz', 500);
+  // the stamp and the full price
+  const ps = k(t, d.stamp, .2);
+  if (ps > 0 && t < d.full - .2) { g.save(); g.globalAlpha = life(t, d.stamp, d.full - .1, .05, .2); g.translate(W / 2, 1450); g.rotate(-.06);
+    g.scale(1 + 1.2 * (1 - eo(ps)), 1 + 1.2 * (1 - eo(ps))); g.strokeStyle = COL.red; g.lineWidth = 10; rr(-430, -90, 860, 180, 26);
+    g.fillStyle = 'rgba(255,255,255,0.94)'; g.fill(); g.stroke(); text(uz("ME'YOR QO'LLANMAYDI"), 0, 4, 66, {w: 800, col: COL.red}); g.restore(); }
+  const pf = k(t, d.full - .1, .9);
+  if (pf > 0) {
+    g.save(); g.globalAlpha = life(t, d.full - .1, a1, .3, .2); const x0 = 110, x1 = 970, y = 1480;
+    text(uz("To'lov — telefonning to'liq qiymatiga"), W / 2, y - 120, 46, {w: 700, col: '#fff'});
+    rr(x0, y - 50, x1 - x0, 100, 24); g.fillStyle = 'rgba(255,255,255,0.12)'; g.fill();
+    rr(x0, y - 50, (x1 - x0) * eo(pf), 100, 24); g.fillStyle = COL.red; g.fill();
+    text('$1 300', W / 2, y + 3, 54, {w: 800, col: '#fff'}); g.restore();
+  }
+}
+function pinScene(seg, ev, big, sub) {
+  return t => { if (!draw3d(t, seg, S3.pin, ev)) return; const [a0, a1] = SG[seg];
+    stationLabels(t, ev.station, life(t, a0, a1, .4, .25)); title3d(t, a0 + .1, a1, big, sub, {y: 230}); };
+}
+const kassaPin = pinScene('kassapin', D3.kassa, "To'lovlar kassasi", "nazoratdan o'tgach · kelish zali");
+const servisPin = pinScene('servispin', D3.servis, 'Bojxona servis', 'kelish zali · chiqishdan oldin');
+function signScene(t) {
+  const [a0, a1] = SG.sign; if (t < a0 || t > a1) return;
+  scrim(true, life(t, a0, a1)); chip(t, a0 + .1, a1, "«UZ IMEI» belgisini qidiring", {y: 330, size: 50, icon: iconInfo});
+}
+// Where the passenger is: a small pin at the top during the walk through the terminal.
+const PLACE = [[['belt', 'hall', 'phone', 'site', 'siteb', 'site2', 's1', 's2', 's2b', 's3', 's4', 's4b', 'ai01', 'imei', 'm1', 'm2', 'm3', 'qr'], 'Bagaj zali'],
+  [['suitcase', 'control', 'ai03', 'pass', 'ai04', 'ai05', 'ai06', 'bko'], 'Bojxona nazorati'],
+  [['cashier', 'pay'], "Kelish zali · kassa"], [['uzk', 'servis', 'sign'], 'Kelish zali · Bojxona servis'], [['exit'], 'Chiqish']];
+function placeTag(t) {
+  for (const [ids, name] of PLACE) for (const id of ids) {
+    const [a, b] = SG[id]; if (t < a || t >= b) continue;
+    const first = ids.map(i => SG[i][0]).reduce((x, y) => Math.min(x, y)), last = ids.map(i => SG[i][1]).reduce((x, y) => Math.max(x, y));
+    const al = life(t, first, last, .3, .3); if (al <= 0) return;
+    g.save(); g.globalAlpha = al * .95; g.font = FONT(700, 34); const w = g.measureText(uz(name)).width + 96;
+    rr(W - 50 - w, 96, w, 64, 32); g.fillStyle = 'rgba(6,42,31,0.82)'; g.fill();
+    g.fillStyle = COL.red; g.beginPath(); g.arc(W - 50 - w + 38, 122, 12, Math.PI, 0); g.lineTo(W - 50 - w + 38, 144); g.closePath(); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(W - 50 - w + 38, 122, 5, 0, Math.PI * 2); g.fill();
+    text(uz(name), W - 50 - w + 66, 129, 34, {w: 700, col: '#fff', align: 'left'}); g.restore(); return;
+  }
+}
+// A quick diagonal swipe that hides the cut between two scenes.
+function whips(t) {
+  for (const c of C.whip) {
+    const u = (t - (c - .17)) / .34; if (u <= 0 || u >= 1) continue;
+    g.save(); g.translate(W / 2, H / 2); g.rotate(-.28);
+    const x = -W * 1.6 + io(u) * W * 3.2;
+    g.fillStyle = COL.mint; g.fillRect(x - 420, -H, 380, H * 2);
+    g.fillStyle = '#0b5a43'; g.fillRect(x - 40, -H, 900, H * 2);
+    g.fillStyle = 'rgba(255,255,255,0.35)'; for (let i = 0; i < 6; i++) g.fillRect(x - 520 - i * 70, -H, 10, H * 2);
+    g.restore();
+  }
+}
+function missingTag(t) {
+  for (const id of C.missing || []) { const v = V[id]; if (t >= v.at - .2 && t <= v.end) tag(t, v.at - .2, v.end, `Ovoz kutilmoqda: ${id}`); }
+}
+const SCENES = [hook, arrival, routeScene, baggage, site, highlights, steps, checks, imeiDual, imeiTip, valueScene, daysScene,
+  monthScene, exceptScene, control, overNorm, payment, kassaPin, bko, uzimei, servis, servisPin, signScene, recap, ending,
+  placeTag, missingTag, whips];
 function draw(t) { g.clearRect(0, 0, W, H); for (const s of SCENES) { g.save(); s(t); g.restore(); } }
 
 // ---------------------------------------------------------------- frame API (tools/render-overlay.mjs)
 window.__N = N; window.__fps = FPS;
 window.__frame = i => { draw(i / FPS); return cv.toDataURL('image/png'); };
 Promise.all(loads).then(() => {
+  GL = S3.init(W, H);
   const range = document.getElementById('t'), lab = document.getElementById('lab'); range.max = C.end;
   const show = t => { draw(t); lab.textContent = t.toFixed(2) + ' s'; };
   range.oninput = () => show(+range.value);

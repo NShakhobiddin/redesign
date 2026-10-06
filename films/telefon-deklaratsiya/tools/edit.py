@@ -52,7 +52,45 @@ MASKS = {
            (375, 1205, 540, 545, 8.2, 99, 'pix'), (85, 2080, 320, 615, 11.7, 99, 'blur')],
 }
 REC_SCALE = W / 1290   # screen recordings fill the width
-TAKES = {'full': '07_32_33_Bekzod', 'redo': '10_32_51_Bekzod', 'off': 'Jahongir'}
+TAKES = {'full': '07_32_33_Bekzod', 'redo': '10_32_51_Bekzod', 'off': 'Jahongir',
+         'new': os.environ.get('TEL_NEW_TAKE', 'NEW_LINES_Bekzod')}
+# The lines added in v4, in the order they are recorded (VOICEOVER.md, "Qo'shimcha gaplar").
+# Until the take exists, each line keeps an estimated length and the video is cut to it.
+NEW = [
+    "Yo'lingiz shunday: bagaj zali — bojxona nazorati — kelish zali. To'lovlar kassasi va Bojxona servis kelish zalida, chiqishdan oldin.",
+    "Lekin bojsiz me'yorning sharti bor: xorijda kamida uch kun bo'lgan bo'lishingiz kerak.",
+    "Safar uch kundan qisqa bo'lsa yoki bir oyda ikki martadan ko'p kelsangiz — me'yor qo'llanmaydi. To'lov telefonning to'liq qiymatiga hisoblanadi.",
+    "To'lovlar kassasi — nazoratdan o'tgach, kelish zalida.",
+    "Bojxona servis ham kelish zalida — uz imey belgisini qidiring.",
+]
+
+
+def syllables(word):
+    return max(1, sum(1 for ch in word.lower().replace("o'", 'o').replace("g'", 'g') if ch in 'aeiou'))
+
+
+def word_times(text, dur):
+    """Estimated start of every word of a line spoken in dur seconds (syllables plus punctuation pauses)."""
+    words = text.split(); w = []
+    for x in words:
+        w.append(syllables(x) / 5.6 + (0.38 if x[-1] in '.!?' else 0.22 if x[-1] in ',:' else 0) + (0.2 if x in ('—',) else 0))
+    total = sum(w); out, acc = [], 0.0
+    for x in w: out.append(acc / total * dur); acc += x
+    return words, out
+
+
+def new_lines():
+    """(in, out) of the five new lines in the take, or None while the take is missing."""
+    hits = [f for f in os.listdir(MEDIA) if TAKES['new'] in f] if MEDIA else []
+    if not hits: return None
+    x = decode(os.path.join(MEDIA, sorted(hits)[0])); h = 480
+    e = 20 * np.log10(np.sqrt((x[:len(x) // h * h].reshape(-1, h) ** 2).mean(1)) + 1e-9) > -45
+    on = np.flatnonzero(e); start, end = on[0], on[-1] + 1
+    gaps = [(b - a, a, b) for a, b in zip(on, on[1:]) if b - a > 1]
+    cuts = sorted(sorted(gaps, reverse=True)[:len(NEW) - 1], key=lambda g: g[1])
+    bounds = [start] + [g for c in cuts for g in (c[1] + 1, c[2])] + [end]
+    return [(max(0, bounds[2 * i] * h / SR - 0.05), bounds[2 * i + 1] * h / SR + 0.08) for i in range(len(NEW))]
+EST = [8.7, 5.2, 8.5, 3.2, 3.7]   # estimated seconds while the take is missing
 
 # Voice items: id, take, in, out, gap before (s), tempo, phrase starts (take time).
 # 'full' is the whole narrator text; 'redo' re-records steps 5a-5e; 'off' is the officer.
@@ -60,6 +98,7 @@ TAKES = {'full': '07_32_33_Bekzod', 'redo': '10_32_51_Bekzod', 'off': 'Jahongir'
 VO = [
     ('N1', 'full', 0.04, 7.30, 0.25, 1, [0.14, 2.88, 4.23, 5.43]),
     ('N2', 'full', 7.42, 13.75, 0.90, 1, [7.52, 8.72]),
+    ('R1', 'new', 0, 0, 0.40, 1, None),
     ('N3', 'full', 13.92, 20.80, 0.35, 1, [14.03, 15.96, 17.98, 19.30]),
     ('N4', 'full', 20.95, 27.95, 0.35, 1, [21.05, 21.95, 24.43, 25.77]),
     ('S1', 'redo', 0.00, 2.68, 0.40, 1, [0.10]),
@@ -70,15 +109,19 @@ VO = [
     ('O2', 'off', 6.86, 10.90, 0.30, 1, [6.96, 9.75]),
     ('S5', 'redo', 13.62, 18.13, 3.05, 1, [13.72, 14.61, 17.05]),
     ('N10', 'full', 46.28, 54.25, 0.45, 1, [46.38, 47.24, 48.10, 49.40, 50.55, 51.55, 52.28]),
-    ('N11', 'full', 54.35, 59.40, 0.35, 1, [54.45, 56.10]),
+    ('R2', 'new', 1, 0, 0.40, 1, None),
+    ('R3', 'new', 2, 0, 0.35, 1, None),
+    ('N11', 'full', 54.35, 59.40, 0.45, 1, [54.45, 56.10]),
     ('N12', 'full', 59.49, 65.42, 0.45, 1, [59.60, 60.42, 62.22, 63.95]),
     ('O3a', 'off', 11.20, 14.00, None, 1, [11.27, 12.52]),
     ('O3b', 'off', 14.40, 18.30, 0.35, 1, [14.46, 16.65]),
     ('O4', 'off', 18.57, 23.92, 0.60, 1, [18.67, 21.17]),
     ('O5', 'off', 24.10, 27.30, 0.55, 1, [24.20]),
     ('N13', 'full', 65.53, 73.08, 0.40, 1, [65.64, 67.54, 69.28, 70.72]),
+    ('R4', 'new', 3, 0, 0.40, 1, None),
     ('O6', 'off', 27.54, 33.15, 1.20, 1, [27.64, 29.05, 29.52, 31.31]),
     ('N14', 'full', 73.18, 85.55, 0.45, 1, [73.28, 74.32, 75.29, 76.97, 79.96, 81.79, 84.00]),
+    ('R5', 'new', 4, 0, 0.40, 1, None),
     ('N15', 'full', 85.59, 97.95, 1.20, 1, [85.69, 86.66, 89.12, 91.31, 92.88, 94.17, 96.00, 96.81]),
     ('N16', 'full', 98.07, 102.84, 0.50, 1, [98.17, 99.36, 101.85]),
 ]
@@ -99,7 +142,16 @@ TEMPO = (0.94, 1.08)   # a sentence may be squeezed or stretched only this much
 
 def timeline():
     T, t = {}, 0.0
+    lines = new_lines()
     for vid, take, a, b, gap, tempo, ph in VO:
+        if take == 'new':   # a, the line number; the words are timed by their syllables
+            i = a; at = t + gap
+            if lines: a, b = lines[i]
+            else: a, b = 0.0, EST[i]
+            words, wt = word_times(NEW[i], b - a - 0.13)
+            T[vid] = {'take': take, 'in': a, 'out': b, 'tempo': 1, 'at': round(at, 3), 'end': round(at + b - a, 3),
+                      'p': [round(at + 0.05 + x, 3) for x in wt], 'words': words, 'missing': lines is None}
+            t = at + b - a; continue
         if vid in SYNC:
             clip, src0, chunks, rate = (*SYNC[vid], 1)[:4]
             if gap is None:   # AI03 starts as the narrator says "QR-kod"; O3a follows its lips
@@ -126,6 +178,26 @@ def timeline():
     return T
 
 
+_LEN = {}
+def clip_length(clip):
+    if clip not in _LEN:
+        path = find(CLIPS[clip])
+        if not os.path.exists(path): return 1e9
+        r = subprocess.run(['ffmpeg', '-hide_banner', '-i', path], capture_output=True, text=True).stderr
+        h, m, sec = r.split('Duration: ')[1].split(',')[0].split(':'); _LEN[clip] = int(h) * 3600 + int(m) * 60 + float(sec)
+    return _LEN[clip]
+
+
+def wt(T, vid, prefix, n=1):
+    """Time of the n-th word of a new line that starts with prefix."""
+    k = 0
+    for w, t in zip(T[vid]['words'], T[vid]['p']):
+        if w.lower().startswith(prefix.lower()):
+            k += 1
+            if k == n: return t
+    raise KeyError(prefix)
+
+
 def segments(T):
     v = lambda k: T[k]
     p = lambda k, i: T[k]['p'][i]
@@ -139,10 +211,12 @@ def segments(T):
         ('tz4', 'K10', 6.2, tz + 1.35, 1, {'mute': 1}),
         ('landing', 'LANDING', 3.3 - (p('N2', 0) - v('N1')['end'] - 0.05), v('N1')['end'] + 0.05, 1, {'sound': 0}),
         ('terminal', 'K03', 0.0, p('N2', 1) + 1.6, 1, {}),
+        ('route', 'K03', 0, v('R1')['at'] - 0.2, 0.5, {'bg': 1, 'mute': 1, 'cont': 1}),
         ('belt', 'K04', 0.0, v('N3')['at'] - 0.2, 1, {}),
         ('hall', 'K04ALT', 3.7, p('N3', 1) - 0.1, 1, {}),
         ('phone', 'K05', 0.0, p('N3', 3) - 0.1, 1, {}),
         ('site', 'K05', 0, v('N4')['at'] - 0.15, 0.8, {'dim': 0.25, 'cont': 1}),
+        ('siteb', 'K01', 0.1, p('N4', 2) - 0.05, 0.7, {'dim': 0.25}),
         ('site2', 'E1', 0.0, p('N4', 3) - 0.1, 0.4, {'oy': 100}),
         ('s1', 'E1', 0, v('S1')['at'] - 0.12, None, {'to': 9.3, 'oy': 100, 'cont': 1}),
         ('s2', 'E1', 11.0, v('S2')['at'] - 0.12, None, {'to': 16.0, 'oy': 100}),
@@ -157,6 +231,8 @@ def segments(T):
         ('m3', 'E6', 5.5, v('O2')['end'] + 2.0, None, {'to': 8.4, 'oy': 100}),
         ('qr', 'E6', 8.4, v('S5')['at'] - 0.12, 1, {'oy': 250}),
         ('value', 'K04ALT', 0.0, v('N10')['at'] - 0.2, 0.6, {'bg': 1, 'mute': 1}),
+        ('days', 'K04ALT', 0, v('R2')['at'] - 0.2, 0.5, {'bg': 1, 'mute': 1, 'cont': 1}),
+        ('month', 'K04ALT', 0, v('R3')['at'] - 0.15, 0.5, {'bg': 1, 'mute': 1, 'cont': 1}),
         ('except', 'K04', 0.0, v('N11')['at'] - 0.2, 0.6, {'bg': 1, 'mute': 1}),
         ('suitcase', 'K06', 0.0, v('N12')['at'] - 0.2, 1, {'sound': -2}),
         ('control', 'K07', 1.5, p('N12', 1) + 0.9, 1, {}),
@@ -166,12 +242,15 @@ def segments(T):
         ('ai05', 'AI05', SYNC['O5'][1], v('O5')['clip'], 1, {'mute': 1}),
         ('cashier', 'K08', 2.5, v('N13')['at'] - 0.2, 1, {}),
         ('pay', 'K08', 0, p('N13', 2) - 0.1, 1, {'bg': 1, 'mute': 1, 'cont': 1}),
+        ('kassapin', 'K08', 0, v('R4')['at'] - 0.2, 0.5, {'bg': 1, 'mute': 1, 'cont': 1}),
         ('ai06', 'AI06', SYNC['O6'][1], v('O6')['clip'], 1, {'mute_after': 2.0, 'sound': 2}),
         ('bko', 'K09KOMP', 0.6, v('O6')['chunks'][2][2] - 0.12, 1, {'blurtop': 1040, 'mute': 1}),
         ('uz1', 'K09PESH', 0.0, v('N14')['at'] - 0.2, 0.6, {'bg': 1, 'mute': 1}),
         ('uzk', 'K09B', 3.0, p('N14', 3) - 0.1, 1, {}),
         ('uz2', 'K09PESH', 2.4, p('N14', 4) - 0.1, 0.6, {'bg': 1, 'mute': 1}),
         ('servis', 'K09PULLIK', 0.2, p('N14', 6) - 0.05, 1, {}),
+        ('servispin', 'K09PULLIK', 0, v('R5')['at'] - 0.2, 0.5, {'bg': 1, 'mute': 1, 'cont': 1}),
+        ('sign', 'K09PULLIK', 2.3, wt(T, 'R5', 'uz') - 0.1, 0.8, {}),
         ('exit', 'K10', 1.5, v('N15')['at'] - 0.25, 1, {}),
         ('recap', 'K10', 0, p('N15', 1) - 0.35, 0.33, {'bg': 1, 'mute': 1, 'cont': 1}),
     ]
@@ -181,12 +260,35 @@ def segments(T):
         stop = S[i + 1][3] if i + 1 < len(S) else end
         if fx.get('cont'):   # the same shot goes on
             q = out[-1]; src = q['src'] + (q['e'] - q['s']) * q['rate']
+        if clip and MEDIA:   # never seek past the end of a clip (an empty segment would shift every later cut)
+            src = min(src, clip_length(clip) - 0.4)
         if rate is None:     # play the source range [src, to] in the segment's time
             rate = (fx['to'] - src) / (stop - start)
+        if clip and clip[0] in 'KWL' and not fx.get('bg') and 'oy' not in fx:   # slow camera drift
+            fx = {**fx, 'drift': 1 if len(out) % 2 else -1}
         if stop - start < 0.2: raise SystemExit(f'segment {sid} too short: {stop - start:.2f} s')
         out.append({'id': sid, 'clip': clip, 'src': round(src, 3), 's': round(start, 3), 'e': round(stop, 3),
                     'rate': rate, 'fx': fx})
     return out, end
+
+
+WHIP = ['landing', 'route', 'belt', 'site2', 'ai01', 'qr', 'value', 'days', 'suitcase', 'ai04', 'cashier',
+        'kassapin', 'uz1', 'servispin', 'recap']
+
+
+def scenes3d(T, segs):
+    sg = {s['id']: (s['s'], s['e']) for s in segs}
+    w = lambda vid, pre, n=1: wt(T, vid, pre, n)
+    return {
+        'route': {'t0': sg['route'][0], 't1': sg['route'][1],
+                  'at': [w('R1', 'bagaj'), w('R1', 'bojxona'), w('R1', "to'lovlar"), w('R1', 'bojxona', 2), w('R1', 'chiqishdan')]},
+        'days': {'t0': sg['days'][0], 't1': sg['days'][1], 'pages': [w('R2', 'xorijda'), w('R2', 'kamida'), w('R2', 'uch')],
+                 'ok': w('R2', 'kerak')},
+        'month': {'t0': sg['month'][0], 't1': sg['month'][1], 'short': w('R3', 'qisqa'),
+                  'flags': [w('R3', 'oyda'), w('R3', 'ikki'), w('R3', "ko'p")], 'stamp': w('R3', "me'yor"), 'full': w('R3', "to'lov")},
+        'kassa': {'t0': sg['kassapin'][0], 't1': sg['kassapin'][1], 'station': 3},
+        'servis': {'t0': sg['servispin'][0], 't1': sg['servispin'][1], 'station': 4},
+    }
 
 
 def events(T):
@@ -241,7 +343,9 @@ def qr_matrix(text):
 def write_cues():
     T = timeline(); segs, end = segments(T)
     cues = {'fps': FPS, 'w': W, 'h': H, 'end': end, 'vo': T,
-            'seg': {s['id']: [s['s'], s['e']] for s in segs}, 'ev': {**events(T), 'loc': src2t(segs, 'm2', 0.5), 'check': src2t(segs, 'm3', 5.6), 'checkDone': src2t(segs, 'm3', 8.0)},
+            'seg': {s['id']: [s['s'], s['e']] for s in segs}, 's3d': scenes3d(T, segs), 'whip': [s['s'] for s in segs if s['id'] in WHIP],
+            'missing': [k for k, it in T.items() if it.get('missing')],
+            'ev': {**events(T), 'loc': src2t(segs, 'm2', 0.5), 'check': src2t(segs, 'm3', 5.6), 'checkDone': src2t(segs, 'm3', 8.0)},
             'hl': highlights(T, segs),
             'qrSite': qr_matrix('https://ybdweb.customs.uz')}
     with open(os.path.join(FILM, 'cues.js'), 'w') as f:
@@ -321,6 +425,9 @@ def sfx_list(T):
     e = events(T)
     L = [('stamp', e['stamp'])] + [('key', k) for k in e['keys']]
     L += [('ding', e['qrShown']), ('ding', e['paid']), ('ding', e['thatsAll'])]
+    d = scenes3d(T, segments(T)[0])
+    L += [('tick', x) for x in d['route']['at']] + [('tick', x) for x in d['days']['pages']] + [('ding', d['days']['ok'])]
+    L += [('thud', x) for x in d['month']['flags']] + [('stamp', d['month']['stamp'])]
     return L
 
 
@@ -359,12 +466,13 @@ def build_audio():
     T = timeline(); segs, end = segments(T)
     n = int((end + 0.5) * SR)
     nar, off, ev, fx = (np.zeros(n, np.float32) for _ in range(4))
-    takes = {k: decode(find(v, '.mp3')) for k, v in TAKES.items()}
+    takes = {k: decode(find(v, '.mp3')) for k, v in TAKES.items() if k != 'new' or new_lines()}
     def stretch(x, k, name):
         if abs(k - 1) < 1e-3: return x
         tmp = os.path.join(WORK, f'_{name}.wav'); write_wav(tmp, x)
         return decode(tmp, af=f'rubberband=tempo={k}:pitchq=quality')
     for vid, it in T.items():
+        if it['take'] not in takes: continue   # a new line not recorded yet
         take, bus = takes[it['take']], (off if it['take'] == 'off' else nar)
         parts = it.get('chunks') or [(it['in'], it['out'], it['at'], it['tempo'])]
         target = -18.5 if it['take'] == 'off' else -17.0   # every sentence at the same loudness
@@ -394,7 +502,7 @@ def build_audio():
             x[q:] = 0; x[max(0, q - 4800):q] *= np.linspace(1, 0, min(q, 4800))
         place(ev, fade(x[:int(dur * SR)], 0.2, 0.25), s['s'], s['fx']['sound'])
     for kind, at in sfx_list(T):
-        place(fx, sfx(kind), at, -4 if kind == 'stamp' else -10)
+        place(fx, sfx(kind), at, {'stamp': -4, 'thud': -8, 'tick': -14}.get(kind, -10))
     duck = envelope_duck(nar + off, n)
     voice = nar + off
     mix = voice + bed * 10 ** (-5 * duck / 20) + ev * 10 ** ((-14 - 6 * duck) / 20) + fx
@@ -412,6 +520,9 @@ def seg_filter(s, dur):
         f += [f'scale={W}:-2:flags=lanczos', f"crop={W}:{H}:0:{fx['oy']}", 'setsar=1']
     else:
         f += [f'scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos', f'crop={W}:{H}', 'setsar=1']
+    if fx.get('drift'):   # 8 % larger, the frame slides slowly sideways
+        d = fx['drift']; f += [f'scale={int(W * 1.08) // 2 * 2}:{int(H * 1.08) // 2 * 2}',
+                               f"crop={W}:{H}:x='(iw-ow)*(0.5+{0.5 * d}*(2*t/{dur:.3f}-1))':y='(ih-oh)/2'"]
     if fx.get('bg'):
         f += ['scale=270:480', 'boxblur=8:3', f'scale={W}:{H}', 'eq=brightness=-0.10:saturation=0.75']
     if fx.get('dim'):
@@ -442,6 +553,10 @@ def build_video():
             ff('-f', 'lavfi', '-i', f'color=c=0x06281e:s={W}x{H}:r={FPS}', '-frames:v', str(nf), *enc, out)
         else:
             ff('-ss', f"{s['src']:.3f}", '-i', find(CLIPS[s['clip']]), '-filter_complex', seg_filter(s, dur), *enc, out)
+        nf = round(s['e'] * FPS) - round(s['s'] * FPS)
+        got = sum(1 for l in subprocess.run(['ffmpeg', '-v', 'error', '-i', out, '-map', '0:v', '-f', 'framecrc', '-'],
+                                             capture_output=True, text=True).stdout.splitlines() if l and not l.startswith('#'))
+        if got != nf: raise SystemExit(f'segment {s["id"]}: {got} frames, expected {nf}')
         print(f'  {i:02d} {s["id"]:9s} {dur:5.2f} s', flush=True)
         return f"file '{out}'"
     with ThreadPoolExecutor(int(opt('--jobs', 3))) as pool:

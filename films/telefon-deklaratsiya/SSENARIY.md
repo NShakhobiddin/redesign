@@ -46,6 +46,9 @@ o'qilmaydi. `[?]` — hali ochiq qolgan joylar.
 | YBD web **aeroportda, uchib kelgandan keyin** to'ldiriladi | siz tasdiqladingiz |
 | YBD web qadamlari: pasport ma'lumotlari → **Face ID** → "Mobil qurilmani deklaratsiyalash" → IMEI kodlar va narxi → QR-kod shakllanadi | siz tasdiqladingiz |
 | O'zbekistonda sotib olingan va UZIMEI'da ro'yxatdan o'tgan telefon deklaratsiya qilinmaydi | qo'llanma: AV-2606 |
+| Bojsiz me'yor faqat xorijda **kamida 3 kun** (havo yo'li) bo'lganda qo'llanadi | qo'llanma: VM-244 |
+| Safar 3 kundan qisqa bo'lsa yoki yo'lovchi **bir oyda 2 martadan ko'p** kelsa — me'yor qo'llanmaydi, to'lov telefonning **to'liq qiymatiga** hisoblanadi | siz tasdiqladingiz (qo'llanmada "oyiga" sharti eski tahrirda deb belgilangan — tekshirib qo'ying) |
+| To'lovlar kassasi va Bojxona servis — bojxona nazoratidan **keyin**, kelish zalida, chiqishdan oldin | siz tasdiqladingiz |
 
 Videoda YBT stavkasi (hozir 30%, kamida $3/kg) **ko'rsatilmaydi**: PF-174 bo'yicha
 u 2027-yil 1-yanvardan 20% / $2 bo'ladi va video tez eskirib qoladi.

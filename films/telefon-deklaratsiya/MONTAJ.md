@@ -5,6 +5,40 @@ Videoni montaj qiluvchi kod shu papkada. Kadrlar, ovozlar va tayyor video
 ularni `--media` papkasidan nomi bo'yicha topadi, oraliq va tayyor fayllarni
 `--work` papkasiga yozadi. Sahnalar: [`SSENARIY.md`](SSENARIY.md).
 
+## 4-versiya — 3:00 (yangi gaplar kutilmoqda)
+
+3-versiyaning hamma kadrlari va ovozi saqlangan. Ustiga quyidagilar qo'shildi:
+
+- **3D grafika** (three.js, [`scene3d.js`](scene3d.js)):
+  - **Yo'nalish xaritasi.** Qo'nishdan keyin chiqadi: samolyot → bagaj zali →
+    bojxona nazorati → kassa → Bojxona servis → chiqish. Nuqta yo'l bo'ylab
+    yuradi, har bekat diktor uni aytganda paydo bo'ladi.
+  - **Kassa va Bojxona servis belgisi.** Xuddi shu xaritada, yaqindan va qizil
+    belgi bilan ko'rsatiladi.
+  - **"3 kun" sahifalari.** Xorijda kamida 3 kun bo'lish sharti.
+  - **Oy kalendari.** "Safar 3 kundan qisqa" va "oyda 3-kelish" holatlari →
+    "Me'yor qo'llanmaydi" → to'lov to'liq qiymatga ($1 300).
+- **"Siz shu yerdasiz" belgisi.** Kadrlarda yuqori o'ng burchakda turadi:
+  - Bagaj zali;
+  - Bojxona nazorati;
+  - Kelish zali · kassa;
+  - Kelish zali · Bojxona servis;
+  - Chiqish.
+- **«UZ IMEI» belgisi.** Bojxona servis kadrida unga ishora qilinadi.
+- **Kadrlarda sekin harakat.** Har kadr 8 % kattalashtirilib, sekin yonga
+  suriladi.
+- **Sahna almashuvi.** Sahnalar orasida tez diagonal "whip" o'tishi bor.
+- **Yangi gaplar** ([`VOICEOVER.md`](VOICEOVER.md), "Qo'shimcha gaplar"). Ular
+  hali yozilmagan, shuning uchun hozircha taxminiy uzunlikda bo'sh turibdi va
+  qizil yorliq bilan belgilangan. Yozuv kelsa, `TEL_NEW_TAKE` orqali fayl
+  ko'rsatiladi. Kod gaplarni pauzalaridan ajratadi va vaqtlarni o'zi qayta
+  hisoblaydi.
+
+Tuzatilgan xato: xiralashgan fon segmentlaridan biri klip tugaganidan keyingi
+joydan o'qilgan va bo'sh chiqqan edi. Natijada undan keyingi kadrlar ~9 s ga
+surilgan edi. Endi o'qish joyi klip uzunligidan oshmaydi. Har segmentning
+kadrlar soni ham tekshiriladi.
+
 ## 3-versiya — 2:29
 
 Video 1080×1920, 30 fps. Ovoz balandligi −14 LUFS. Hamma vaqtlar diktor
@@ -103,9 +137,10 @@ Ishlatilmaganlar:
 
 ## Hali kerak
 
-1. **Musiqa** — [`MUSIC-PROMPT.md`](MUSIC-PROMPT.md). Video 2:29. Suno'da
-   Duration'ni 2:40 qilib qo'ying, qisqaroq bo'lsa ham uzaytiraman.
-2. Ixtiyoriy: to'lov ilovasining ekran yozuvi (hozir brendsiz grafika).
+1. **Yangi gaplar** — [`VOICEOVER.md`](VOICEOVER.md), "Qo'shimcha gaplar".
+2. **Musiqa** — [`MUSIC-PROMPT.md`](MUSIC-PROMPT.md). Video endi ~3:00. Suno'da
+   Duration'ni 3:10 qilib qo'ying, qisqaroq bo'lsa ham uzaytiraman.
+3. Ixtiyoriy: to'lov ilovasining ekran yozuvi (hozir brendsiz grafika).
 
 ## Qayta yig'ish
 

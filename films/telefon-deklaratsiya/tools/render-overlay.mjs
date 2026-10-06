@@ -16,7 +16,7 @@ const chrome = process.env.CHROME || ['/usr/local/bin/chromium', '/opt/pw-browse
 const url = pathToFileURL(film); url.searchParams.set('bare', '1');
 const save = (f, data) => writeFileSync(f, Buffer.from(data.split(',')[1], 'base64'));
 
-const browser = await puppeteer.launch({executablePath: chrome, headless: true, args: ['--allow-file-access-from-files']});
+const browser = await puppeteer.launch({executablePath: chrome, headless: true, args: ['--allow-file-access-from-files', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']});
 try {
   const open = async () => {
     const page = await browser.newPage(); const errors = [];
