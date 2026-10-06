@@ -86,6 +86,26 @@ Bu matnlar ikki holatda kerak:
 Agar Veo o'zi yaxshi gapirsa, ular kerak emas. Har bir gapni **alohida**
 yarating. Raqamlar Flow kliplarining raqamlari bilan bir xil.
 
+**Hammasini bitta yozuvda** — eng qulay yo'l. Bo'sh qatorlar pauza beradi.
+Tayyor yozuvni menga yuborsangiz, uni 6 ta gapga bo'lib, har birini o'z
+klipiga o'zim qo'yaman.
+
+```
+[friendly] Imey kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering.
+
+[helpful] Ikki SIM-kartali telefonda ikkita kod chiqadi — ikkalasini ham yozing.
+
+[warm] Assalomu alaykum! Deklaratsiyangiz tayyor ekan. [reassuring] Me'yor ichida — to'lov yo'q. [cheerful] Marhamat, xush kelibsiz!
+
+[calm] Telefoningiz qiymati me'yordan oshgan. Oshgan qismiga yagona bojxona to'lovi to'lanadi.
+
+[reassuring] To'lovdan so'ng be-ka-o'ni rasmiylashtirib beraman.
+
+[warm] To'lov qabul qilindi. Mana, bojxona kirim orderingiz — be-ka-o. [cheerful] Telefoningiz rasmiylashtirildi.
+```
+
+Yoki har bir gapni alohida yarating:
+
 **1-klip · IMEI (6-sahna)**
 ```
 [friendly] Imey kodini bilish oson: telefoningizda yulduzcha, panjara, nol, olti, panjara tering.
