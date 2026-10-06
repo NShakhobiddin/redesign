@@ -77,6 +77,29 @@ chiziq bilan "surilib" o'tadi.
   faqat ohangli tovushlardan iborat: F#m–D–A–E akkordlari, 120 BPM,
   logotip zarbasi, ikkinchi drop va final.
 
+## Tayyor musiqani joylash
+
+[`tools/fit-music.py`](tools/fit-music.py) 120 BPM dagi tayyor trekni videoga
+moslaydi. Trek butun taktlar (2 s) bo'yicha qayta yig'iladi:
+- video hook zarbasidan boshlanadi;
+- beat 8 s dagi logotipga, pastlash 34 s ga, naqarot 38 s dagi qutiga tushadi;
+- trekning oxirgi ikki zarbasi logotip (41 s) va manzil (43 s) bilan birga keladi.
+
+Ulanish joylarida 30 ms li yumshoq o'tish bor, u keyingi taktning zarbasidan
+oldin tugaydi. Taktlar boshi sukut bo'yicha 0,178 s; boshqa trek uchun
+`--offset` bilan beriladi.
+
+Suno'dagi "Cold-Open Hit" treki shu usulda joylandi. Taktlar boshi beat
+tahlili bilan topildi. Natijada 1068 kadr, 44,5 s, −14,0 LUFS, eng baland
+nuqta −1,4 dBFS. Trek foydalanuvchiniki, shuning uchun u ham, u qo'yilgan
+video (`out/pochtam-promo-music.mp4`) ham ochiq repozitoriyga qo'yilmagan.
+
+```bash
+python3 tools/fit-music.py trek.mp3 /tmp/fitted.wav
+ffmpeg -i out/pochtam-promo-silent.mp4 -i /tmp/fitted.wav -map 0:v -map 1:a \
+  -af loudnorm=I=-14:TP=-1:LRA=11 -c:v copy -c:a aac -b:a 192k -t 44.5 out/pochtam-promo-music.mp4
+```
+
 ## Fayllar va buyruqlar
 
 ```bash

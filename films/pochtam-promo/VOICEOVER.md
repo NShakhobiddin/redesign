@@ -77,39 +77,59 @@ Orzuingiz — eshigingiz oldida. <break time="0.5s" />
 Hoziroq sinab ko'ring — Pochtam nuqta uz.
 ```
 
-**Eleven v3 uchun.** v3 `<break>` teglarini o'qimaydi, shuning uchun pauzalar
-tinish belgilari bilan beriladi. Kvadrat qavsdagi teglar ovoz ohangini
-boshqaradi; ularni o'chirib tashlasangiz ham bo'ladi.
+**Eleven v3 uchun, ohang teglari (promptlar) bilan.** v3 `<break>` teglarini
+o'qimaydi, shuning uchun pauzalar tinish belgilari bilan beriladi. Kvadrat
+qavsdagi inglizcha teglar diktorga har bir satrni qanday aytishni buyuradi.
+Ular o'qilmaydi. Butun matnni bitta qilib qo'yish ham, har satrni alohida
+yaratish ham mumkin.
 
 ```
 [excited] Taxmin qiling!... [curious] Uyingizgacha qanchaga tushadi?
 
-Uch... ikki... bir...
+[playful] Uch... ikki... bir...
 
-Javob — bitta skrinshotda.
+[confident] Javob — bitta skrinshotda.
 
-[excited] Bu — Pochtam.
+[excited] Bu — Pochtam!
 
-Rasmini yuklang — sun'iy intellekt tovarni topadi.
+[friendly] Rasmini yuklang — sun'iy intellekt tovarni topadi.
 
-Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor.
+[upbeat] Narxni skrinshot qiling — jami summa boj, kargo va kurs bilan tayyor.
 
-Oyiga ikki yuz dollargacha — bojsiz.
+[impressed] Oyiga ikki yuz dollargacha — bojsiz!
 
-Butun savatni ham — bitta skrinshotda.
+[playful] Butun savatni ham — bitta skrinshotda.
 
-Eng arzon kuryer — u siz uchun sotib oladi.
+[warm] Eng arzon kuryer — u siz uchun sotib oladi.
 
-Qo'llanma va jo'natmani kuzatish.
+[reassuring] Qo'llanma va jo'natmani kuzatish.
 
-Qirq uch do'kon... Yigirma kuryer... Uch til.
+[energetic] Qirq uch do'kon... Yigirma kuryer... Uch til.
 
-Hammasi — bitta ilovada.
+[confident] Hammasi — bitta ilovada.
 
-[excited] Orzuingiz — eshigingiz oldida.
+[warm] Orzuingiz — eshigingiz oldida.
 
-Hoziroq sinab ko'ring — Pochtam nuqta uz.
+[excited] Hoziroq sinab ko'ring — Pochtam nuqta uz!
 ```
+
+Har bir teg nima qiladi:
+
+| Teg | Satr | Qanday aytiladi |
+| --- | --- | --- |
+| `[excited]` | Taxmin qiling! · Bu — Pochtam! · Hoziroq sinab ko'ring | Quvnoq, ko'tarinki, e'tiborni tortadi |
+| `[curious]` | Uyingizgacha qanchaga tushadi? | Savol ohangida, qiziqtirib |
+| `[playful]` | Uch… ikki… bir… · Butun savatni ham… | O'ynoqi, viktorinadagidek |
+| `[confident]` | Javob — bitta skrinshotda · Hammasi — bitta ilovada | Ishonch bilan, aniq |
+| `[friendly]` `[upbeat]` | Rasmini yuklang… · Narxni skrinshot qiling… | Do'stona, tushuntirib, shoshmasdan |
+| `[impressed]` | Oyiga ikki yuz dollargacha — bojsiz! | Hayratlanib, yaxshi xabar sifatida |
+| `[warm]` `[reassuring]` | Eng arzon kuryer… · Qo'llanma… · Orzuingiz… | Iliq, xotirjam qiladi |
+| `[energetic]` | Qirq uch do'kon… | Tez, har raqam alohida urg'u bilan |
+
+- Teglar **Creative** yoki **Natural** rejimida yaxshi ishlaydi. Agar ohang
+  haddan oshib ketsa, o'sha satrdan tegni olib tashlang.
+- Satr o'z vaqtiga sig'masa, tegni `[fast-paced]` ga almashtirib ko'ring
+  yoki faqat o'sha satrni qayta yarating.
 
 ## 3. Ovoz va sozlamalar
 
@@ -130,7 +150,7 @@ Hoziroq sinab ko'ring — Pochtam nuqta uz.
   - Speaker boost yoqilgan
   - Speed 1.0
   - Satr oynasiga sig'masa, Speed'ni 1.05–1.1 qiling.
-- **Sozlamalar (v3):** Stability — Natural.
+- **Sozlamalar (v3):** Stability — Natural (ohang teglari ko'proq sezilishi uchun Creative ni ham sinab ko'ring).
 
 ## 4. Talaffuz bo'yicha maslahatlar
 
