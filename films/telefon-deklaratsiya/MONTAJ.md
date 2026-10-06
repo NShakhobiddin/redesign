@@ -61,8 +61,7 @@ Montajdan oldin ekran yozuvida xiralashtiriladi (`tools/edit.py`, `MASKS`):
 - ro'yxatga olish raqami, haqiqiy QR-kod va skrinshot nusxasi.
 
 Kadrlarda:
-- K09-kompyuterda kadri ishlatilmadi (o'rniga AI06), K09b va K09-kioskda
-  kadrlaridan yo'lovchining yuzi ko'rinmaydigan qismi olinadi.
+- K09b (IMEI kioski) kadridan yo'lovchining yuzi ko'rinmaydigan qismi olinadi.
 
 Ishlatilmaganlar:
 - yo'lak belgilari (K07-alt);
